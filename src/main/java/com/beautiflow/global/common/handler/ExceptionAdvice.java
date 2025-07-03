@@ -1,4 +1,4 @@
-package com.beautiflow.common.handler;
+package com.beautiflow.global.common.handler;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.beautiflow.common.ApiResponse;
-import com.beautiflow.common.error.CommonErrorCode;
-import com.beautiflow.common.error.ErrorCode;
-import com.beautiflow.common.exception.BeautiFlowException;
+import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.global.common.error.CommonErrorCode;
+import com.beautiflow.global.common.error.ErrorCode;
+import com.beautiflow.global.common.exception.BeautiFlowException;
 
 import lombok.extern.slf4j.Slf4j;
 
