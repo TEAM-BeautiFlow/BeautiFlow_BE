@@ -1,8 +1,8 @@
-package com.beautiflow.common;
+package com.beautiflow.global.common;
 
-import com.beautiflow.common.error.ErrorCode;
-import com.beautiflow.common.error.MemberErrorCode;
-import com.beautiflow.common.success.CommonSuccessCode;
+import com.beautiflow.global.common.error.ErrorCode;
+import com.beautiflow.global.common.error.MemberErrorCode;
+import com.beautiflow.global.common.success.CommonSuccessCode;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.AccessLevel;

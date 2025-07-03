@@ -1,4 +1,4 @@
-package com.beautiflow.common.config;
+package com.beautiflow.global.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

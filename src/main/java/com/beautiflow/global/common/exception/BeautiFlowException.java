@@ -1,6 +1,6 @@
-package com.beautiflow.common.exception;
+package com.beautiflow.global.common.exception;
 
-import com.beautiflow.common.error.ErrorCode;
+import com.beautiflow.global.common.error.ErrorCode;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
