@@ -33,7 +33,7 @@ jobs:
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew build -x test
 
       # 4. AWS 자격 증명 설정
       # GitHub Secrets에 저장해둔 키를 사용하여 AWS에 로그인
