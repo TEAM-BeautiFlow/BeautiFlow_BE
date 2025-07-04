@@ -47,6 +47,7 @@ jobs:
       # 5. 빌드 결과물을 압축하여 S3에 업로드
       # CodeDeploy가 가져갈 수 있도록 빌드 결과물 전체를 압축해서 S3 버킷에 올림
       - name: Upload to S3
+        working-directory: ./
         run: |
           aws deploy push \
             --application-name beautiflow-app \
@@ -60,4 +61,4 @@ jobs:
           aws deploy create-deployment \
             --application-name beautiflow-app \
             --deployment-group-name beautiflow-api-deployment-group \
-            --s3-location bucket=[미리-만들어둔-S3버킷이름],bundleType=zip,key=beautiflow-api.zip
+            --s3-location bucket=beautiflow-dev-artifacts,bundleType=zip,key=beautiflow-api.zip
