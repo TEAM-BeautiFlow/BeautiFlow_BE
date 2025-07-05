@@ -1,8 +1,8 @@
-package com.beautiflow.common.success;
+package com.beautiflow.global.common.error;
 
 import org.springframework.http.HttpStatus;
 
-public interface SuccessCode {
+public interface ErrorCode {
 
 	HttpStatus getHttpStatus();
 

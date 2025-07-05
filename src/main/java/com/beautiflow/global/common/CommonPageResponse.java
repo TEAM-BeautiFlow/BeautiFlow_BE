@@ -1,4 +1,4 @@
-package com.beautiflow.common;
+package com.beautiflow.global.common;
 
 
 import java.util.List;
