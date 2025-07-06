@@ -29,13 +29,20 @@ public class ChatRoomService {
 	private final UserRepository userRepository;
 	private final ShopRepository shopRepository;
 
-	public RoomCreateRes createRoom(RoomCreateReq roomCreateReq){
-		if (chatRoomRepository
-			.findByShopIdAndCustomerIdAndDesignerId(roomCreateReq.shopId(), roomCreateReq.customerId(), roomCreateReq.designerId())
-			.isPresent()) {
-			throw new BeautiFlowException(ChatRoomErrorCode.CHAT_ROOM_ALREADY_EXISTS);
-		}
+	public RoomCreateRes createRoom(Long requesterId,RoomCreateReq roomCreateReq){
+		Optional<ChatRoom> optional = chatRoomRepository
+			.findByShopIdAndCustomerIdAndDesignerId(roomCreateReq.shopId(), roomCreateReq.customerId(), roomCreateReq.designerId());
 
+		if (optional.isPresent()) {
+			ChatRoom room = optional.get();
+
+			// 재입장 처리
+			User requester = userRepository.findById(requesterId)
+				.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+			room.reenterBy(requester);
+
+			return RoomCreateRes.of(room);
+		}
 		Shop shop = shopRepository.findById(roomCreateReq.shopId())
 			.orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 		User customer = userRepository.findById(roomCreateReq.customerId())
@@ -54,6 +61,27 @@ public class ChatRoomService {
 		return RoomCreateRes.of(newRoom);
 
 	}
+
+	public void exitRoom(Long roomId, Long userId) {
+		ChatRoom room = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new BeautiFlowException(ChatRoomErrorCode.CHATROOM_NOT_FOUND));
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+		if (!room.getCustomer().getId().equals(userId) && !room.getDesigner().getId().equals(userId)) {
+			throw new BeautiFlowException(ChatRoomErrorCode.INVALID_CHATROOM_PARAMETER);
+		}
+
+		// 나가기 처리
+		room.exitBy(user);
+
+		//  둘 다 나갔으면 삭제
+		if (room.isBothExited()) {
+			chatRoomRepository.delete(room);
+		}
+	}
+
 
 
 

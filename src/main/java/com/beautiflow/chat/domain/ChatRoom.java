@@ -44,4 +44,30 @@ public class ChatRoom extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "chatRoom")
 	private List<ChatMessage> messages = new ArrayList<>();
+
+	private boolean customerExited = false;
+	private boolean designerExited = false;
+
+	public boolean isBothExited() {
+		return customerExited && designerExited;
+	}
+
+	public void exitBy(User user) {
+		if (user.equals(customer)) {
+			this.customerExited = true;
+		} else if (user.equals(designer)) {
+			this.designerExited = true;
+		} else {
+			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
+		}
+	}
+	public void reenterBy(User user) {
+		if (user.equals(customer)) {
+			this.customerExited = false;
+		} else if (user.equals(designer)) {
+			this.designerExited = false;
+		} else {
+			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
+		}
+	}
 }
