@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.beautiflow.chat.controller.ChatRoomRepository;
+import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.domain.ChatRoom;
 import com.beautiflow.chat.dto.RoomCreateReq;
 import com.beautiflow.chat.dto.RoomCreateRes;

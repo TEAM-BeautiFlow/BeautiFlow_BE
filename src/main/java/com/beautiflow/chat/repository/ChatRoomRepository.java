@@ -1,4 +1,4 @@
-package com.beautiflow.chat.controller;
+package com.beautiflow.chat.repository;
 
 import java.util.Optional;
 
