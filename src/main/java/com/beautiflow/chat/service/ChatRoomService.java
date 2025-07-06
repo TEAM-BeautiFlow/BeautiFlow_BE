@@ -1,10 +1,15 @@
 package com.beautiflow.chat.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.beautiflow.chat.domain.ChatMessage;
+import com.beautiflow.chat.dto.ChatMessageRes;
+import com.beautiflow.chat.dto.ChatRoomSummaryRes;
+import com.beautiflow.chat.repository.ChatMessageRepository;
 import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.domain.ChatRoom;
 import com.beautiflow.chat.dto.RoomCreateReq;
@@ -28,6 +33,7 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final UserRepository userRepository;
 	private final ShopRepository shopRepository;
+	private final ChatMessageRepository chatMessageRepository;
 
 	public RoomCreateRes createRoom(Long requesterId,RoomCreateReq roomCreateReq){
 		Optional<ChatRoom> optional = chatRoomRepository
@@ -82,6 +88,22 @@ public class ChatRoomService {
 		}
 	}
 
+	@Transactional(readOnly = true)
+	public List<ChatRoomSummaryRes> getMyChatRooms(Long userId) {
+		User me = userRepository.findById(userId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+		List<ChatRoom> myRooms = chatRoomRepository.findMyActiveChatRooms(userId);
+
+		return myRooms.stream().map(room -> {
+			User opponent = room.getCustomer().equals(me) ? room.getDesigner() : room.getCustomer();
+
+			// 가장 최근 메시지 조회
+			ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedTimeDesc(room).orElse(null);
+
+			return ChatRoomSummaryRes.of(room, opponent, lastMessage);
+		}).toList();
+	}
 
 
 
