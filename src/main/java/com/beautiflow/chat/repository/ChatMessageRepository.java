@@ -9,7 +9,7 @@ import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.chat.domain.ChatRoom;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-	List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
+	List<ChatMessage> findByChatRoomOrderByCreatedTimeAsc(ChatRoom chatRoom);
 
 	Optional<ChatMessage> findTopByChatRoomOrderByCreatedTimeDesc(ChatRoom chatRoom);
 

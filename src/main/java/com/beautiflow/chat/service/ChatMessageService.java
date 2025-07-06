@@ -57,7 +57,7 @@ public class ChatMessageService {
 			throw new BeautiFlowException(ChatRoomErrorCode.INVALID_CHATROOM_PARAMETER);
 		}
 
-		return chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(room).stream()
+		return chatMessageRepository.findByChatRoomOrderByCreatedTimeAsc(room).stream()
 			.map(msg -> new ChatMessageRes(
 				msg.getId(),
 				msg.getSender().getId(),
