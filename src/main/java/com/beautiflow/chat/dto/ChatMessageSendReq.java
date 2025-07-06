@@ -3,6 +3,7 @@ package com.beautiflow.chat.dto;
 import com.beautiflow.global.domain.SenderType;
 
 public record ChatMessageSendReq(
+	Long roomId,
 	Long senderId,
 	SenderType senderType,
 	String content,
