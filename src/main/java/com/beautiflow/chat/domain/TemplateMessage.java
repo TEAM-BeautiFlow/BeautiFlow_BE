@@ -1,20 +1,16 @@
-package com.beautiflow.chat;
+package com.beautiflow.chat.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.beautiflow.global.domain.BaseTimeEntity;
+import com.beautiflow.global.domain.SendTimeType;
 import com.beautiflow.shop.domain.Shop;
-import com.beautiflow.user.domain.User;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,8 +23,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "chat_rooms")
-public class ChatRoom extends BaseTimeEntity {
+@Table(name = "template_messages")
+public class TemplateMessage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -36,12 +32,12 @@ public class ChatRoom extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Shop shop;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User customer;
+	private String title;
+	private String content;
+	private boolean enabled;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User designer;
+	@Enumerated(EnumType.STRING)
+	private SendTimeType sendTimeType;
 
-	@OneToMany(mappedBy = "chatRoom")
-	private List<ChatMessage> messages = new ArrayList<>();
+	private String tag;
 }
