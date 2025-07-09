@@ -27,6 +27,14 @@ public class ReservationService {
     return reservationRepository.findReservedDatesByDesignerAndMonth(designerId, month);
   }
 
+  @Transactional(readOnly = true) //시간대별 예약 현황 조회
+  public List<TimeSlotResponse> getReservedTimeSlots(Long designerId, LocalDate date) {
+    List<Object[]> results = reservationRepository.findTimeSlotsByDesignerIdAndDate(designerId, date);
+    return results.stream()
+        .map(row -> new TimeSlotResponse((LocalTime) row[0], (LocalTime) row[1]))
+        .toList();
+  }
+
 
 
 }
