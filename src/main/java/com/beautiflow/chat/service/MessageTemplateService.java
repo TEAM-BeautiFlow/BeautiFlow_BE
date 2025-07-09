@@ -53,12 +53,6 @@ public class MessageTemplateService {
 			.collect(Collectors.toList());
 	}
 
-	public void deactivate(Long templateId) {
-		MessageTemplate template = templateRepository.findById(templateId)
-			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));
-		template.deactivate();
-	}
-
 	public void update(Long templateId, MessageTemplateUpdateReq req) {
 		MessageTemplate template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));

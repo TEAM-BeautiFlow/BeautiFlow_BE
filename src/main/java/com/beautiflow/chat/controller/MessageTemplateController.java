@@ -45,13 +45,6 @@ public class MessageTemplateController {
 		return ResponseEntity.ok(ApiResponse.success(templateService.getMyTemplates(ownerId)));
 	}
 
-	@Operation(summary = "템플릿 비활성화", description = "특정 템플릿을 비활성화합니다.")
-	@PatchMapping("/{templateId}/deactivate")
-	public ResponseEntity<ApiResponse<Void>> deactivateTemplate(@PathVariable Long templateId) {
-		templateService.deactivate(templateId);
-		return ResponseEntity.ok(ApiResponse.successWithNoData());
-	}
-
 	@Operation(summary = "템플릿 수정")
 	@PutMapping("/{templateId}")
 	public ResponseEntity<ApiResponse<Void>> updateTemplate(

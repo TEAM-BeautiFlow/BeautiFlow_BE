@@ -50,9 +50,6 @@ public class MessageTemplate extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User owner; //디자이너랑 사장만
 
-	public void deactivate() {
-		this.isActive = false;
-	}
 
 	public void update(MessageTemplateUpdateReq req) {
 		this.name = req.name();
