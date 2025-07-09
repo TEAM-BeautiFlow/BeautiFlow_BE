@@ -28,5 +28,13 @@ public class ReservationController {
     return ApiResponse.success(reservationService.getReservedDates(designerId, month));
   }
 
+  @GetMapping("/timeslots") // 시간대별 예약 현황 조회
+  public ApiResponse<List<TimeSlotResponse>> getReservedTimeSlots(
+      @RequestParam Long designerId,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+  ) {
+    return ApiResponse.success(reservationService.getReservedTimeSlots(designerId, date));
+  }
+
 
 }
