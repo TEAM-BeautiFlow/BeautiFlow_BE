@@ -36,5 +36,11 @@ public class ReservationController {
     return ApiResponse.success(reservationService.getReservedTimeSlots(designerId, date));
   }
 
+  @GetMapping("/{reservationId}") // 예약 상세 조회
+  @Operation(summary = "예약 상세 정보 조회")
+  public ApiResponse<ReservationDetailResponse> getReservationDetail(@PathVariable Long reservationId) {
+    return ApiResponse.success(reservationService.getReservationDetail(reservationId));
+  }
+
 
 }
