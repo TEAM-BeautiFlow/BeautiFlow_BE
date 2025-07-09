@@ -11,6 +11,9 @@ import com.beautiflow.chat.dto.MessageTemplateCreateReq;
 import com.beautiflow.chat.dto.MessageTemplateRes;
 import com.beautiflow.chat.dto.MessageTemplateUpdateReq;
 import com.beautiflow.chat.repository.MessageTemplateRepository;
+import com.beautiflow.global.common.error.TemplateErrorCode;
+import com.beautiflow.global.common.error.UserErrorCode;
+import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 
@@ -26,7 +29,7 @@ public class MessageTemplateService {
 
 	public void create(Long ownerId, MessageTemplateCreateReq req) {
 		User owner = userRepository.findById(ownerId)
-			.orElseThrow(() -> new IllegalArgumentException("User not found"));
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
 		MessageTemplate template = MessageTemplate.builder()
 			.name(req.name())
@@ -43,7 +46,7 @@ public class MessageTemplateService {
 
 	public List<MessageTemplateRes> getMyTemplates(Long ownerId) {
 		User owner = userRepository.findById(ownerId)
-			.orElseThrow(() -> new IllegalArgumentException("User not found"));
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
 		return templateRepository.findByOwner(owner).stream()
 			.map(MessageTemplateRes::from)
@@ -52,13 +55,13 @@ public class MessageTemplateService {
 
 	public void deactivate(Long templateId) {
 		MessageTemplate template = templateRepository.findById(templateId)
-			.orElseThrow(() -> new IllegalArgumentException("Template not found"));
+			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));
 		template.deactivate();
 	}
 
 	public void update(Long templateId, MessageTemplateUpdateReq req) {
 		MessageTemplate template = templateRepository.findById(templateId)
-			.orElseThrow(() -> new IllegalArgumentException("Template not found"));
+			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));
 		template.update(req);
 	}
 
