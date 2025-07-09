@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.beautiflow.chat.domain.MessageTemplate;
+import com.beautiflow.chat.dto.ChatMessageSendReq;
 import com.beautiflow.chat.dto.MessageTemplateCreateReq;
 import com.beautiflow.chat.dto.MessageTemplateRes;
 import com.beautiflow.chat.dto.MessageTemplateUpdateReq;
@@ -14,6 +15,7 @@ import com.beautiflow.chat.repository.MessageTemplateRepository;
 import com.beautiflow.global.common.error.TemplateErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.SenderType;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 
@@ -61,6 +63,22 @@ public class MessageTemplateService {
 
 	public void delete(Long templateId) {
 		templateRepository.deleteById(templateId);
+	}
+
+	@Transactional(readOnly = true)
+	public ChatMessageSendReq toSendReq(Long templateId, Long roomId, Long senderId) {
+
+		MessageTemplate messageTemplate = templateRepository.findById(templateId)
+			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));
+		if (!messageTemplate.isActive()) throw new BeautiFlowException(TemplateErrorCode.INACTIVE_TEMPLATE);
+
+		return new ChatMessageSendReq(
+			roomId,
+			senderId,
+			SenderType.STAFF,
+			messageTemplate.getContent(),
+			null
+		);
 	}
 }
 
