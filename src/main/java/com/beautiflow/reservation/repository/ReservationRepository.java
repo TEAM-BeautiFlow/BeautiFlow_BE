@@ -27,5 +27,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   List<Object[]> findTimeSlotsByDesignerIdAndDate(@Param("designerId") Long designerId,
       @Param("date") LocalDate date);
 
+  @Query("SELECT r FROM Reservation r " + //예약 상세 조회
+      "JOIN FETCH r.designer " +
+      "JOIN FETCH r.customer " +
+      "WHERE r.id = :id")
+  Optional<Reservation> findFetchAllById(@Param("id") Long id);
 
 }
