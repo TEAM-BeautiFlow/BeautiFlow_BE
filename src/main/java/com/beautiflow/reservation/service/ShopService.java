@@ -2,6 +2,7 @@ package com.beautiflow.reservation.service;
 
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
+import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.reservation.converter.ShopConverter;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse;
@@ -29,14 +30,14 @@ public class ShopService {
 
     public ShopDetailResponse getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new EntityNotFoundException(ShopErrorCode.SHOP_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         return ShopConverter.toDto(shop);
     }
 
     public List<TreatmentResponse> getTreatmentsByShopAndCategory(Long shopId, String category) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new EntityNotFoundException(ShopErrorCode.SHOP_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         List<Treatment> treatments;
 
@@ -46,7 +47,7 @@ public class ShopService {
             TreatmentCategory catEnum = Arrays.stream(TreatmentCategory.values())
                     .filter(c -> c.name().equalsIgnoreCase(category))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(TreatmentErrorCode.INVALID_TREATMENT_PARAMETER.getMessage()));
+                    .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.INVALID_TREATMENT_PARAMETER));
             treatments = treatmentRepository.findByShopAndCategory(shop, catEnum);
         }
 
@@ -57,10 +58,10 @@ public class ShopService {
 
     public TreatmentResponse getTreatmentDetail(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new EntityNotFoundException(ShopErrorCode.SHOP_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         Treatment treatment = treatmentRepository.findByShopAndId(shop, treatmentId)
-                .orElseThrow(() -> new EntityNotFoundException(TreatmentErrorCode.TREATMENT_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
         return TreatmentResponse.from(treatment);
     }
