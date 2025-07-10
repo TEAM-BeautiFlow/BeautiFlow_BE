@@ -1,7 +1,9 @@
 package com.beautiflow.reservation.repository;
 
+import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +34,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       "JOIN FETCH r.customer " +
       "WHERE r.id = :id")
   Optional<Reservation> findFetchAllById(@Param("id") Long id);
+
 
 }

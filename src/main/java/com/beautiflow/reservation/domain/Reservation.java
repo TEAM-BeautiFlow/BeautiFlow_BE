@@ -56,6 +56,10 @@ public class Reservation extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private ReservationStatus status;
 
+	public void updateStatus(ReservationStatus newStatus) {
+		this.status = newStatus;
+	}
+
 	private String requestNotes;
 
 	@Column(columnDefinition = "json")
