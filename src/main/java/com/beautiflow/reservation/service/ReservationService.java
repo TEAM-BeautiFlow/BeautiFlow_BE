@@ -1,5 +1,6 @@
 package com.beautiflow.reservation.service;
 
+import com.beautiflow.customer.service.CustomerService;
 import com.beautiflow.global.common.error.MemberErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.ReservationStatus;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationService {
 
   private final ReservationRepository reservationRepository;
+  private final CustomerService customerService;
 
   @Transactional(readOnly = true) //날짜별 예약 유무 캘린더
   public List<LocalDate> getReservedDates(Long designerId, String month) {
@@ -48,6 +50,8 @@ public class ReservationService {
     if (reservation.getStatus() == ReservationStatus.CONFIRMED && reservationEnd.isBefore(LocalDateTime.now())) {
       reservation.updateStatus(ReservationStatus.COMPLETED);
       reservationRepository.save(reservation);
+
+      customerService.autoRegister(reservation); //자동 등록 추가
     }
 
     return ReservationDetailResponse.from(reservation);
@@ -61,7 +65,12 @@ public class ReservationService {
         .orElseThrow(() -> new BeautiFlowException(MemberErrorCode.MATCH_NOT_FOUND));
 
     reservation.updateStatus(newStatus);
+
+    if (newStatus == ReservationStatus.COMPLETED) {
+      customerService.autoRegister(reservation);
+    }
   }
+
 
 
 }
