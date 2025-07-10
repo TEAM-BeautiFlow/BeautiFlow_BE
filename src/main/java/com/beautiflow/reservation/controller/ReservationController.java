@@ -1,10 +1,12 @@
 package com.beautiflow.reservation.controller;
 
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.reservation.dto.request.UpdateReservationStatusRequest;
 import com.beautiflow.reservation.dto.response.ReservationDetailResponse;
 import com.beautiflow.reservation.dto.response.TimeSlotResponse;
 import com.beautiflow.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -47,4 +49,17 @@ public class ReservationController {
     ReservationDetailResponse result = reservationService.getReservationDetail(reservationId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
+
+  @PatchMapping("/{reservationId}/status") //예약 상태 변경
+  @Operation(summary = "예약 상태 변경")
+  public ResponseEntity<Void> updateReservationStatus(
+      @PathVariable Long reservationId,
+      @RequestBody UpdateReservationStatusRequest request
+  ) {
+    reservationService.updateStatus(reservationId, request.status());
+    return ResponseEntity.ok().build();
+  }
+
+
+
 }
