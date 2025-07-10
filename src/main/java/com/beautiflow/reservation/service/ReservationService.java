@@ -39,7 +39,6 @@ public class ReservationService {
   public ReservationDetailResponse getReservationDetail(Long id) {
     Reservation reservation = reservationRepository.findFetchAllById(id)
         .orElseThrow(() -> {
-          //해당 예약이 존재하지 않음
           return new BeautiFlowException(MemberErrorCode.RESERVATION_NOT_FOUND);
         });
 
