@@ -39,12 +39,9 @@ public class ReservationService {
   public ReservationDetailResponse getReservationDetail(Long id) {
     Reservation reservation = reservationRepository.findFetchAllById(id)
         .orElseThrow(() -> {
-          //log.error("해당 ID의 예약이 존재하지 않음: {}", id);
-          return new BeautiFlowException(MemberErrorCode.MATCH_NOT_FOUND);
+          //해당 예약이 존재하지 않음
+          return new BeautiFlowException(MemberErrorCode.RESERVATION_NOT_FOUND);
         });
-
-    //log.info("디자이너: {}", reservation.getDesigner());
-    //log.info("고객: {}", reservation.getCustomer());
 
 
     return ReservationDetailResponse.from(reservation);
