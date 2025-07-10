@@ -24,7 +24,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "user_roles")
 public class UserRole {
-
     @EmbeddedId
     private UserRoleId id;
 
@@ -32,8 +31,7 @@ public class UserRole {
     @MapsId("userId")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", insertable = false, updatable = false)
-    private GlobalRole role;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private GlobalRole role;
 }
-
