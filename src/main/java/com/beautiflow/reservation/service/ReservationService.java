@@ -2,11 +2,13 @@ package com.beautiflow.reservation.service;
 
 import com.beautiflow.global.common.error.MemberErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.response.ReservationDetailResponse;
 import com.beautiflow.reservation.dto.response.TimeSlotResponse;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,16 +37,30 @@ public class ReservationService {
         .toList();
   }
 
-  @Transactional(readOnly = true) // 예약 상세 조회
+  @Transactional//(readOnly = true) // 고객 상세 정보 조회
   public ReservationDetailResponse getReservationDetail(Long id) {
     Reservation reservation = reservationRepository.findFetchAllById(id)
-        .orElseThrow(() -> {
-          return new BeautiFlowException(MemberErrorCode.RESERVATION_NOT_FOUND);
-        });
+        .orElseThrow(() -> new BeautiFlowException(MemberErrorCode.RESERVATION_NOT_FOUND));
 
+    // 상태가 CONFIRMED이고, 예약 종료 시간이 지났다면 자동으로 COMPLETED로 변경
+    LocalDateTime reservationEnd = LocalDateTime.of(reservation.getReservationDate(), reservation.getEndTime());
+
+    if (reservation.getStatus() == ReservationStatus.CONFIRMED && reservationEnd.isBefore(LocalDateTime.now())) {
+      reservation.updateStatus(ReservationStatus.COMPLETED);
+      reservationRepository.save(reservation);
+    }
 
     return ReservationDetailResponse.from(reservation);
+  }
 
+
+
+  @Transactional //예약 상태 변경
+  public void updateStatus(Long reservationId, ReservationStatus newStatus) {
+    Reservation reservation = reservationRepository.findById(reservationId)
+        .orElseThrow(() -> new BeautiFlowException(MemberErrorCode.MATCH_NOT_FOUND));
+
+    reservation.updateStatus(newStatus);
   }
 
 
