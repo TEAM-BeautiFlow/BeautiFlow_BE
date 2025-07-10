@@ -15,6 +15,8 @@ public enum MemberErrorCode implements ErrorCode{
 	DUPLICATE_AUTHORIZE_CODE(HttpStatus.BAD_REQUEST,"ACCESS402","인가 코드 중복 사용"),
 	ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN,"ACCESS403","탈퇴한 회원입니다."),
 
+	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND,"RESERVATION401","해당 예약이 존재하지 않습니다."),
+
 
 	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND,"MATCH404","이용내역을 찾을 수 없습니다.");
 
