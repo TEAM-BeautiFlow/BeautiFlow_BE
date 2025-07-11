@@ -3,6 +3,7 @@ package com.beautiflow.chat.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.beautiflow.chat.dto.RoomCreateRes;
 import com.beautiflow.chat.service.ChatMessageService;
 import com.beautiflow.chat.service.ChatRoomService;
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.global.common.security.CustomOAuth2User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -35,18 +37,18 @@ public class ChatController {
 	@Operation(summary = "채팅방 생성·재입장")
 	public ResponseEntity<ApiResponse<RoomCreateRes>> createRoom(
 		@RequestBody RoomCreateReq req,
-		@RequestParam Long userId) {
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
 
-		RoomCreateRes res = chatRoomService.createRoom(userId, req);
+		RoomCreateRes res = chatRoomService.createRoom(customOAuth2User.getUserId(), req);
 		return ResponseEntity.ok(ApiResponse.success(res));
 	}
 
 	@GetMapping("/rooms")
 	@Operation(summary = "채팅방 리스트 조회")
 	public ResponseEntity<ApiResponse<List<ChatRoomSummaryRes>>> getMyRooms(
-		@RequestParam Long userId
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		List<ChatRoomSummaryRes> rooms = chatRoomService.getMyChatRooms(userId);
+		List<ChatRoomSummaryRes> rooms = chatRoomService.getMyChatRooms(customOAuth2User.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(rooms));
 	}
 
@@ -54,9 +56,9 @@ public class ChatController {
 	@Operation(summary = "채팅방 나가기")
 	public ResponseEntity<ApiResponse<Void>> exitRoom(
 		@PathVariable Long roomId,
-		@RequestParam Long userId
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		chatRoomService.exitRoom(roomId, userId);
+		chatRoomService.exitRoom(roomId, customOAuth2User.getUserId());
 		return ResponseEntity.ok(ApiResponse.successWithNoData());
 	}
 
@@ -65,9 +67,9 @@ public class ChatController {
 	@Operation(summary = "채팅 메시지 불러오기")
 	public ResponseEntity<ApiResponse<List<ChatMessageRes>>> getChatHistory(
 		@PathVariable Long roomId,
-		@RequestParam Long userId
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		List<ChatMessageRes> messages = chatMessageService.getChatHistory(roomId, userId);
+		List<ChatMessageRes> messages = chatMessageService.getChatHistory(roomId, customOAuth2User.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(messages));
 	}
 
