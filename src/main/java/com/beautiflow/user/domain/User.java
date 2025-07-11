@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beautiflow.chat.domain.TargetGroup;
 import com.beautiflow.global.domain.BaseTimeEntity;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.shop.domain.ShopMember;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -54,4 +57,8 @@ public class User extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "user")
 	private List<UserStyleImage> styleImages = new ArrayList<>();
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private TargetGroup targetGroup;
 }
