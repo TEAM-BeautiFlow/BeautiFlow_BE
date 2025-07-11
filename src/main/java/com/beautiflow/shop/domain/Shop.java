@@ -1,5 +1,6 @@
 package com.beautiflow.shop.domain;
 
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +18,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -29,23 +32,25 @@ public class Shop {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String name;
+	private String shopName;
 	private String contact;
 	private String link;
 	private String accountInfo;
-	private String location;
-	private String introText;
-	private String mainImageUrl;
+	private String address;
+	private String introduction;
 
 	@Column(unique = true)
 	private String businessRegistrationNumber;
 
-	@OneToMany(mappedBy = "shop")
-	private List<ShopNotice> notices = new ArrayList<>();
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+	private final List<ShopImage> shopImages = new ArrayList<>();
 
 	@OneToMany(mappedBy = "shop")
-	private List<BusinessHour> businessHours = new ArrayList<>();
+	private final List<ShopNotice> notices = new ArrayList<>();
 
 	@OneToMany(mappedBy = "shop")
-	private List<Treatment> treatments = new ArrayList<>();
+	private final List<BusinessHour> businessHours = new ArrayList<>();
+
+	@OneToMany(mappedBy = "shop")
+	private final List<Treatment> treatments = new ArrayList<>();
 }
