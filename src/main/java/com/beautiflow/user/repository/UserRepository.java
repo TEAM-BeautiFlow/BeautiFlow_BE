@@ -8,6 +8,7 @@ import com.beautiflow.user.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findById(Long Id);
+    Optional<User> findById(Long Id);
 
+    Optional<User> findByKakaoId(String kakaoId);
 }
