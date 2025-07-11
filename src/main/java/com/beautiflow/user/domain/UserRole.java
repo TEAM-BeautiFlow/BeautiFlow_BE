@@ -24,14 +24,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "user_roles")
 public class UserRole {
-	@EmbeddedId
-	private UserRoleId id;
+    @EmbeddedId
+    private UserRoleId id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@MapsId("userId")
-	private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    private User user;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private GlobalRole role;
+    @Column(name = "role", insertable = false, updatable = false)
+    private GlobalRole role;
 }
