@@ -69,8 +69,9 @@ public class SignUpService {
             throw new BeautiFlowException(UserErrorCode.USER_ROLE_SAVE_FAILED);
         }
 
-        String accessToken = jwtUtil.createAccessToken(provider, kakaoId);
-        String refreshToken = jwtUtil.createRefreshToken(kakaoId);
+        Long userId = user.getId();
+        String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
+        String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
 
         return SignUpRes.builder()
                 .id(user.getId())

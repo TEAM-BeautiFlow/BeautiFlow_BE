@@ -40,21 +40,22 @@ public class JWTUtil {
                 .getExpiration().before(new Date());
     }
 
-    public String createAccessToken(String provider, String kakaoId) {
+    public String createAccessToken(String provider, String kakaoId, Long userId) {
 
         return Jwts.builder()
-
                 .claim("provider", provider)
                 .claim("kakaoId", kakaoId)
+                .claim("userId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenValidity))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String createRefreshToken(String kakaoId) {
+    public String createRefreshToken(String kakaoId, Long userId) {
         return Jwts.builder()
                 .claim("kakaoId", kakaoId)
+                .claim("userId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenValidity))
                 .signWith(secretKey)

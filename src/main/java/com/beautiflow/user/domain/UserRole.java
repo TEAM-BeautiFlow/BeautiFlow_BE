@@ -32,6 +32,6 @@ public class UserRole {
     private User user;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private GlobalRole role;
+    @Column(name = "role", insertable = false, updatable = false)
+    private GlobalRole role;
 }

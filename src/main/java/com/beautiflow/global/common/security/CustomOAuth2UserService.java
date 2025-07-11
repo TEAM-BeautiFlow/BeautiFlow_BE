@@ -28,7 +28,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             default -> throw new BeautiFlowException(UserErrorCode.USER_ROLE_NOT_FOUND);
         };
 
-        return new CustomOAuth2User(kakaoRes.provider(), kakaoRes.kakaoId(), globalRole);
+        //db에 user가 저장되지 않은 시점이므로 uerId가 null
+
+        return new CustomOAuth2User(kakaoRes.provider(), kakaoRes.kakaoId(), null, globalRole);
 
 
     }

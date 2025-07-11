@@ -5,12 +5,10 @@ import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.util.JWTUtil;
 import com.beautiflow.global.domain.GlobalRole;
 import com.beautiflow.user.domain.User;
-import com.beautiflow.user.dto.LoginRes;
-import com.beautiflow.user.dto.UserRes;
 import com.beautiflow.user.repository.UserRepository;
 import com.beautiflow.user.repository.UserRoleRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,15 +21,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public CustomSuccessHandler(JWTUtil jwtUtil, UserRepository userRepository,
-            UserRoleRepository userRoleRepository) {
+    public CustomSuccessHandler(JWTUtil jwtUtil, UserRepository userRepository) {
 
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        this.userRoleRepository = userRoleRepository;
     }
 
     @Override
@@ -43,32 +37,40 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String kakaoId = oAuth2User.getKakaoId();
         String provider = oAuth2User.getProvider();
 
-        GlobalRole globalRole = switch (provider) {
-            case "kakao-customer" -> GlobalRole.CUSTOMER;
-            case "kakao-staff" -> GlobalRole.STAFF;
-            default -> throw new BeautiFlowException(UserErrorCode.USER_ROLE_NOT_FOUND);
-        };
-
         User user = userRepository.findByKakaoId(kakaoId).orElse(null);
 
-        // 이미 같은 역할로 가입한 사용자인지 판단
-        boolean hasSameRole = userRoleRepository.existsByUserAndRole(user, globalRole);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
 
-        if (!hasSameRole) {
-            // 가입되지 않은 유저, json body로 응답
-            var body = new LoginRes(null, null, null, false, kakaoId, provider);
-            response.getWriter().write(objectMapper.writeValueAsString(body));
+
+        if (user==null) {
+            response.addCookie(createCookie("isUserAlreadyExist", "false"));
+            response.addCookie(createCookie("kakaoId", kakaoId));
+            response.addCookie(createCookie("provider", provider));
+            response.sendRedirect("http://localhost:3000");
         } else {
-            // 이미 가입된 유저 토큰 발급, json body로 응답
-            String accessToken = jwtUtil.createAccessToken(provider, kakaoId);
-            String refreshToken = jwtUtil.createRefreshToken(kakaoId);
-            var userRes = new UserRes(user.getId(), user.getName(), user.getContact());
-            var body = new LoginRes(accessToken, refreshToken, userRes, true, kakaoId, provider);
-            response.getWriter().write(objectMapper.writeValueAsString(body));
+            Long userId = user.getId();
+            response.addCookie(createCookie("isUserAlreadyExist", "true"));
+            response.addCookie(createCookie("kakaoId", kakaoId));
+            response.addCookie(createCookie("provider", provider));
+            String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
+            String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
+            response.addCookie(createCookie("accessToken", accessToken));
+            response.addCookie(createCookie("refreshToken", refreshToken));
+            response.sendRedirect("http://localhost:3000");
         }
+
+
+    }
+
+
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(60 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
     }
 }
