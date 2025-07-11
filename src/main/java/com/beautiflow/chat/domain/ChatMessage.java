@@ -1,7 +1,8 @@
-package com.beautiflow.chat;
+package com.beautiflow.chat.domain;
 
-import com.beautiflow.global.domain.SendTimeType;
-import com.beautiflow.shop.domain.Shop;
+import com.beautiflow.global.domain.BaseTimeEntity;
+import com.beautiflow.global.domain.SenderType;
+import com.beautiflow.user.domain.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,21 +24,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "template_messages")
-public class TemplateMessage {
+@Table(name = "messages")
+public class ChatMessage extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	private Shop shop;
+	private ChatRoom chatRoom;
 
-	private String title;
-	private String content;
-	private boolean enabled;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User sender;
 
 	@Enumerated(EnumType.STRING)
-	private SendTimeType sendTimeType;
+	private SenderType senderType;
 
-	private String tag;
+	private String content;
+	private String imageUrl;
 }
