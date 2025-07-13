@@ -8,6 +8,10 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Component;
 
+import com.beautiflow.chat.service.ChatRoomService;
+import com.beautiflow.global.common.util.JWTUtil;
+
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,64 +20,60 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StompHandler implements ChannelInterceptor {
 
-	//TODO 로그인 구현 전이므로 jwtUtil은 주석 처리했슴돠
-	// private final JwtUtill jwtUtill;
-	//private final ChatRoomService chatRoomService;
+
+	private final JWTUtil jwtUtill;
+	private final ChatRoomService chatRoomService;
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		final StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
 		if (StompCommand.CONNECT == accessor.getCommand()) {
-			log.info("CONNECT 요청 수신 (임시 인증 로직 생략)");
-			// 임시로 토큰 인증 생략
-			// String token = extractToken(accessor);
-			// jwtUtill.isExpired(token);
+			String token= extractToken(accessor);
+			try{
+				if(jwtUtill.isExpired(token)){
+					throw new JwtException("token expired");
+				}
+				log.info("CONNECT -JWT 유효성 통과");
+			}catch (Exception e){
+				throw new AuthenticationServiceException("JWT 인증 실패: " + e.getMessage());
+			}
 		}
 
 		if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
-			log.info("SUBSCRIBE 진입 (임시 인증 로직 생략)");
-			log.info("Destination: {}", accessor.getDestination());
+			log.info("SUBSCRIBE 요청 - destination: {}", accessor.getDestination());
 
+			String token = extractToken(accessor);
+			String kakaoId = jwtUtill.getKakaoId(token);
+			Long userId = jwtUtill.getUserId(token);
 			String destination = accessor.getDestination();
 			if (destination == null || !destination.startsWith("/topic/")) {
 				log.error("잘못된 destination: {}", destination);
 				throw new AuthenticationServiceException("잘못된 destination입니다.");
 			}
 
-			String[] parts = destination.split("/");
-			if (parts.length < 3) {
-				log.error("destination split 오류: {}", (Object) parts);
-				throw new AuthenticationServiceException("destination 파싱 오류");
-			}
-
-			String roomIdStr = parts[parts.length - 1];
 			try {
-				Long roomId = Long.parseLong(roomIdStr);
-				log.info("Room ID: {}", roomId);
+				String[] parts = destination.split("/");
+				Long roomId = Long.parseLong(parts[parts.length - 1]);
 
-				//TODO 임시 사용자 email (실제 로그인 구현 후 제거)
-				/*String dummyEmail = "temp@user.com";
-
-				if (!chatRoomService.isRoomParticipant(dummyEmail, roomId)) {
-					log.warn("Room 참가자 아님: {} not in room {}", dummyEmail, roomId);
-					throw new AuthenticationServiceException("해당 room에 권한이 없습니다");
-				}*/
+				if (!chatRoomService.isParticipant(userId, roomId)) {
+					log.warn("해당 채팅방 접근 권한 없음: userId={} roomId={}", userId, roomId);
+					throw new AuthenticationServiceException("채팅방 참가자가 아님");
+				}
+				log.info("채팅방 권한 확인 완료 - userId={} roomId={}", userId, roomId);
 			} catch (NumberFormatException e) {
-				log.error("roomId가 숫자 아님: {}", parts[2]);
-				throw new AuthenticationServiceException("roomId가 숫자가 아님");
+				throw new AuthenticationServiceException("roomId 형식 오류");
 			}
 		}
 
 		return message;
 	}
 
-	//TODO 토큰 추출 메서드는 주석 처리
-	//	private String extractToken(StompHeaderAccessor accessor) {
-	//		String bearerToken = accessor.getFirstNativeHeader("Authorization");
-	//		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-	//			throw new AuthenticationServiceException("Authorization 헤더가 잘못되었습니다");
-	//		}
-	//		return bearerToken.substring(7).trim();
-	//	}
+	private String extractToken(StompHeaderAccessor accessor) {
+		String bearerToken = accessor.getFirstNativeHeader("Authorization");
+		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+			throw new AuthenticationServiceException("Authorization 헤더가 잘못되었습니다");
+		}
+		return bearerToken.substring(7).trim();
+	}
 }

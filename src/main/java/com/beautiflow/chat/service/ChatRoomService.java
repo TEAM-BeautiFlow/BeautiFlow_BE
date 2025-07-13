@@ -105,6 +105,12 @@ public class ChatRoomService {
 		}).toList();
 	}
 
+	public boolean isParticipant(Long userId, Long roomId) {
+		return chatRoomRepository.findById(roomId)
+			.filter(room -> room.getCustomer().getId().equals(userId) || room.getDesigner().getId().equals(userId))
+			.isPresent();
+	}
+
 
 
 }
