@@ -4,9 +4,14 @@ import com.beautiflow.reservation.dto.response.ShopDetailResponse;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.BusinessHourDto;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.NoticeDto;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;
 import com.beautiflow.shop.domain.BusinessHour;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopNotice;
+import com.beautiflow.treatment.domain.OptionGroup;
+import com.beautiflow.treatment.domain.OptionItem;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.treatment.domain.TreatmentImage;
 import java.util.stream.Collectors;
@@ -73,6 +78,46 @@ public class ShopConverter {
         return TreatmentDto.TreatmentImageDto.builder()
                 .id(image.getId())
                 .imageUrl(image.getImageUrl())
+                .build();
+    }
+
+    public static TreatmentDetailWithOptionResponse toTreatmentDetailWithOptionResponse(Treatment treatment) {
+        return TreatmentDetailWithOptionResponse.builder()
+                .id(treatment.getId())
+                .name(treatment.getName())
+                .durationMinutes(treatment.getDurationMinutes())
+                .minPrice(treatment.getMinPrice())
+                .maxPrice(treatment.getMaxPrice())
+                .description(treatment.getDescription())
+                .images(treatment.getImages().stream()
+                        .map(image -> TreatmentImageDto.builder()
+                                .id(image.getId())
+                                .imageUrl(image.getImageUrl())
+                                .build())
+                        .collect(Collectors.toList()))
+                .optionGroups(treatment.getOptionGroups().stream()
+                        .map(ShopConverter::toOptionGroupDto)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private static OptionGroupDto toOptionGroupDto(OptionGroup group) {
+        return OptionGroupDto.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .enabled(group.isEnabled())
+                .items(group.getItems().stream()
+                        .map(ShopConverter::toOptionItemDto)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private static OptionGroupDto.OptionItemDto toOptionItemDto(OptionItem item) {
+        return OptionGroupDto.OptionItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .extraMinutes(item.getExtraMinutes())
+                .description(item.getDescription())
                 .build();
     }
 }

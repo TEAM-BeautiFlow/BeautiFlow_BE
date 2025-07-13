@@ -9,6 +9,7 @@ import com.beautiflow.reservation.dto.response.ShopDetailResponse;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.BusinessHourDto;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.NoticeDto;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.reservation.repository.ShopRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
@@ -65,4 +66,14 @@ public class ShopService {
 
         return TreatmentResponse.from(treatment);
     }
+    public TreatmentDetailWithOptionResponse getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+        Treatment treatment = treatmentRepository.findWithOptionsByShopAndId(shop, treatmentId)
+                .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
+
+        return ShopConverter.toTreatmentDetailWithOptionResponse(treatment);
+    }
+
 }

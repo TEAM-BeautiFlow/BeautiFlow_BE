@@ -7,6 +7,7 @@ import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.success.CommonSuccessCode;
 import com.beautiflow.global.common.success.SuccessCode;
 import com.beautiflow.reservation.dto.response.ShopDetailResponse;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.reservation.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +52,15 @@ public class ShopController {
             @PathVariable Long shopId,
             @PathVariable Long treatmentId) {
         TreatmentResponse response = shopService.getTreatmentDetail(shopId, treatmentId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "매장 내 특정 시술과 시술 내 옵션 조회", description = "shopId와 treatmentId로 옵션 포함 시술 상세 정보 조회")
+    @GetMapping("/{shopId}/treatments/{treatmentId}/options")
+    public ResponseEntity<ApiResponse<TreatmentDetailWithOptionResponse>> getTreatmentDetailWithOptions(
+            @PathVariable Long shopId,
+            @PathVariable Long treatmentId) {
+        TreatmentDetailWithOptionResponse response = shopService.getTreatmentDetailWithOptions(shopId, treatmentId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
