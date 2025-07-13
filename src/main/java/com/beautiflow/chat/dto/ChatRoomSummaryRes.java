@@ -9,6 +9,7 @@ import com.beautiflow.user.domain.User;
 public record ChatRoomSummaryRes(
 	Long roomId,
 	Long shopId,
+	String shopName,
 	String opponentName,
 	Long opponentId,
 	String lastMessageContent,
@@ -18,6 +19,7 @@ public record ChatRoomSummaryRes(
 		return new ChatRoomSummaryRes(
 			room.getId(),
 			room.getShop().getId(),
+			room.getShop().getName(),
 			opponent.getName(),
 			opponent.getId(),
 			lastMessage != null ? lastMessage.getContent() : null,
