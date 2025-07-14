@@ -1,5 +1,6 @@
 package com.beautiflow.shop.domain;
 
+import com.beautiflow.shop.dto.ShopUpdateReq;
 import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -53,4 +53,25 @@ public class Shop {
 
 	@OneToMany(mappedBy = "shop")
 	private final List<Treatment> treatments = new ArrayList<>();
+
+	public void updateDetails(ShopUpdateReq requestDto) {
+		if (requestDto.shopName() != null) {
+			this.shopName = requestDto.shopName();
+		}
+		if (requestDto.contact() != null) {
+			this.contact = requestDto.contact();
+		}
+		if (requestDto.link() != null) {
+			this.link = requestDto.link();
+		}
+		if (requestDto.accountInfo() != null) {
+			this.accountInfo = requestDto.accountInfo();
+		}
+		if (requestDto.address() != null) {
+			this.address = requestDto.address();
+		}
+		if (requestDto.introduction() != null) {
+			this.introduction = requestDto.introduction();
+		}
+	}
 }

@@ -2,7 +2,7 @@ package com.beautiflow.shop.dto;
 
 import java.util.List;
 
-public record ShopUpdateRequestDto (
+public record ShopUpdateReq(
     String shopName,
     String contact,
     String link,
