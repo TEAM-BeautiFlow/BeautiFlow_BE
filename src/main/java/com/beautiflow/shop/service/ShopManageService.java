@@ -1,5 +1,6 @@
 package com.beautiflow.shop.service;
 
+import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.error.CommonErrorCode;
 import com.beautiflow.global.common.s3.S3Service;
@@ -27,7 +28,7 @@ public class ShopManageService {
   @Transactional(readOnly = true)
   public ShopInfoRes getShopDetails(Long shopId) {
     Shop shop = shopManageRepository.findById(shopId)
-        .orElseThrow(() -> new BeautiFlowException(CommonErrorCode.SHOP_NOT_FOUND));
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
     return ShopInfoRes.from(shop);
   }
@@ -39,7 +40,7 @@ public class ShopManageService {
       List<MultipartFile> newImages
   ) {
     Shop shop = shopManageRepository.findById(shopId)
-        .orElseThrow(() -> new BeautiFlowException(CommonErrorCode.SHOP_NOT_FOUND));
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
     // 1. 기존 이미지 삭제 처리
     if (requestDto.deleteImageIds() != null && !requestDto.deleteImageIds().isEmpty()) {
@@ -67,7 +68,7 @@ public class ShopManageService {
       ShopImage imageToRemove = shop.getShopImages().stream()
           .filter(shopImage -> shopImage.getId().equals(imageId))
           .findFirst()
-          .orElseThrow(() -> new BeautiFlowException(CommonErrorCode.IMAGE_NOT_FOUND));
+          .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND));
 
       // S3에 있는 실제 파일 삭제
       s3Service.deleteFile(imageToRemove.getStoredFilePath());

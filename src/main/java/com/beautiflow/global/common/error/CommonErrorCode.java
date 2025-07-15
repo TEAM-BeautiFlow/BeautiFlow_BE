@@ -16,12 +16,7 @@ public enum CommonErrorCode implements ErrorCode {
 	METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON405", "허용되지 않는 HTTP Method입니다."),
 
 	// COMMON 5XX
-	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 내부 오류입니다."),
-
-	// Shop 관련 에러
-	SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "SHOP404", "해당 매장을 찾을 수 없습니다."),
-	IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "IMAGE404", "해당 이미지를 찾을 수 없습니다.");
-
+	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 내부 오류입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
