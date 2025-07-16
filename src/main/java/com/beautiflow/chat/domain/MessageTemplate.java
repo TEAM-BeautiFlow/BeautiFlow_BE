@@ -1,5 +1,6 @@
 package com.beautiflow.chat.domain;
 
+import com.beautiflow.chat.dto.messageTemplateDto.MessageTemplateUpdateReq;
 import com.beautiflow.global.domain.BaseTimeEntity;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
@@ -49,5 +50,14 @@ public class MessageTemplate extends BaseTimeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User owner;
+
+	public void update(MessageTemplateUpdateReq req) {
+		this.name = req.name();
+		this.sendTiming = req.sendTiming();
+		this.daysOffset = req.daysOffset();
+		this.content = req.content();
+		this.targetGroup = req.targetGroup();
+		this.isActive = req.isActive();
+	}
 
 }
