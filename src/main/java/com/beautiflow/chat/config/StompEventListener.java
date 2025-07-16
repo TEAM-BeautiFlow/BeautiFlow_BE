@@ -29,5 +29,3 @@ public class StompEventListener {
 		System.out.println("total session : "+sessions.size());
 	}
 }
-
-
