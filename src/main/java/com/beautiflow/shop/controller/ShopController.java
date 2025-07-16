@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.controller;
+package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.error.ErrorCode;
