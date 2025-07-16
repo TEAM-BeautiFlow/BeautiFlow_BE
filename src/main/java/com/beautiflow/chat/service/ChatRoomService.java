@@ -123,35 +123,6 @@ public class ChatRoomService {
 			.isPresent();
 	}
 
-/*
-	@Transactional
-	public ChatRoom getOrCreateRoom(Long requesterId, Long shopId, Long customerId, Long designerId) {
-		User requester = userRepository.findById(requesterId)
-			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-		Shop shop = shopRepository.findById(shopId)
-			.orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
-		User customer = userRepository.findById(customerId)
-			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-		User designer = userRepository.findById(designerId)
-			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-
-		Optional<ChatRoom> optional = chatRoomRepository
-			.findByShopAndCustomerAndDesigner(shopId, customerId, designerId);
-
-		if (optional.isPresent()) {
-			ChatRoom room = optional.get();
-			room.reenterBy(requester); // 나갔던 유저 재입장 처리
-			return room;
-		}
-
-		ChatRoom newRoom = ChatRoom.builder()
-			.shop(shop)
-			.customer(customer)
-			.designer(designer)
-			.build();
-		return chatRoomRepository.save(newRoom);
-	}
-*/
 
 
 
