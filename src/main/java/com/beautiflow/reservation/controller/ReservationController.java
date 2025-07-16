@@ -2,11 +2,14 @@ package com.beautiflow.reservation.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
+import com.beautiflow.reservation.dto.TimeSlotResponse;
 import com.beautiflow.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +28,16 @@ public class ReservationController {
       @RequestParam String month
   ) {
     List<ReservationMonthRes> result = reservationService.getReservedDates(designerId, month);
+    return ResponseEntity.ok(ApiResponse.success(result));
+  }
+
+  @GetMapping("/timeslots") // 시간대별 예약 현황 조회
+  @Operation(summary = "시간대별 예약 현황 조회")
+  public ResponseEntity<ApiResponse<List<TimeSlotResponse>>> getReservedTimeSlots(
+      @RequestParam Long designerId,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+  ) {
+    List<TimeSlotResponse> result = reservationService.getReservedTimeSlots(designerId, date);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
