@@ -4,6 +4,7 @@ import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +30,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       @Param("designerId") Long designerId,
       @Param("date") LocalDate date
   );
+
+  @Query("SELECT r FROM Reservation r " + //예약 상세 조회
+      "JOIN FETCH r.designer " +
+      "JOIN FETCH r.customer " +
+      "WHERE r.id = :id")
+  Optional<Reservation> findFetchAllById(@Param("id") Long id);
 
 
 }
