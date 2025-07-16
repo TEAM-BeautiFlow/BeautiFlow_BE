@@ -59,6 +59,9 @@ dependencies {
 
 	//cool sms
 	implementation 'net.nurigo:sdk:4.3.2'
+
+	// Redisson
+	implementation 'org.redisson:redisson:3.50.0'
 }
 
 tasks.named('test') {
