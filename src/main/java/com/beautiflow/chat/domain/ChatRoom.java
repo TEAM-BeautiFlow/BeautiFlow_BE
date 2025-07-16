@@ -2,6 +2,7 @@ package com.beautiflow.chat.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.global.domain.BaseTimeEntity;
@@ -62,12 +63,13 @@ public class ChatRoom extends BaseTimeEntity {
 		}
 	}
 	public void reEnterBy(User user) {
-		if (user.equals(customer)) {
+		if (Objects.equals(user, customer)) {
 			this.customerExited = false;
-		} else if (user.equals(designer)) {
+		} else if (Objects.equals(user, designer)) {
 			this.designerExited = false;
 		} else {
 			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
 		}
 	}
+
 }

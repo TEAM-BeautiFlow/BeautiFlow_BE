@@ -60,6 +60,11 @@ public class GroupMessageService {
 				req.shopId(), customer.getId(), designerId
 			).map(existing -> {
 				existing.reEnterBy(designer);
+
+				if (existing.isCustomerExited()) {
+					existing.reEnterBy(customer);
+				}
+				
 				return existing;
 			}).orElseGet(() -> {
 				ChatRoom newRoom = ChatRoom.builder()
