@@ -58,6 +58,11 @@ public class Reservation extends BaseTimeEntity {
 
 	private String requestNotes;
 
+	public void updateStatus(ReservationStatus newStatus) {
+		this.status = newStatus;
+	}
+
+
 	@Column(columnDefinition = "json")
 	private String styleImageUrls;
 
