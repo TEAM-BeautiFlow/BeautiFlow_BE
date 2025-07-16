@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.beautiflow.chat.domain.MessageTemplate;
+import com.beautiflow.chat.domain.TargetGroup;
 import com.beautiflow.chat.dto.ChatMessageSendReq;
 import com.beautiflow.chat.dto.MessageTemplateCreateReq;
 import com.beautiflow.chat.dto.MessageTemplateRes;
@@ -29,7 +30,7 @@ public class MessageTemplateService {
 	private final MessageTemplateRepository templateRepository;
 	private final UserRepository userRepository;
 
-	public void create(Long ownerId, MessageTemplateCreateReq req) {
+	public void createTemplate(Long ownerId, MessageTemplateCreateReq req) {
 		User owner = userRepository.findById(ownerId)
 			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
@@ -70,7 +71,10 @@ public class MessageTemplateService {
 
 		MessageTemplate messageTemplate = templateRepository.findById(templateId)
 			.orElseThrow(() -> new BeautiFlowException(TemplateErrorCode.Template_NOT_FOUND));
-		if (!messageTemplate.isActive()) throw new BeautiFlowException(TemplateErrorCode.INACTIVE_TEMPLATE);
+
+		if (!messageTemplate.getOwner().getId().equals(senderId)) {
+			throw new BeautiFlowException(TemplateErrorCode.UNAUTHORIZED_ACCESS);
+		}
 
 		return new ChatMessageSendReq(
 			roomId,

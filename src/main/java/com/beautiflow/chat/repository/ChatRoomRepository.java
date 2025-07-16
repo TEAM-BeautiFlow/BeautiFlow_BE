@@ -21,4 +21,12 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>{
 	ORDER BY r.updatedTime DESC
 """)
 	List<ChatRoom> findMyActiveChatRooms(@Param("userId") Long userId);
+
+
+	@Query("SELECT r FROM ChatRoom r " +
+		"WHERE r.shop.id = :shopId AND r.customer.id = :customerId AND r.designer.id = :designerId")
+	Optional<ChatRoom> findByShopAndCustomerAndDesigner(
+		@Param("shopId") Long shopId,
+		@Param("customerId") Long customerId,
+		@Param("designerId") Long designerId);
 }

@@ -13,9 +13,10 @@ public record ChatRoomSummaryRes(
 	String opponentName,
 	Long opponentId,
 	String lastMessageContent,
-	LocalDateTime lastMessageTime
+	LocalDateTime lastMessageTime,
+	int unreadCount
 ) {
-	public static ChatRoomSummaryRes of(ChatRoom room, User opponent, ChatMessage lastMessage) {
+	public static ChatRoomSummaryRes of(ChatRoom room, User opponent, ChatMessage lastMessage,int unreadCount) {
 		return new ChatRoomSummaryRes(
 			room.getId(),
 			room.getShop().getId(),
@@ -23,7 +24,8 @@ public record ChatRoomSummaryRes(
 			opponent.getName(),
 			opponent.getId(),
 			lastMessage != null ? lastMessage.getContent() : null,
-			lastMessage != null ? lastMessage.getCreatedTime() : room.getCreatedTime()
+			lastMessage != null ? lastMessage.getCreatedTime() : room.getCreatedTime(),
+			unreadCount
 		);
 	}
 }

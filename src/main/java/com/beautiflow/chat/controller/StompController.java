@@ -3,15 +3,17 @@ package com.beautiflow.chat.controller;
 import java.time.LocalDateTime;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 import com.beautiflow.chat.dto.ChatMessageSendReq;
 import com.beautiflow.chat.service.ChatMessageService;
 import com.beautiflow.chat.service.MessageTemplateService;
 import com.beautiflow.chat.service.RedisPubSubService;
+import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.user.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -27,6 +29,7 @@ public class StompController {
 	private final RedisPubSubService pubSubService;
 	private final SimpMessageSendingOperations messageTemplate;
 	private final MessageTemplateService templateService;
+	private final UserRepository userRepository;
 
 	@MessageMapping("/{roomId}")
 	public void sendMessage(@DestinationVariable Long roomId, ChatMessageSendReq chatMessageSendReq) throws
@@ -50,8 +53,10 @@ public class StompController {
 	@MessageMapping("/template/{templateId}/room/{roomId}")
 	public void sendTemplate(@DestinationVariable Long templateId,
 		@DestinationVariable Long roomId,
-		@Header("senderId") Long senderId) throws
+		@AuthenticationPrincipal CustomOAuth2User user) throws
 		JsonProcessingException {
+
+		Long senderId=user.getUserId();
 
 		ChatMessageSendReq dto = templateService.toSendReq(templateId, roomId, senderId);
 

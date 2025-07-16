@@ -1,5 +1,6 @@
 package com.beautiflow.chat.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,9 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.beautiflow.chat.domain.ChatMessage;
-import com.beautiflow.chat.dto.ChatMessageRes;
+import com.beautiflow.chat.domain.ChatRoomRead;
 import com.beautiflow.chat.dto.ChatRoomSummaryRes;
 import com.beautiflow.chat.repository.ChatMessageRepository;
+import com.beautiflow.chat.repository.ChatRoomReadRepository;
 import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.domain.ChatRoom;
 import com.beautiflow.chat.dto.RoomCreateReq;
@@ -34,6 +36,7 @@ public class ChatRoomService {
 	private final UserRepository userRepository;
 	private final ShopRepository shopRepository;
 	private final ChatMessageRepository chatMessageRepository;
+	private final ChatRoomReadRepository chatRoomReadRepository;
 
 	public RoomCreateRes createRoom(Long requesterId,RoomCreateReq roomCreateReq){
 		Optional<ChatRoom> optional = chatRoomRepository
@@ -95,13 +98,22 @@ public class ChatRoomService {
 
 		List<ChatRoom> myRooms = chatRoomRepository.findMyActiveChatRooms(userId);
 
+
 		return myRooms.stream().map(room -> {
 			User opponent = room.getCustomer().equals(me) ? room.getDesigner() : room.getCustomer();
 
 			// 가장 최근 메시지 조회
 			ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedTimeDesc(room).orElse(null);
+			//마지막 읽은 시간
+			LocalDateTime lastReadTime = chatRoomReadRepository
+				.findByChatRoomAndUser(room,me)
+				.map(ChatRoomRead::getLastReadTime)
+				.orElse(LocalDateTime.MIN);
 
-			return ChatRoomSummaryRes.of(room, opponent, lastMessage);
+
+			int unreadCount = chatMessageRepository.countByChatRoomAndSenderNotAndCreatedTimeAfter(room, me, lastReadTime);
+
+			return ChatRoomSummaryRes.of(room, opponent, lastMessage, unreadCount);
 		}).toList();
 	}
 
@@ -110,6 +122,36 @@ public class ChatRoomService {
 			.filter(room -> room.getCustomer().getId().equals(userId) || room.getDesigner().getId().equals(userId))
 			.isPresent();
 	}
+
+/*
+	@Transactional
+	public ChatRoom getOrCreateRoom(Long requesterId, Long shopId, Long customerId, Long designerId) {
+		User requester = userRepository.findById(requesterId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+		Shop shop = shopRepository.findById(shopId)
+			.orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+		User customer = userRepository.findById(customerId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+		User designer = userRepository.findById(designerId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+		Optional<ChatRoom> optional = chatRoomRepository
+			.findByShopAndCustomerAndDesigner(shopId, customerId, designerId);
+
+		if (optional.isPresent()) {
+			ChatRoom room = optional.get();
+			room.reenterBy(requester); // 나갔던 유저 재입장 처리
+			return room;
+		}
+
+		ChatRoom newRoom = ChatRoom.builder()
+			.shop(shop)
+			.customer(customer)
+			.designer(designer)
+			.build();
+		return chatRoomRepository.save(newRoom);
+	}
+*/
 
 
 

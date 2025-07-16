@@ -37,7 +37,7 @@ public class MessageTemplateController {
 	@Operation(summary = "템플릿 생성", description = "디자이너 또는 사장이 템플릿을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createTemplate(@RequestBody MessageTemplateCreateReq req, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-		templateService.create(customOAuth2User.getUserId(), req);
+		templateService.createTemplate(customOAuth2User.getUserId(), req);
 		return ResponseEntity.ok(ApiResponse.successWithNoData());
 	}
 

@@ -1,12 +1,15 @@
 package com.beautiflow.chat.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.beautiflow.chat.domain.ChatRoomRead;
 import com.beautiflow.chat.dto.ChatMessageRes;
 import com.beautiflow.chat.repository.ChatMessageRepository;
+import com.beautiflow.chat.repository.ChatRoomReadRepository;
 import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.chat.domain.ChatRoom;
@@ -27,6 +30,7 @@ public class ChatMessageService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final UserRepository userRepository;
 	private final ChatMessageRepository chatMessageRepository;
+	private final ChatRoomReadRepository chatRoomReadRepository;
 
 	public void saveMessage(Long roomId, ChatMessageSendReq req) {
 		ChatRoom room = chatRoomRepository.findById(roomId)
@@ -56,6 +60,18 @@ public class ChatMessageService {
 		if (!room.getCustomer().getId().equals(requesterId) && !room.getDesigner().getId().equals(requesterId)) {
 			throw new BeautiFlowException(ChatRoomErrorCode.INVALID_CHATROOM_PARAMETER);
 		}
+		User requester = userRepository.findById(requesterId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+		chatRoomReadRepository.findByChatRoomAndUser(room, requester)
+			.ifPresentOrElse(
+				read -> read.updateReadTime(LocalDateTime.now()),
+				() -> chatRoomReadRepository.save(ChatRoomRead.builder()
+					.chatRoom(room)
+					.user(requester)
+					.lastReadTime(LocalDateTime.now())
+					.build())
+			);
 
 		return chatMessageRepository.findByChatRoomOrderByCreatedTimeAsc(room).stream()
 			.map(msg -> new ChatMessageRes(
