@@ -16,6 +16,7 @@ public class CustomOAuth2User implements OAuth2User {
     private final String provider;
     @Getter
     private final String kakaoId;
+    @Getter
     private final Long userId;
     private final GlobalRole role;
 

@@ -39,6 +39,12 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .getExpiration().before(new Date());
     }
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .get("userId", Long.class);
+    }
 
     public String createAccessToken(String provider, String kakaoId, Long userId) {
 

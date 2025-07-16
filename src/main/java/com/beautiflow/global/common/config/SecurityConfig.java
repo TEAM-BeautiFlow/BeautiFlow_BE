@@ -63,9 +63,14 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(customSuccessHandler))
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/users/signup").permitAll()
-                        .anyRequest().authenticated())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/users/signup",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html"
+                ).permitAll()                        .anyRequest().authenticated())
 
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
