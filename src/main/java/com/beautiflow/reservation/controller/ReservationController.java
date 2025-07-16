@@ -1,8 +1,14 @@
 package com.beautiflow.reservation.controller;
 
+import com.beautiflow.customer.dto.CustomerListRes;
+import com.beautiflow.customer.service.DesignerCustomerService;
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.reservation.domain.Reservation;
+import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.reservation.dto.TimeSlotResponse;
+import com.beautiflow.reservation.dto.UpdateReservationStatusReq;
+import com.beautiflow.reservation.dto.UpdateReservationStatusRes;
 import com.beautiflow.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
 
   private final ReservationService reservationService;
+  private final DesignerCustomerService designerCustomerService;
 
   @GetMapping("/months")
   @Operation(summary = "월별 예약 유무 조회", description = "특정 월에 예약된 날짜별 예약 개수를 조회합니다.")
@@ -40,5 +47,38 @@ public class ReservationController {
     List<TimeSlotResponse> result = reservationService.getReservedTimeSlots(designerId, date);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
+
+  @GetMapping("/{reservationId}") // 예약 상세 조회
+  @Operation(summary = "예약 상세 정보 조회")
+  public ResponseEntity<ApiResponse<ReservationDetailRes>> getReservationDetail(
+      @PathVariable Long reservationId
+  ) {
+    ReservationDetailRes result = reservationService.getReservationDetail(reservationId);
+    return ResponseEntity.ok(ApiResponse.success(result));
+  }
+
+  @PatchMapping("/{reservationId}/status")
+  @Operation(summary = "예약 상태 변경 및 결과 반환")
+  public ResponseEntity<ApiResponse<UpdateReservationStatusRes>> updateReservationStatus(
+      @PathVariable Long reservationId,
+      @RequestBody UpdateReservationStatusReq request
+  ) {
+    reservationService.updateStatus(reservationId, request.status());
+
+    Reservation reservation = reservationService.getReservationEntity(reservationId); // 상태만 확인용
+    UpdateReservationStatusRes response = UpdateReservationStatusRes.from(reservation);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+
+  @GetMapping("/list")
+  @Operation(summary = "디자이너 고객 리스트 조회")
+  public ResponseEntity<ApiResponse<List<CustomerListRes>>> getCustomersByDesigner(
+      @RequestParam Long designerId
+  ) {
+    List<CustomerListRes> customers = designerCustomerService.getCustomersByDesigner(designerId);
+    return ResponseEntity.ok(ApiResponse.success(customers));
+  }
+
 
 }
