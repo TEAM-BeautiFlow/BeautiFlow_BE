@@ -50,9 +50,12 @@ public class GroupMessageService {
 		Shop shop = shopRepository.findById(req.shopId())
 			.orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
+		// 여러 TargetGroup
 		List<User> targetCustomers = managedCustomerRepository
-			.findByDesignerIdAndTargetGroupAndCustomerIdIn(designerId, req.targetGroup(), req.customerIds())
-			.stream().map(ManagedCustomer::getCustomer)
+			.findByDesignerIdAndTargetGroupInAndCustomerIdIn(designerId, req.targetGroups(), req.customerIds())
+			.stream()
+			.map(ManagedCustomer::getCustomer)
+			.distinct() // 중복 제거
 			.toList();
 
 		for (User customer : targetCustomers) {
@@ -64,7 +67,7 @@ public class GroupMessageService {
 				if (existing.isCustomerExited()) {
 					existing.reEnterBy(customer);
 				}
-				
+
 				return existing;
 			}).orElseGet(() -> {
 				ChatRoom newRoom = ChatRoom.builder()

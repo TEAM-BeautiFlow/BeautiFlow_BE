@@ -9,6 +9,6 @@ import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.global.domain.TargetGroup;
 
 public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer,Long> {
-	List<ManagedCustomer> findByDesignerIdAndTargetGroupAndCustomerIdIn(Long designerId, TargetGroup targetGroup, List<Long> customerIds);
-
+	List<ManagedCustomer> findByDesignerIdAndTargetGroupInAndCustomerIdIn(
+		Long designerId, List<TargetGroup> targetGroups, List<Long> customerIds);
 }

@@ -6,7 +6,7 @@ import com.beautiflow.global.domain.TargetGroup;
 
 public record GroupMessageSendReq(
 	Long shopId,
-	TargetGroup targetGroup,
+	List<TargetGroup> targetGroups,
 	List<Long> customerIds,
 	String content,
 	String imageUrl
