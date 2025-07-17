@@ -62,8 +62,4 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(licenseImageUrl));
   }
 
-
-
-
-
 }

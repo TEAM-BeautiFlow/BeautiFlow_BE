@@ -58,6 +58,7 @@ public class ShopManageService {
     return ShopInfoRes.from(shop);
   }
 
+  // 매장 사업자 등록증 이미지 조회
   @Transactional
   public String getLicenseImageUrl(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -71,6 +72,7 @@ public class ShopManageService {
     return licenseImageUrl;
   }
 
+  // 매장 사업자 등록증 이미지 업로드
   @Transactional
   public String uploadLicenseImage(Long shopId, MultipartFile licenseImage) {
     Shop shop = shopRepository.findById(shopId)
@@ -83,9 +85,7 @@ public class ShopManageService {
     return result.imageUrl();
   }
 
-  /**
-   * 이미지 삭제
-   */
+  // 이미지 삭제
   private void deleteImages(Shop shop, List<Long> imageIdsToDelete) {
     // 삭제할 이미지 ID에 대해 유효성 검사 수행
     for (Long imageId : imageIdsToDelete) {
@@ -101,9 +101,7 @@ public class ShopManageService {
     }
   }
 
-  /**
-   * 이미지 추가
-   */
+  // 새로운 이미지 업로드
   private void uploadNewImages(Shop shop, List<MultipartFile> newImages) {
     for (MultipartFile file : newImages) {
       // S3에 파일 업로드
