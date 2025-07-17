@@ -1,9 +1,9 @@
-package com.beautiflow.reservation.converter;
+package com.beautiflow.shop.converter;
 
-import com.beautiflow.reservation.dto.response.ShopDetailResponse;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.BusinessHourDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.NoticeDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.shop.dto.ShopDetailResponse;
+import com.beautiflow.shop.dto.ShopDetailResponse.BusinessHourDto;
+import com.beautiflow.shop.dto.ShopDetailResponse.NoticeDto;
+import com.beautiflow.shop.dto.ShopDetailResponse.TreatmentDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;

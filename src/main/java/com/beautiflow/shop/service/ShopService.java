@@ -1,11 +1,11 @@
-package com.beautiflow.reservation.service;
+package com.beautiflow.shop.service;
 
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TreatmentCategory;
-import com.beautiflow.reservation.converter.ShopConverter;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse;
+import com.beautiflow.shop.converter.ShopConverter;
+import com.beautiflow.shop.dto.ShopDetailResponse;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.shop.repository.ShopRepository;
