@@ -4,10 +4,7 @@ import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.shop.dto.ShopInfoRes;
 import com.beautiflow.shop.dto.ShopUpdateReq;
-import com.beautiflow.shop.dto.TreatmentInfoRes;
 import com.beautiflow.shop.service.ShopManageService;
-import com.beautiflow.treatment.domain.service.TreatmentService;
-import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -28,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ShopManageController {
 
   private final ShopManageService shopManageService;
-  private final TreatmentService treatmentService;
 
   // 매장 상세 정보 조회
   @GetMapping("/{shopId}")
@@ -66,16 +62,6 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(licenseImageUrl));
   }
 
-  // 시술 목록 조회
-  @GetMapping("/{shopId}/treatments")
-  public ResponseEntity<ApiResponse<List<TreatmentInfoRes>>> getTreatments(
-      @PathVariable Long shopId,
-      @Parameter(description = "시술 카테고리 (hand, feet, cf)")
-      @RequestParam(required = false) TreatmentCategory category
-  ) {
-    List<TreatmentInfoRes> treatments = treatmentService.getTreatments(shopId, category);
-    return ResponseEntity.ok(ApiResponse.success(treatments));
-  }
 
 
 
