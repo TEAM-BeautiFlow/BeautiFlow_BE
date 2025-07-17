@@ -42,8 +42,7 @@ public record ShopDetailResponse (
             Long id,
             TreatmentCategory category,
             String name,
-            Integer minPrice,
-            Integer maxPrice,
+            Integer price,
             Integer durationMinutes,
             String description,
             List<TreatmentImageDto> images
