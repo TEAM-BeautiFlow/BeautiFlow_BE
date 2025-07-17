@@ -1,18 +1,12 @@
-package com.beautiflow.reservation.controller;
+package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
-import com.beautiflow.global.common.error.ErrorCode;
-import com.beautiflow.global.common.error.ShopErrorCode;
-import com.beautiflow.global.common.error.TreatmentErrorCode;
-import com.beautiflow.global.common.success.CommonSuccessCode;
-import com.beautiflow.global.common.success.SuccessCode;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse;
+import com.beautiflow.shop.dto.ShopDetailResponse;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
-import com.beautiflow.reservation.service.ShopService;
+import com.beautiflow.shop.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

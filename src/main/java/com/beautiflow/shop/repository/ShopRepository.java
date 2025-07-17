@@ -1,8 +1,10 @@
 package com.beautiflow.shop.repository;
 
-
 import com.beautiflow.shop.domain.Shop;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ShopManageRepository extends JpaRepository<Shop, Long> {
+@Repository
+public interface ShopRepository extends JpaRepository<Shop, Long> {
+
 }
