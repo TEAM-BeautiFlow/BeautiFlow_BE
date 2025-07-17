@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.dto.response;
+package com.beautiflow.shop.dto;
 
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.global.domain.WeekDay;

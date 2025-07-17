@@ -23,14 +23,14 @@ public class ShopManageController {
 
   private final ShopManageService shopManageService;
 
-  @GetMapping("/{shopId}")
+  @GetMapping("/manage/{shopId}")
   public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(@PathVariable Long shopId) {
     ShopInfoRes shopDetails = shopManageService.getShopDetails(shopId);
 
     return ResponseEntity.ok(ApiResponse.success(shopDetails));
   }
 
-  @PatchMapping("/{shopId}")
+  @PatchMapping("/manage/{shopId}")
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
       @PathVariable Long shopId,
       @ModelAttribute ShopUpdateReq requestDto,
