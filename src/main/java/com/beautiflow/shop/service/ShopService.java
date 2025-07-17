@@ -5,7 +5,7 @@ import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.shop.converter.ShopConverter;
-import com.beautiflow.shop.dto.ShopDetailResponse;
+import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.shop.repository.ShopRepository;
@@ -25,7 +25,7 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final TreatmentRepository treatmentRepository;
 
-    public ShopDetailResponse getShopDetail(Long shopId) {
+    public ShopDetailRes getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
