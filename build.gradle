@@ -52,7 +52,7 @@ dependencies {
 
 	// AWS S3
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
-	//implementation 'software.amazon.awssdk:s3'
+	implementation 'software.amazon.awssdk:s3'
 
 }
 

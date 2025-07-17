@@ -49,7 +49,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             response.addCookie(createCookie("isUserAlreadyExist", "false"));
             response.addCookie(createCookie("kakaoId", kakaoId));
             response.addCookie(createCookie("provider", provider));
-            response.sendRedirect("http://localhost:8080/swagger-ui/index.html");
+            response.sendRedirect("http://localhost:3000");
         } else {
             Long userId = user.getId();
             response.addCookie(createCookie("isUserAlreadyExist", "true"));
