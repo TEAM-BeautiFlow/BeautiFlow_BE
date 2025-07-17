@@ -1,3 +1,3 @@
 package com.beautiflow.global.domain;
 
-public enum ReservationStatus { PENDING, CONFIRMED, CANCELLED }
+public enum ReservationStatus { TEMPORARY, PENDING, CONFIRMED, CANCELLED }
