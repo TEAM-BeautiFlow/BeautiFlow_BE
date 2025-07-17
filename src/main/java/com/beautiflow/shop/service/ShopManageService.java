@@ -10,7 +10,7 @@ import com.beautiflow.shop.domain.ShopImage;
 import com.beautiflow.shop.dto.ShopInfoRes;
 import com.beautiflow.shop.dto.ShopUpdateReq;
 import com.beautiflow.shop.repository.ShopImageRepository;
-import com.beautiflow.shop.repository.ShopManageRepository;
+import com.beautiflow.shop.repository.ShopRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ShopManageService {
 
-  private final ShopManageRepository shopManageRepository;
+  private final ShopRepository shopRepository;
   private final ShopImageRepository shopImageRepository;
   private final S3Service s3Service;
 
   @Transactional(readOnly = true)
   public ShopInfoRes getShopDetails(Long shopId) {
-    Shop shop = shopManageRepository.findById(shopId)
+    Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
     return ShopInfoRes.from(shop);
@@ -39,7 +39,7 @@ public class ShopManageService {
       ShopUpdateReq requestDto,
       List<MultipartFile> newImages
   ) {
-    Shop shop = shopManageRepository.findById(shopId)
+    Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
     // 1. 기존 이미지 삭제 처리
