@@ -75,14 +75,34 @@ public class ShopManageService {
   // 매장 사업자 등록증 이미지 업로드
   @Transactional
   public String uploadLicenseImage(Long shopId, MultipartFile licenseImage) {
+    // 1. DB 트랜잭션 시작 전에 매장 존재 여부 확인
+    if (!shopRepository.existsById(shopId)) {
+      throw new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND);
+    }
+
+    // 2. shopId를 기반으로 S3 저장 경로 생성
+    String dirName = String.format("shops/%d/license", shopId);
+
+    // 3. S3에 파일 먼저 업로드
+    S3UploadResult result = s3Service.uploadFile(licenseImage, dirName);
+
+    // 4. DB 업데이트 로직만 트랜잭션으로 호출
+    try {
+      updateLicenseImageUrl(shopId, result.imageUrl());
+      return result.imageUrl();
+    } catch (Exception e) {
+      // 5. DB 업데이트 실패 시 업로드한 S3 파일을 삭제
+      s3Service.deleteFile(result.fileKey());
+      throw e;
+    }
+  }
+
+  // DB 업데이트 로직 분리
+  @Transactional
+  public void updateLicenseImageUrl(Long shopId, String imageUrl) {
     Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
-
-    S3UploadResult result = s3Service.uploadFile(licenseImage, "shops/license");
-
-    shop.setLicenseImageUrl(result.imageUrl());
-
-    return result.imageUrl();
+    shop.setLicenseImageUrl(imageUrl);
   }
 
   // 이미지 삭제
