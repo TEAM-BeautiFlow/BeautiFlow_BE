@@ -1,9 +1,7 @@
 package com.beautiflow.reservation.dto.response;
 
-import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.treatment.domain.Treatment;
 import java.util.List;
-import lombok.Builder;
 
 public record TreatmentResponse(
         Long id,

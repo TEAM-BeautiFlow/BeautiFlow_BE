@@ -2,7 +2,6 @@ package com.beautiflow.shop.service;
 
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.global.common.error.CommonErrorCode;
 import com.beautiflow.global.common.s3.S3Service;
 import com.beautiflow.global.common.s3.S3UploadResult;
 import com.beautiflow.shop.domain.Shop;
