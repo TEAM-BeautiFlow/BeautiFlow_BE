@@ -37,6 +37,7 @@ public class Shop {
 	private String accountInfo;
 	private String address;
 	private String introduction;
+	private String licenseImageUrl;
 
 	@Column(unique = true)
 	private String businessRegistrationNumber;
@@ -72,5 +73,9 @@ public class Shop {
 		if (requestDto.introduction() != null) {
 			this.introduction = requestDto.introduction();
 		}
+	}
+
+	public void setLicenseImageUrl(String licenseImageUrl) {
+		this.licenseImageUrl = licenseImageUrl;
 	}
 }

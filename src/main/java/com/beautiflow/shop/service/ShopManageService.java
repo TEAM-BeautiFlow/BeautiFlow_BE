@@ -58,6 +58,31 @@ public class ShopManageService {
     return ShopInfoRes.from(shop);
   }
 
+  @Transactional
+  public String getLicenseImageUrl(Long shopId) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    String licenseImageUrl = shop.getLicenseImageUrl();
+    if (licenseImageUrl == null || licenseImageUrl.isEmpty()) {
+      throw new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND);
+    }
+
+    return licenseImageUrl;
+  }
+
+  @Transactional
+  public String uploadLicenseImage(Long shopId, MultipartFile licenseImage) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    S3UploadResult result = s3Service.uploadFile(licenseImage, "shops/license");
+
+    shop.setLicenseImageUrl(result.imageUrl());
+
+    return result.imageUrl();
+  }
+
   /**
    * 이미지 삭제
    */
