@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JWTUtil {
 
-    private final long accessTokenValidity = 1000L * 60 * 30; // 30분
+    private final long accessTokenValidity = 1000L * 60 * 60; // 1시간
     private final long refreshTokenValidity = 1000L * 60 * 60 * 24 * 7; // 7일
-
-
     private SecretKey secretKey;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
