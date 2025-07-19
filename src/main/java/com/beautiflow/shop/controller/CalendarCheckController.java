@@ -1,7 +1,7 @@
 package com.beautiflow.shop.controller;
 
-import com.beautiflow.customer.dto.CustomerListRes;
-import com.beautiflow.customer.service.DesignerCustomerService;
+import com.beautiflow.MangedCustomer.dto.CustomerListRes;
+import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class CalendarCheckController {
 
   private final CalendarCheckService calendarCheckService;
-  private final DesignerCustomerService designerCustomerService;
+  private final ManagedCustomerService managedCustomerService;
 
   @GetMapping("/months")
   @Operation(summary = "월별 예약 유무 조회", description = "특정 월에 예약된 날짜별 예약 개수를 조회합니다.")
@@ -76,7 +76,7 @@ public class CalendarCheckController {
   public ResponseEntity<ApiResponse<List<CustomerListRes>>> getCustomersByDesigner(
       @RequestParam Long designerId
   ) {
-    List<CustomerListRes> customers = designerCustomerService.getCustomersByDesigner(designerId);
+    List<CustomerListRes> customers = managedCustomerService.getCustomersByDesigner(designerId);
     return ResponseEntity.ok(ApiResponse.success(customers));
   }
 

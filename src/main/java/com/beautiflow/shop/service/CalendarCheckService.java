@@ -1,9 +1,9 @@
 package com.beautiflow.shop.service;
 
 
-import com.beautiflow.customer.dto.CustomerListRes;
-import com.beautiflow.customer.repository.DesignerCustomerRepository;
-import com.beautiflow.customer.service.DesignerCustomerService;
+import com.beautiflow.MangedCustomer.dto.CustomerListRes;
+import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
+import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.ReservationStatus;
@@ -27,8 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class CalendarCheckService {
 
   private final ReservationRepository reservationRepository;
-  private final DesignerCustomerRepository designerCustomerRepository;
-  private final DesignerCustomerService designerCustomerService;
+  private final ManagedCustomerRepository managedCustomerRepository;
+  private final ManagedCustomerService managedCustomerService;
 
 
 
@@ -74,7 +74,7 @@ public class CalendarCheckService {
       reservation.updateStatus(ReservationStatus.COMPLETED);
       reservationRepository.save(reservation);
 
-      designerCustomerService.autoRegister(
+      managedCustomerService.autoRegister(
           reservation.getDesigner(),
           reservation.getCustomer(),
           reservation.getShop()
@@ -93,7 +93,7 @@ public class CalendarCheckService {
     reservation.updateStatus(newStatus);
 
     if (newStatus == ReservationStatus.CONFIRMED) {
-      designerCustomerService.autoRegister(
+      managedCustomerService.autoRegister(
           reservation.getDesigner(),
           reservation.getCustomer(),
           reservation.getShop()
@@ -107,12 +107,13 @@ public class CalendarCheckService {
   }
 
 
-  @Transactional
+  @Transactional(readOnly = true)
   public List<CustomerListRes> getCustomersByDesigner(Long designerId) {
-    return designerCustomerRepository.findByDesignerId(designerId).stream()
-        .map(dc -> CustomerListRes.from(dc.getCustomer()))
+    return managedCustomerRepository.findByDesignerId(designerId).stream()
+        .map(CustomerListRes::from)
         .toList();
   }
+
 
 
 
