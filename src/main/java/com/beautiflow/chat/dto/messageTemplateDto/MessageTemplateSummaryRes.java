@@ -12,5 +12,6 @@ public record MessageTemplateSummaryRes(
 	String name,
 	SendTiming sendTiming,
 	int daysOffset,
-	TargetGroup targetGroup
+	TargetGroup targetGroup,
+	String content
 ) {}

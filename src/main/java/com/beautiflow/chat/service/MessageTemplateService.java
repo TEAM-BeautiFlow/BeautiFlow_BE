@@ -81,6 +81,7 @@ public class MessageTemplateService {
 				.sendTiming(template.getSendTiming())
 				.daysOffset(template.getDaysOffset())
 				.targetGroup(template.getTargetGroup())
+				.content(template.getContent())
 				.build()
 			).toList();
 	}
