@@ -1,9 +1,9 @@
-package com.beautiflow.reservation.controller;
+package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.reservation.dto.TimeSlotResponse;
-import com.beautiflow.reservation.service.ReservationService;
+import com.beautiflow.shop.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;

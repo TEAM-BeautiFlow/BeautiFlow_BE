@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.service;
+package com.beautiflow.shop.service;
 
 
 import com.beautiflow.global.common.error.ReservationErrorCode;
