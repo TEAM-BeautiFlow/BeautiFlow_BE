@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.dto.response;
+package com.beautiflow.shop.dto;
 
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.global.domain.WeekDay;
@@ -42,8 +42,7 @@ public record ShopDetailResponse (
             Long id,
             TreatmentCategory category,
             String name,
-            Integer minPrice,
-            Integer maxPrice,
+            Integer price,
             Integer durationMinutes,
             String description,
             List<TreatmentImageDto> images
