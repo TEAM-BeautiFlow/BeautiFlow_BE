@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReservationService {
+public class CalendarCheckService {
 
   private final ReservationRepository reservationRepository;
   private final DesignerCustomerRepository designerCustomerRepository;

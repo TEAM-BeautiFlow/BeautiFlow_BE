@@ -9,7 +9,7 @@ import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.reservation.dto.TimeSlotResponse;
 import com.beautiflow.reservation.dto.UpdateReservationStatusReq;
 import com.beautiflow.reservation.dto.UpdateReservationStatusRes;
-import com.beautiflow.shop.service.ReservationService;
+import com.beautiflow.shop.service.CalendarCheckService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
@@ -23,9 +23,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/reservations")
 @RequiredArgsConstructor
 @Tag(name = "Reservation", description = "사장님 월별 예약 조회 API")
-public class ReservationController {
+public class CalendarCheckController {
 
-  private final ReservationService reservationService;
+  private final CalendarCheckService calendarCheckService;
   private final DesignerCustomerService designerCustomerService;
 
   @GetMapping("/months")
@@ -34,7 +34,7 @@ public class ReservationController {
       @RequestParam Long designerId,
       @RequestParam String month
   ) {
-    List<ReservationMonthRes> result = reservationService.getReservedDates(designerId, month);
+    List<ReservationMonthRes> result = calendarCheckService.getReservedDates(designerId, month);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -44,7 +44,7 @@ public class ReservationController {
       @RequestParam Long designerId,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
-    List<TimeSlotResponse> result = reservationService.getReservedTimeSlots(designerId, date);
+    List<TimeSlotResponse> result = calendarCheckService.getReservedTimeSlots(designerId, date);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -53,7 +53,7 @@ public class ReservationController {
   public ResponseEntity<ApiResponse<ReservationDetailRes>> getReservationDetail(
       @PathVariable Long reservationId
   ) {
-    ReservationDetailRes result = reservationService.getReservationDetail(reservationId);
+    ReservationDetailRes result = calendarCheckService.getReservationDetail(reservationId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -63,9 +63,9 @@ public class ReservationController {
       @PathVariable Long reservationId,
       @RequestBody UpdateReservationStatusReq request
   ) {
-    reservationService.updateStatus(reservationId, request.status());
+    calendarCheckService.updateStatus(reservationId, request.status());
 
-    Reservation reservation = reservationService.getReservationEntity(reservationId); // 상태만 확인용
+    Reservation reservation = calendarCheckService.getReservationEntity(reservationId); // 상태만 확인용
     UpdateReservationStatusRes response = UpdateReservationStatusRes.from(reservation);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
