@@ -71,7 +71,7 @@ public class MessageTemplateService {
 		User owner = userRepository.findById(userId)
 			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
-		List<MessageTemplate> templates = templateRepository.findByOwner(owner);
+		List<MessageTemplate> templates = templateRepository.findByOwnerAndIsActiveTrue(owner);
 
 		return templates.stream()
 			.map(template -> MessageTemplateSummaryRes.builder()
