@@ -13,6 +13,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import com.beautiflow.chat.service.RedisPubSubService;
+import com.beautiflow.global.common.Alert.AlertEventListener;
 
 @Configuration
 public class RedisConfig {
@@ -61,4 +62,23 @@ public class RedisConfig {
 		//RedisPubSubService의 특정 메서드가 수신된 메시지를 처리할 수 있도록 지정
 		return new MessageListenerAdapter(redisPubSubService,"onMessage");
 	}
+
+	// 알림용 리스너 등록
+	@Bean(name = "alertListenerAdapter")
+	public MessageListenerAdapter alertListenerAdapter(AlertEventListener listener) {
+		return new MessageListenerAdapter(listener, "handle");
+	}
+
+	// 알림용 리스너 컨테이너 등록 (옵션)
+	@Bean
+	public RedisMessageListenerContainer alertListenerContainer(
+		@Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory,
+		@Qualifier("alertListenerAdapter") MessageListenerAdapter alertListenerAdapter
+	) {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(redisConnectionFactory);
+		container.addMessageListener(alertListenerAdapter, new PatternTopic("alertQueue"));
+		return container;
+	}
+
 }
