@@ -9,6 +9,8 @@ import com.beautiflow.chat.domain.MessageTemplate;
 import com.beautiflow.chat.domain.SendTiming;
 import com.beautiflow.chat.dto.ChatMessageSendReq;
 import com.beautiflow.chat.repository.MessageTemplateRepository;
+import com.beautiflow.global.common.Alert.AlertEvent;
+import com.beautiflow.global.common.Alert.AlertEventPublisher;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.SenderType;
 import com.beautiflow.reservation.domain.Reservation;
@@ -27,8 +29,7 @@ public class MessageTemplateScheduler {
 	private final MessageTemplateRepository templateRepository;
 	private final ReservationRepository reservationRepository;
 	private final ChatRoomService chatRoomService;
-	private final RedisPubSubService redisPubSubService;
-	private final ChatMessageService chatMessageService;
+	private final AlertEventPublisher alertEventPublisher;
 
 	private final ObjectMapper objectMapper = new ObjectMapper()
 		.registerModule(new JavaTimeModule())
@@ -71,6 +72,8 @@ public class MessageTemplateScheduler {
 					.getOrCreateRoom(reservation.getShop(), reservation.getCustomer(), reservation.getDesigner())
 					.getId();
 
+				Long receiverId = reservation.getCustomer().getId();
+
 				ChatMessageSendReq message = new ChatMessageSendReq(
 					roomId,
 					template.getOwner().getId(),
@@ -80,9 +83,13 @@ public class MessageTemplateScheduler {
 				);
 
 				try {
-					chatMessageService.saveMessage(roomId, message);
-					String jsonMessage = objectMapper.writeValueAsString(message);
-					redisPubSubService.publish("chat", jsonMessage);
+					alertEventPublisher.publish(new AlertEvent(
+						roomId,
+						receiverId,
+						template.getOwner().getId(),
+						"TEMPLATE",
+						template.getContent()
+					));
 				} catch (Exception e) {
 					log.info("메시지 전송 실패: " + e.getMessage());
 				}
