@@ -9,5 +9,10 @@ import com.beautiflow.chat.domain.ChatRoomRead;
 import com.beautiflow.user.domain.User;
 
 public interface ChatRoomReadRepository extends JpaRepository<ChatRoomRead, Long> {
+
+	Optional<ChatRoomRead> findByChatRoomIdAndUserId(Long chatRoomId, Long userId);
+
 	Optional<ChatRoomRead> findByChatRoomAndUser(ChatRoom chatRoom, User me);
 }
+
+

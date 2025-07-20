@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,15 @@ public class ChatRoomRead {
 	private User user;
 
 	private LocalDateTime lastReadTime;
+
+	private LocalDateTime lastAlertSentTime;
+
+	@Version
+	private Long version;
+
+	public void updateLastAlertSentTime(LocalDateTime now) {
+		this.lastAlertSentTime = now;
+	}
 
 	public void updateReadTime(LocalDateTime time) {
 		this.lastReadTime = time;

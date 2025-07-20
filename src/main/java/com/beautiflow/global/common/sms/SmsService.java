@@ -57,4 +57,17 @@ public class SmsService {
 			log.error("❌ 인증번호 발송 실패: {}", e.getMessage(), e);
 		}
 	}
+
+	public void sendReminderTo(String toPhoneNumber) {
+		try {
+			Message message = new Message();
+			message.setFrom(smsProperties.getFromNumber());
+			message.setTo(toPhoneNumber);
+			message.setText("읽지 않은 메시지가 있습니다. BeautiFlow에서 확인해주세요.");
+
+			messageService.sendOne(new SingleMessageSendingRequest(message));
+		} catch (Exception e) {
+			log.error("SMS 발송 실패", e);
+		}
+	}
 }
