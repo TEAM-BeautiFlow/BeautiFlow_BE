@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.dto;
+package com.beautiflow.reservation.dto.request;
 
 import lombok.Builder;
 

@@ -1,3 +1,4 @@
+
 package com.beautiflow.global.common.config;
 
 import com.beautiflow.global.common.security.CustomOAuth2UserService;
@@ -28,7 +29,7 @@ public class SecurityConfig {
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
             CustomSuccessHandler customSuccessHandler, JWTUtil jwtUtil
-            ) {
+    ) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.customSuccessHandler = customSuccessHandler;
         this.jwtUtil = jwtUtil;
@@ -64,8 +65,13 @@ public class SecurityConfig {
                         .successHandler(customSuccessHandler))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/users/signup").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(
+                                "/",
+                                "/users/signup",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()                        .anyRequest().authenticated())
 
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

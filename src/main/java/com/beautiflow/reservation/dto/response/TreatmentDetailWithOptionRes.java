@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record TreatmentDetailWithOptionResponse(
+public record TreatmentDetailWithOptionRes(
         Long id,
         String name,
         Integer durationMinutes,

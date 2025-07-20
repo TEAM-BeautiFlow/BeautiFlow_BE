@@ -4,9 +4,9 @@ import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.shop.dto.ShopDetailRes.BusinessHourDto;
 import com.beautiflow.shop.dto.ShopDetailRes.NoticeDto;
 import com.beautiflow.shop.dto.ShopDetailRes.TreatmentDto;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes.OptionGroupDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes.TreatmentImageDto;
 import com.beautiflow.shop.domain.BusinessHour;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopNotice;
@@ -76,8 +76,8 @@ public class ShopConverter {
                 .build();
     }
 
-    public static TreatmentDetailWithOptionResponse toTreatmentDetailWithOptionResponse(Treatment treatment) {
-        return TreatmentDetailWithOptionResponse.builder()
+    public static TreatmentDetailWithOptionRes toTreatmentDetailWithOptionResponse(Treatment treatment) {
+        return TreatmentDetailWithOptionRes.builder()
                 .id(treatment.getId())
                 .name(treatment.getName())
                 .durationMinutes(treatment.getDurationMinutes())

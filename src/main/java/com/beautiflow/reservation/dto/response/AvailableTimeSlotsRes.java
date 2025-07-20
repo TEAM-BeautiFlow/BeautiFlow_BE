@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.dto;
+package com.beautiflow.reservation.dto.response;
 
 import java.util.Map;
 

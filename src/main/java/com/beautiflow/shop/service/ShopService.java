@@ -6,8 +6,8 @@ import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.shop.converter.ShopConverter;
 import com.beautiflow.shop.dto.ShopDetailRes;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
-import com.beautiflow.reservation.dto.response.TreatmentResponse;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
+import com.beautiflow.reservation.dto.response.TreatmentRes;
 import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.shop.domain.Shop;
@@ -32,7 +32,7 @@ public class ShopService {
         return ShopConverter.toDto(shop);
     }
 
-    public List<TreatmentResponse> getTreatmentsByShopAndCategory(Long shopId, String category) {
+    public List<TreatmentRes> getTreatmentsByShopAndCategory(Long shopId, String category) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
@@ -49,20 +49,20 @@ public class ShopService {
         }
 
         return treatments.stream()
-                .map(TreatmentResponse::from)
+                .map(TreatmentRes::from)
                 .collect(Collectors.toList());
     }
 
-    public TreatmentResponse getTreatmentDetail(Long shopId, Long treatmentId) {
+    public TreatmentRes getTreatmentDetail(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         Treatment treatment = treatmentRepository.findByShopAndId(shop, treatmentId)
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
-        return TreatmentResponse.from(treatment);
+        return TreatmentRes.from(treatment);
     }
-    public TreatmentDetailWithOptionResponse getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
+    public TreatmentDetailWithOptionRes getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 

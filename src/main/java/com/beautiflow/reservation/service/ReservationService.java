@@ -6,15 +6,17 @@ import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.GlobalRole;
 import com.beautiflow.global.domain.PaymentStatus;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.WeekDay;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.domain.ReservationOption;
 import com.beautiflow.reservation.domain.ReservationTreatment;
-import com.beautiflow.reservation.domain.ReservationTreatmentId;
-import com.beautiflow.reservation.dto.TemporaryReservationReq;
-import com.beautiflow.reservation.dto.TemporaryReservationRes;
+import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
+import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
+import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
+import com.beautiflow.reservation.repository.DesignerRepository;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import com.beautiflow.reservation.repository.ReservationTreatmentRepository;
@@ -29,7 +31,6 @@ import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.treatment.repository.OptionItemRepository;
 import com.beautiflow.user.repository.UserRepository;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class ReservationService {
     private final ReservationTreatmentRepository reservationTreatmentRepository;
     private final ReservationOptionRepository reservationOptionRepository;
     private final BusinessHourRepository businessHourRepository;
+    private final DesignerRepository designerRepository;
 
     @Transactional
     public Reservation tempSaveReservation(User customer, TemporaryReservationReq request) {
@@ -297,7 +299,26 @@ public class ReservationService {
 
         return result;
     }
+    public List<AvailableDesignerRes> getAvailableDesigners(Long shopId) {
+        List<User> designers = designerRepository.findByShopMemberships_Shop_IdAndRoles_Id_Role(
+                shopId, GlobalRole.STAFF
+        );
 
+        return designers.stream()
+                .map(user -> new AvailableDesignerRes(
+                        user.getId(),
+                        user.getName(),
+                        user.getStyleImages().isEmpty() ? null : user.getStyleImages().get(0).getImageUrl(), // 예시: 프로필 이미지 (없으면 null)
+                        isOwner(user), // 예: 원장 여부 판별 메서드 구현 필요
+                        user.getIntro()
+                ))
+                .collect(Collectors.toList());
+    }
 
+    private boolean isOwner(User user) {
+        // userRole 중에 원장 역할이 있으면 true (원장 역할 별도 구현에 따라 조정 필요)
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getRole().equals(GlobalRole.STAFF)); // 예시, 실제 role 이름 확인 필요
+    }
 
 }
