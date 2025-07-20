@@ -11,21 +11,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-    private final UserRepository userRepository;
-
-    public JWTFilter(JWTUtil jwtUtil, UserRepository userRepository) {
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -40,32 +36,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String token = authorization.substring(7);
 
-        if (jwtUtil.isExpired(token)) {
-
-            filterChain.doFilter(request, response);
-
-            return;
+        if (jwtUtil.validateToken(token)) {
+            Authentication authentication = jwtUtil.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-        String provider = jwtUtil.getProvider(token);
-        String kakaoId = jwtUtil.getKakaoId(token);
-        Optional<User> user =  userRepository.findByKakaoId(kakaoId);
-        Long userId = user.map(User::getId).orElse(null);
-
-        GlobalRole globalRole = switch (provider) {
-            case "kakao-customer" -> GlobalRole.CUSTOMER;
-            case "kakao-staff" -> GlobalRole.STAFF;
-            default -> throw new BeautiFlowException(UserErrorCode.INVALID_USER_INPUT);
-        };
-
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(provider, kakaoId, userId, globalRole);
-
-        //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, userId,
-                customOAuth2User.getAuthorities());
         //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-
         filterChain.doFilter(request, response);
     }
 }
