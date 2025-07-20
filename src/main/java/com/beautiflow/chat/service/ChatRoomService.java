@@ -124,6 +124,22 @@ public class ChatRoomService {
 	}
 
 
+	public ChatRoom getOrCreateRoom(Shop shop, User customer, User designer) {
+		return chatRoomRepository.findByShopIdAndCustomerIdAndDesignerId(shop.getId(), customer.getId(), designer.getId())
+			.map(room -> {
+				room.reEnterBy(customer);
+				room.reEnterBy(designer);
+				return room;
+			})
+			.orElseGet(() -> {
+				ChatRoom newRoom = ChatRoom.builder()
+					.shop(shop)
+					.customer(customer)
+					.designer(designer)
+					.build();
+				return chatRoomRepository.save(newRoom);
+			});
+	}
 
 
 }

@@ -10,5 +10,6 @@ import com.beautiflow.user.domain.User;
 public interface MessageTemplateRepository extends JpaRepository<MessageTemplate, Long> {
 
 	List<MessageTemplate> findByOwnerAndIsActiveTrue(User owner);
+	List<MessageTemplate> findByIsActiveTrue();
 
 }
