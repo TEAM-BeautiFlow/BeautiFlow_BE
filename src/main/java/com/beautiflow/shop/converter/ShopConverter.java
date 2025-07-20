@@ -1,9 +1,9 @@
 package com.beautiflow.shop.converter;
 
-import com.beautiflow.shop.dto.ShopDetailResponse;
-import com.beautiflow.shop.dto.ShopDetailResponse.BusinessHourDto;
-import com.beautiflow.shop.dto.ShopDetailResponse.NoticeDto;
-import com.beautiflow.shop.dto.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.shop.dto.ShopDetailRes;
+import com.beautiflow.shop.dto.ShopDetailRes.BusinessHourDto;
+import com.beautiflow.shop.dto.ShopDetailRes.NoticeDto;
+import com.beautiflow.shop.dto.ShopDetailRes.TreatmentDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;
@@ -18,16 +18,13 @@ import java.util.stream.Collectors;
 
 public class ShopConverter {
 
-    public static ShopDetailResponse toDto(Shop shop) {
-        return ShopDetailResponse.builder()
+    public static ShopDetailRes toDto(Shop shop) {
+        return ShopDetailRes.builder()
                 .id(shop.getId())
                 .name(shop.getShopName())
                 .contact(shop.getContact())
                 .location(shop.getAddress())
                 .introText(shop.getIntroduction())
-                .notices(shop.getNotices().stream()
-                        .map(ShopConverter::toNoticeDto)
-                        .collect(Collectors.toList()))
                 .notices(shop.getNotices().stream()
                         .map(ShopConverter::toNoticeDto)
                         .collect(Collectors.toList()))

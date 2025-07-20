@@ -27,8 +27,8 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
-            CustomSuccessHandler customSuccessHandler, JWTUtil jwtUtil
-            ) {
+        CustomSuccessHandler customSuccessHandler, JWTUtil jwtUtil
+    ) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.customSuccessHandler = customSuccessHandler;
         this.jwtUtil = jwtUtil;
@@ -39,38 +39,43 @@ public class SecurityConfig {
 
         http
 
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(
-                        request -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
-                            configuration.setAllowedOrigins(
-                                    Collections.singletonList("http://localhost:3000"));
-                            configuration.setAllowedMethods(Collections.singletonList("*"));
-                            configuration.setAllowCredentials(true);
-                            configuration.setAllowedHeaders(Collections.singletonList("*"));
-                            configuration.setMaxAge(3600L);
-                            configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
-                            return configuration;
-                        }))
+            .cors(corsCustomizer -> corsCustomizer.configurationSource(
+                request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(
+                        Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                    return configuration;
+                }))
 
-                .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable())
 
-                .formLogin(form -> form.disable())
+            .formLogin(form -> form.disable())
 
-                .httpBasic(httpBasic -> httpBasic.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
 
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler))
+            .oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                    .userService(customOAuth2UserService))
+                .successHandler(customSuccessHandler))
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/users/signup").permitAll()
-                        .anyRequest().authenticated())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/users/signup",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html"
+                ).permitAll()                        .anyRequest().authenticated())
 
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository),
-                        UsernamePasswordAuthenticationFilter.class);
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(new JWTFilter(jwtUtil, userRepository),
+                UsernamePasswordAuthenticationFilter.class);
         ;
 
         return http.build();
