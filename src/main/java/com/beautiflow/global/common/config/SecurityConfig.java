@@ -6,6 +6,7 @@ import com.beautiflow.global.common.security.JWTExceptionFilter;
 import com.beautiflow.global.common.security.JWTFilter;
 import com.beautiflow.global.common.util.JWTUtil;
 import com.beautiflow.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @RequiredArgsConstructor
@@ -38,34 +40,39 @@ public class SecurityConfig {
 
         http
 
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(
-                        request -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
-                            configuration.setAllowedOrigins(
-                                    Collections.singletonList("http://localhost:3000"));
-                            configuration.setAllowedMethods(Collections.singletonList("*"));
-                            configuration.setAllowCredentials(true);
-                            configuration.setAllowedHeaders(Collections.singletonList("*"));
-                            configuration.setMaxAge(3600L);
-                            configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
-                            return configuration;
-                        }))
+            .cors(corsCustomizer -> corsCustomizer.configurationSource(
+                request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(
+                        Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                    return configuration;
+                }))
 
-                .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable())
 
-                .formLogin(form -> form.disable())
+            .formLogin(form -> form.disable())
 
-                .httpBasic(httpBasic -> httpBasic.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
 
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler))
+            .oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                    .userService(customOAuth2UserService))
+                .successHandler(customSuccessHandler))
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","/users/signup","/users/refresh").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/users/signup",
+                    "/users/refresh",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html"
+                ).permitAll()                        .anyRequest().authenticated())
 
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

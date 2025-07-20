@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import lombok.Builder;
 
-public record ShopDetailResponse (
+public record ShopDetailRes(
     Long id,
     String name,
     String contact,
@@ -19,7 +19,7 @@ public record ShopDetailResponse (
 
 ) {
     @Builder
-    public ShopDetailResponse {}
+    public ShopDetailRes {}
 
     public record NoticeDto(Long id, String title, String content) {
         @Builder
