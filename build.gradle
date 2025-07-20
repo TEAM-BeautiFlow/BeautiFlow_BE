@@ -23,6 +23,12 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -40,7 +46,6 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
 	//jwt
@@ -48,7 +53,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-
+	// AWS S3
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+	implementation 'software.amazon.awssdk:s3'
 
 }
 

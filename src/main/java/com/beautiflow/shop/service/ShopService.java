@@ -1,21 +1,17 @@
-package com.beautiflow.reservation.service;
+package com.beautiflow.shop.service;
 
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TreatmentCategory;
-import com.beautiflow.reservation.converter.ShopConverter;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.BusinessHourDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.NoticeDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.shop.converter.ShopConverter;
+import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
-import com.beautiflow.reservation.repository.ShopRepository;
+import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.treatment.domain.Treatment;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +25,7 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final TreatmentRepository treatmentRepository;
 
-    public ShopDetailResponse getShopDetail(Long shopId) {
+    public ShopDetailRes getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 

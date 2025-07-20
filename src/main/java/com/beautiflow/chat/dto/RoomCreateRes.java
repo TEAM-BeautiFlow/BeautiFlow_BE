@@ -13,7 +13,7 @@ public record RoomCreateRes(
 	return new RoomCreateRes(
 		room.getId(),
 		room.getShop().getId(),
-		room.getShop().getName(),
+		room.getShop().getShopName(),
 		room.getCustomer().getId(),
 		room.getDesigner().getId()
 	);

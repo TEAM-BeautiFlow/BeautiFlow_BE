@@ -20,7 +20,7 @@ public record ChatRoomSummaryRes(
 		return new ChatRoomSummaryRes(
 			room.getId(),
 			room.getShop().getId(),
-			room.getShop().getName(),
+			room.getShop().getShopName(),
 			opponent.getName(),
 			opponent.getId(),
 			lastMessage != null ? lastMessage.getContent() : null,

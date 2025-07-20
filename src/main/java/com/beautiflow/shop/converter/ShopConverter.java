@@ -1,9 +1,9 @@
-package com.beautiflow.reservation.converter;
+package com.beautiflow.shop.converter;
 
-import com.beautiflow.reservation.dto.response.ShopDetailResponse;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.BusinessHourDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.NoticeDto;
-import com.beautiflow.reservation.dto.response.ShopDetailResponse.TreatmentDto;
+import com.beautiflow.shop.dto.ShopDetailRes;
+import com.beautiflow.shop.dto.ShopDetailRes.BusinessHourDto;
+import com.beautiflow.shop.dto.ShopDetailRes.NoticeDto;
+import com.beautiflow.shop.dto.ShopDetailRes.TreatmentDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;
@@ -18,17 +18,13 @@ import java.util.stream.Collectors;
 
 public class ShopConverter {
 
-    public static ShopDetailResponse toDto(Shop shop) {
-        return ShopDetailResponse.builder()
+    public static ShopDetailRes toDto(Shop shop) {
+        return ShopDetailRes.builder()
                 .id(shop.getId())
-                .name(shop.getName())
+                .name(shop.getShopName())
                 .contact(shop.getContact())
-                .location(shop.getLocation())
-                .introText(shop.getIntroText())
-                .mainImageUrl(shop.getMainImageUrl())
-                .notices(shop.getNotices().stream()
-                        .map(ShopConverter::toNoticeDto)
-                        .collect(Collectors.toList()))
+                .location(shop.getAddress())
+                .introText(shop.getIntroduction())
                 .notices(shop.getNotices().stream()
                         .map(ShopConverter::toNoticeDto)
                         .collect(Collectors.toList()))
@@ -64,8 +60,7 @@ public class ShopConverter {
                 .id(treatment.getId())
                 .category(treatment.getCategory())
                 .name(treatment.getName())
-                .minPrice(treatment.getMinPrice())
-                .maxPrice(treatment.getMaxPrice())
+                .price(treatment.getPrice())
                 .durationMinutes(treatment.getDurationMinutes())
                 .description(treatment.getDescription())
                 .images(treatment.getImages().stream()
@@ -86,8 +81,7 @@ public class ShopConverter {
                 .id(treatment.getId())
                 .name(treatment.getName())
                 .durationMinutes(treatment.getDurationMinutes())
-                .minPrice(treatment.getMinPrice())
-                .maxPrice(treatment.getMaxPrice())
+                .price(treatment.getPrice())
                 .description(treatment.getDescription())
                 .images(treatment.getImages().stream()
                         .map(image -> TreatmentImageDto.builder()
