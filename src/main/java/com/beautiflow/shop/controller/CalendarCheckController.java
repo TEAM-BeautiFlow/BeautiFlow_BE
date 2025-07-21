@@ -6,7 +6,7 @@ import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
-import com.beautiflow.reservation.dto.TimeSlotResponse;
+import com.beautiflow.reservation.dto.TimeSlotRes;
 import com.beautiflow.reservation.dto.UpdateReservationStatusReq;
 import com.beautiflow.reservation.dto.UpdateReservationStatusRes;
 import com.beautiflow.shop.service.CalendarCheckService;
@@ -40,11 +40,11 @@ public class CalendarCheckController {
 
   @GetMapping("/timeslots") // 시간대별 예약 현황 조회
   @Operation(summary = "시간대별 예약 현황 조회")
-  public ResponseEntity<ApiResponse<List<TimeSlotResponse>>> getReservedTimeSlots(
+  public ResponseEntity<ApiResponse<List<TimeSlotRes>>> getReservedTimeSlots(
       @RequestParam Long designerId,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
-    List<TimeSlotResponse> result = calendarCheckService.getReservedTimeSlots(designerId, date);
+    List<TimeSlotRes> result = calendarCheckService.getReservedTimeSlots(designerId, date);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
