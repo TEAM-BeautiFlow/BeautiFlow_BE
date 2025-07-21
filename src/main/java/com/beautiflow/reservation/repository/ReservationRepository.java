@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-  @Query("SELECT new com.beautiflow.reservation.dto.ReservationMonthRes(r.reservationDate, true, COUNT(r)) " +
+  @Query("SELECT new com.beautiflow.reservation.dto.ReservationMonthRes(r.reservationDate, COUNT(r)) " +
       "FROM Reservation r " +
       "WHERE r.designer.id = :designerId " +
       "AND FUNCTION('DATE_FORMAT', r.reservationDate, '%Y-%m') = :month " +
