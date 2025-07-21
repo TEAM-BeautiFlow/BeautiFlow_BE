@@ -1,6 +1,7 @@
 package com.beautiflow.reservation.dto;
 
 import com.beautiflow.global.domain.ReservationStatus;
+import com.beautiflow.reservation.domain.Reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -13,7 +14,7 @@ public record UpdateReservationStatusRes(
     LocalTime endTime,
     ReservationStatus status
 ) {
-  public static UpdateReservationStatusRes from(com.beautiflow.reservation.domain.Reservation reservation) {
+  public static UpdateReservationStatusRes from(Reservation reservation) {
     return new UpdateReservationStatusRes(
         reservation.getId(),
         reservation.getDesigner().getId(),
