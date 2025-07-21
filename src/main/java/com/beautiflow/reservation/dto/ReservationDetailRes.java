@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record ReservationDetailRes(
     Long reservationId,
@@ -19,10 +18,42 @@ public record ReservationDetailRes(
     LocalTime endTime,
     String status,
     List<String> treatmentNames,
-    ReservationDetailRes.PaymentInfo paymentInfo, // 내부 record는 이렇게 명시적으로
-    List<String> imageUrls
+    List<String> optionNames,
+    PaymentInfo paymentInfo,
+    List<String> imageUrls,
+    String durationText
 ) {
   public static ReservationDetailRes from(Reservation reservation) {
+    final int RESERVATION_DEPOSIT = 5000; // 고정 예약금
+
+    // 시술 가격 합산
+    int totalTreatmentPrice = reservation.getReservationTreatments() != null
+        ? reservation.getReservationTreatments().stream()
+        .map(rt -> rt.getTreatment().getPrice() != null ? rt.getTreatment().getPrice() : 0)
+        .mapToInt(Integer::intValue)
+        .sum()
+        : 0;
+
+    // 시술 총 소요 시간 계산
+    int totalDuration = reservation.getReservationTreatments() != null
+        ? reservation.getReservationTreatments().stream()
+        .map(rt -> rt.getTreatment().getDurationMinutes() != null ? rt.getTreatment().getDurationMinutes() : 0)
+        .mapToInt(Integer::intValue)
+        .sum()
+        : 0;
+
+    String durationText = totalDuration >= 60
+        ? (totalDuration / 60) + "시간" + (totalDuration % 60 != 0 ? " " + (totalDuration % 60) + "분" : "")
+        : totalDuration + "분";
+
+    // 결제 정보 생성
+    PaymentInfo paymentInfo = new PaymentInfo(
+        reservation.getPaymentMethod(),
+        reservation.getPaymentStatus(),
+        RESERVATION_DEPOSIT,
+        totalTreatmentPrice - RESERVATION_DEPOSIT
+    );
+
     return new ReservationDetailRes(
         reservation.getId(),
         reservation.getDesigner() != null ? reservation.getDesigner().getId() : null,
@@ -35,25 +66,32 @@ public record ReservationDetailRes(
         reservation.getReservationTreatments() != null
             ? reservation.getReservationTreatments().stream()
             .map(rt -> rt.getTreatment().getName())
-            .collect(Collectors.toList())
+            .toList()
             : Collections.emptyList(),
 
-        new ReservationDetailRes.PaymentInfo( // 여기도 명확하게 지정
-            reservation.getPaymentMethod(),
-            reservation.getPaymentStatus()
-        ),
+        reservation.getReservationOptions() != null
+            ? reservation.getReservationOptions().stream()
+            .map(ro -> ro.getOptionItem().getName())
+            .toList()
+            : Collections.emptyList(),
+
+        paymentInfo,
 
         reservation.getReservationTreatments() != null
             ? reservation.getReservationTreatments().stream()
             .flatMap(rt -> rt.getTreatment().getImages().stream())
             .map(TreatmentImage::getImageUrl)
-            .collect(Collectors.toList())
-            : Collections.emptyList()
+            .toList()
+            : Collections.emptyList(),
+
+        durationText
     );
   }
 
   public record PaymentInfo(
       PaymentMethod method,
-      PaymentStatus status
+      PaymentStatus status,
+      int depositAmount,     // 받은 예약금
+      int shopPayAmount      // 매장에서 결제할 금액
   ) {}
 }
