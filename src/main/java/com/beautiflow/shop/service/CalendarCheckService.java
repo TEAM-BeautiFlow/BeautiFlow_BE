@@ -1,6 +1,5 @@
 package com.beautiflow.shop.service;
 
-import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
 import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
