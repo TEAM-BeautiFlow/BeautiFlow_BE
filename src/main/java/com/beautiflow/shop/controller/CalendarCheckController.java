@@ -79,7 +79,7 @@ public class CalendarCheckController {
   @GetMapping("/list")
   @Operation(summary = "디자이너 고객 리스트 조회")
   public ResponseEntity<ApiResponse<List<CustomerListRes>>> getCustomersByDesigner(
-      @RequestParam Long designerId
+      @AuthenticationPrincipal(expression = "userId") Long designerId
   ) {
     List<CustomerListRes> customers = managedCustomerService.getCustomersByDesigner(designerId);
     return ResponseEntity.ok(ApiResponse.success(customers));
