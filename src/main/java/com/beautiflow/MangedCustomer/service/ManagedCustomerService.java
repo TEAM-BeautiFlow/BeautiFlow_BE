@@ -33,7 +33,7 @@ public class ManagedCustomerService {
   public List<CustomerListRes> getCustomersByDesigner(Long designerId) {
     // 디자이너 존재 여부 확인
     User designer = userRepository.findById(designerId)
-        .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.LIST_NOT_FOUND));
+        .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.DESIGNER_NOT_FOUND));
 
     // 고객 리스트 조회
     List<CustomerListRes> customers = managedCustomerRepository.findByDesignerId(designerId).stream()
