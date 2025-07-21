@@ -22,14 +22,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   );
 
   //시간대별 예약 조회
-  @Query("SELECT r.id, r.customer.name, r.status, r.startTime, r.endTime " +
-      "FROM Reservation r " +
-      "WHERE r.designer.id = :designerId " +
-      "AND r.reservationDate = :date")
-  List<Object[]> findTimeSlotsByDesignerIdAndDate(
+  // ReservationRepository.java
+  @Query("""
+    SELECT r FROM Reservation r
+    JOIN FETCH r.customer c
+    JOIN FETCH r.reservationTreatments rt
+    JOIN FETCH rt.treatment t
+    WHERE r.designer.id = :designerId
+      AND r.reservationDate = :date
+""")
+  List<Reservation> findReservationsWithTreatmentsByDesignerAndDate(
       @Param("designerId") Long designerId,
       @Param("date") LocalDate date
   );
+
+
 
   @Query("SELECT r FROM Reservation r " + //예약 상세 조회
       "JOIN FETCH r.designer " +
