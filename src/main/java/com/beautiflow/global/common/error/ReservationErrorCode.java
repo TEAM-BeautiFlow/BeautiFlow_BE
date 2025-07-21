@@ -8,7 +8,11 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ReservationErrorCode implements ErrorCode{
 
-    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERV404", "예약을 찾을 수 없습니다.");
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES404", "예약을 찾을 수 없습니다."),
+    RESERVATION_LOCKED(HttpStatus.CONFLICT, "RES409", "해당 예약은 현재 다른 작업 중입니다. 잠시 후 다시 시도해주세요."),
+    RESERVATION_CONFLICT(HttpStatus.CONFLICT, "RES410", "예약 정보에 충돌이 발생했습니다. 다시 확인해주세요."),
+    RESERVATION_LOCK_INTERRUPTED(HttpStatus.INTERNAL_SERVER_ERROR, "RES500", "락 획득 중 인터럽트 발생");
+
 
     private final HttpStatus httpStatus;
     private final String code;

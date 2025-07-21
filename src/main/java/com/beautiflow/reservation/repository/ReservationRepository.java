@@ -9,6 +9,7 @@ import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.user.domain.User;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,12 +17,28 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    boolean existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
+            Long designerId,
+            LocalDate reservationDate,
+            LocalTime endTime,
+            LocalTime startTime,
+            ReservationStatus status
+    );
+
+    Optional<Reservation> findByCustomerAndShopAndStatus(User customer, Shop shop, ReservationStatus status);
+
     List<Reservation> findByShopAndReservationDateAndStatus(Shop shop, LocalDate date, ReservationStatus status);
 
     Optional<Reservation> findTemporaryByCustomerAndShop(User customer, Shop shop);
     Optional<Reservation> findTemporaryByCustomerAndShopAndReservationTreatments(User customer, Shop shop, ReservationTreatment reservationTreatment);
 
     List<Reservation> findByDesigner_IdAndReservationDateAndStatus(Long designerId, LocalDate reservationDate, ReservationStatus status);
+    List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> 2c81244 ([FEAT] 날짜, 시간, 디자이너 llock 건 후 ãtemp-save에 patch)
