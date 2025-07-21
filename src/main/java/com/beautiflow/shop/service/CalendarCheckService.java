@@ -10,11 +10,10 @@ import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
-import com.beautiflow.reservation.dto.TimeSlotResponse;
+import com.beautiflow.reservation.dto.TimeSlotRes;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,22 +44,29 @@ public class CalendarCheckService {
     return stats;
   }
 
-  @Transactional(readOnly = true) // 시간대별 예약 현황 조회
-  public List<TimeSlotResponse> getReservedTimeSlots(Long designerId, LocalDate date) {
-    List<Object[]> results = reservationRepository.findTimeSlotsByDesignerIdAndDate(designerId, date);
-    if (results.isEmpty()) {
+  @Transactional(readOnly = true)
+  public List<TimeSlotRes> getReservedTimeSlots(Long designerId, LocalDate date) {
+    List<Reservation> reservations = reservationRepository
+        .findReservationsWithTreatmentsByDesignerAndDate(designerId, date);
+
+    if (reservations.isEmpty()) {
       throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TIME_NOT_FOUND);
     }
-    return results.stream()
-        .map(row -> new TimeSlotResponse(
-            (Long) row[0],                 // reservationId
-            (String) row[1],               // customerName
-            row[2].toString(),             // status (enum → string)
-            (LocalTime) row[3],            // startTime
-            (LocalTime) row[4]             // endTime
+
+    return reservations.stream()
+        .map(reservation -> new TimeSlotRes(
+            reservation.getId(),
+            reservation.getCustomer().getName(),
+            reservation.getStatus(),
+            reservation.getStartTime(),
+            reservation.getEndTime(),
+            reservation.getReservationTreatments().stream()
+                .map(rt -> rt.getTreatment().getName())
+                .toList()
         ))
         .toList();
   }
+
 
   @Transactional//(readOnly = true) // 고객 상세 정보 조회
   public ReservationDetailRes getReservationDetail(Long id) {
