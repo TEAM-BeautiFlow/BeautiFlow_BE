@@ -17,6 +17,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,17 +32,17 @@ public class CalendarCheckController {
   @GetMapping("/months")
   @Operation(summary = "월별 예약 유무 조회", description = "특정 월에 예약된 날짜별 예약 개수를 조회합니다.")
   public ResponseEntity<ApiResponse<List<ReservationMonthRes>>> getReservedDates(
-      @RequestParam Long designerId,
+      @AuthenticationPrincipal(expression = "userId") Long designerId,
       @RequestParam String month
   ) {
     List<ReservationMonthRes> result = calendarCheckService.getReservedDates(designerId, month);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @GetMapping("/timeslots") // 시간대별 예약 현황 조회
+  @GetMapping("/timeslots")
   @Operation(summary = "시간대별 예약 현황 조회")
   public ResponseEntity<ApiResponse<List<TimeSlotRes>>> getReservedTimeSlots(
-      @RequestParam Long designerId,
+      @AuthenticationPrincipal(expression = "userId") Long designerId,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
   ) {
     List<TimeSlotRes> result = calendarCheckService.getReservedTimeSlots(designerId, date);
