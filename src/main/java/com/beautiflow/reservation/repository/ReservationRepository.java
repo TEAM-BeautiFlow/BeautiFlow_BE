@@ -1,5 +1,6 @@
 package com.beautiflow.reservation.repository;
 
+<<<<<<< HEAD
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.WeekDay;
 import com.beautiflow.reservation.domain.Reservation;
@@ -25,3 +26,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
 }
 
+=======
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.beautiflow.global.domain.ReservationStatus;
+import com.beautiflow.reservation.domain.Reservation;
+import com.beautiflow.user.domain.User;
+
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+	List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
+
+
+}
+>>>>>>> 4f79cbff59b6b78f1f3a3b91732d93e9464b27d2
