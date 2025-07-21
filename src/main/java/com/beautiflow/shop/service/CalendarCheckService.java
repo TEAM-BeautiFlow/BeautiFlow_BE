@@ -9,6 +9,7 @@ import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
+import com.beautiflow.reservation.dto.ReservationListRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.reservation.dto.TimeSlotRes;
 import com.beautiflow.reservation.repository.ReservationRepository;
@@ -17,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +123,11 @@ public class CalendarCheckService {
         .toList();
   }
 
+  //페이지네이션추가
+  public Page<ReservationListRes> getReservationsByDate(Long designerId, LocalDate date, Pageable pageable) {
+    return reservationRepository.findPageByDesignerAndDate(designerId, date, pageable)
+        .map(ReservationListRes::from);
+  }
 
 
 

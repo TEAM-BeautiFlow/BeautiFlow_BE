@@ -5,6 +5,8 @@ import com.beautiflow.reservation.dto.ReservationMonthRes;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -44,5 +46,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       "WHERE r.id = :id")
   Optional<Reservation> findFetchAllById(@Param("id") Long id);
 
+//페이지네이션추가
+  @Query("""
+    SELECT r FROM Reservation r
+    JOIN FETCH r.customer c
+    JOIN FETCH r.reservationTreatments rt
+    JOIN FETCH rt.treatment t
+    WHERE r.designer.id = :designerId
+    AND r.reservationDate = :date
+""")
+  Page<Reservation> findPageByDesignerAndDate(
+      @Param("designerId") Long designerId,
+      @Param("date") LocalDate date,
+      Pageable pageable
+  );
+
 
 }
+
+
