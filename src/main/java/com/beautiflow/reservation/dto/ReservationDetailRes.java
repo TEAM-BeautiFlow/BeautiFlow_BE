@@ -21,12 +21,12 @@ public record ReservationDetailRes(
     List<String> optionNames,
     PaymentInfo paymentInfo,
     List<String> imageUrls,
-    String durationText
+    String durationText,
+    String requestNotes
 ) {
   public static ReservationDetailRes from(Reservation reservation) {
-    final int RESERVATION_DEPOSIT = 5000; // 고정 예약금
+    final int RESERVATION_DEPOSIT = 5000;
 
-    // 시술 가격 합산
     int totalTreatmentPrice = reservation.getReservationTreatments() != null
         ? reservation.getReservationTreatments().stream()
         .map(rt -> rt.getTreatment().getPrice() != null ? rt.getTreatment().getPrice() : 0)
@@ -34,7 +34,6 @@ public record ReservationDetailRes(
         .sum()
         : 0;
 
-    // 시술 총 소요 시간 계산
     int totalDuration = reservation.getReservationTreatments() != null
         ? reservation.getReservationTreatments().stream()
         .map(rt -> rt.getTreatment().getDurationMinutes() != null ? rt.getTreatment().getDurationMinutes() : 0)
@@ -46,7 +45,6 @@ public record ReservationDetailRes(
         ? (totalDuration / 60) + "시간" + (totalDuration % 60 != 0 ? " " + (totalDuration % 60) + "분" : "")
         : totalDuration + "분";
 
-    // 결제 정보 생성
     PaymentInfo paymentInfo = new PaymentInfo(
         reservation.getPaymentMethod(),
         reservation.getPaymentStatus(),
@@ -62,36 +60,33 @@ public record ReservationDetailRes(
         reservation.getStartTime(),
         reservation.getEndTime(),
         reservation.getStatus().name(),
-
         reservation.getReservationTreatments() != null
             ? reservation.getReservationTreatments().stream()
             .map(rt -> rt.getTreatment().getName())
             .toList()
             : Collections.emptyList(),
-
         reservation.getReservationOptions() != null
             ? reservation.getReservationOptions().stream()
             .map(ro -> ro.getOptionItem().getName())
             .toList()
             : Collections.emptyList(),
-
         paymentInfo,
-
         reservation.getReservationTreatments() != null
             ? reservation.getReservationTreatments().stream()
             .flatMap(rt -> rt.getTreatment().getImages().stream())
             .map(TreatmentImage::getImageUrl)
             .toList()
             : Collections.emptyList(),
-
-        durationText
+        durationText,
+        reservation.getRequestNotes()
     );
   }
 
   public record PaymentInfo(
       PaymentMethod method,
       PaymentStatus status,
-      int depositAmount,     // 받은 예약금
-      int shopPayAmount      // 매장에서 결제할 금액
+      int depositAmount,
+      int shopPayAmount
   ) {}
 }
+
