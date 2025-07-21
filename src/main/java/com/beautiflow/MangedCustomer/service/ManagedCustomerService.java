@@ -21,7 +21,7 @@ public class ManagedCustomerService {
   private final UserRepository userRepository;
 
   @Transactional //디자이너와 고객이 이미 고객 관리에 등록돼 있는지 확인. -> 없으면 새로 등록
-  public void autoRegister(User designer, User customer, Shop shop) {
+  public void autoRegister(User designer, User customer) {
     boolean exists = managedCustomerRepository.existsByDesignerAndCustomer(designer, customer);
     if (!exists) {
       ManagedCustomer entity = new ManagedCustomer(designer, customer, null, null);
@@ -31,13 +31,8 @@ public class ManagedCustomerService {
 
   @Transactional(readOnly = true)
   public List<CustomerListRes> getCustomersByDesigner(Long designerId) {
-    // 디자이너 존재 여부 확인
-    User designer = userRepository.findById(designerId)
-        .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.DESIGNER_NOT_FOUND));
-
-
     return managedCustomerRepository.findByDesignerId(designerId).stream()
         .map(CustomerListRes::from)
-        .toList(); //고객관리리스트에 고객없으면 빈값 반환
+        .toList(); // 고객 없으면 빈 리스트 반환됨
   }
 }

@@ -1,7 +1,5 @@
 package com.beautiflow.shop.service;
 
-
-import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
 import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.error.ReservationErrorCode;
@@ -14,7 +12,6 @@ import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.reservation.dto.UpdateReservationStatusRes;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CalendarCheckService {
 
   private final ReservationRepository reservationRepository;
-  private final ManagedCustomerRepository managedCustomerRepository;
   private final ManagedCustomerService managedCustomerService;
 
   @Transactional(readOnly = true) //월별 조회
@@ -58,14 +54,14 @@ public class CalendarCheckService {
     if (newStatus == ReservationStatus.CONFIRMED) {
       managedCustomerService.autoRegister(
           reservation.getDesigner(),
-          reservation.getCustomer(),
-          reservation.getShop()
+          reservation.getCustomer()
       );
     }
     return UpdateReservationStatusRes.from(reservation);
   }
 
   //시간대별 조회 페이지네이션추가
+  //당일취소 화면 프론트에서 필터링할지, 백엔드에서 필터링할지 의논필요
   @Transactional(readOnly = true)
   public Page<ReservationListRes> getReservationsByDate(Long designerId, LocalDate date, Pageable pageable) {
     return reservationRepository.findPageByDesignerAndDate(designerId, date, pageable)
