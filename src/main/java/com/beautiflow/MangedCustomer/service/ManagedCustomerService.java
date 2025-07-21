@@ -3,11 +3,7 @@ package com.beautiflow.MangedCustomer.service;
 import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
 import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
-import com.beautiflow.global.common.error.ManagedCustomerErrorCode;
-import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
-import com.beautiflow.user.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ManagedCustomerService {
 
   private final ManagedCustomerRepository managedCustomerRepository;
-  private final UserRepository userRepository;
 
   @Transactional //디자이너와 고객이 이미 고객 관리에 등록돼 있는지 확인. -> 없으면 새로 등록
   public void autoRegister(User designer, User customer) {
