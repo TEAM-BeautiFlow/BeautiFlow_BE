@@ -6,24 +6,28 @@ import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.GlobalRole;
 import com.beautiflow.global.domain.PaymentStatus;
 import com.beautiflow.global.domain.ReservationStatus;
+import com.beautiflow.global.domain.ShopRole;
 import com.beautiflow.global.domain.WeekDay;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.domain.ReservationOption;
 import com.beautiflow.reservation.domain.ReservationTreatment;
+import com.beautiflow.reservation.domain.ReservationTreatmentId;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
-import com.beautiflow.reservation.repository.DesignerRepository;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import com.beautiflow.reservation.repository.ReservationTreatmentRepository;
+import com.beautiflow.reservation.repository.ShopMemberRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.shop.converter.WeekDayConverter;
 import com.beautiflow.shop.domain.BusinessHour;
 import com.beautiflow.shop.domain.Shop;
+import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.shop.repository.BusinessHourRepository;
 import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.treatment.domain.OptionItem;
@@ -40,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,7 +61,7 @@ public class ReservationService {
     private final ReservationTreatmentRepository reservationTreatmentRepository;
     private final ReservationOptionRepository reservationOptionRepository;
     private final BusinessHourRepository businessHourRepository;
-    private final DesignerRepository designerRepository;
+    private final ShopMemberRepository shopMemberRepository;
 
     @Transactional
     public Reservation tempSaveReservation(User customer, TemporaryReservationReq request) {
@@ -65,115 +70,54 @@ public class ReservationService {
         Treatment treatment = treatmentRepository.findById(request.treatmentId())
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
+        // 옵션 아이템 조회
+        List<OptionItem> optionItems = request.selectedOptions().stream()
+                .map(selectedOption -> optionItemRepository.findById(selectedOption.optionItemId())
+                        .orElseThrow(() -> new RuntimeException("OptionItem not found")))
+                .collect(Collectors.toList());
+
+        // 총 시간, 총 가격 계산
+        int totalDuration = treatment.getDurationMinutes() != null ? treatment.getDurationMinutes() : 0;
+        int totalExtraMinutes = optionItems.stream()
+                .mapToInt(opt -> opt.getExtraMinutes() != null ? opt.getExtraMinutes() : 0)
+                .sum();
+        int totalDurationMinutes = totalDuration + totalExtraMinutes;
+
+        int totalPrice = treatment.getPrice() != null ? treatment.getPrice() : 0;
+        int totalExtraPrice = optionItems.stream()
+                .mapToInt(opt -> opt.getExtraPrice() != null ? opt.getExtraPrice() : 0)
+                .sum();
+        int totalPriceAmount = totalPrice + totalExtraPrice;
+
+        // Reservation 생성 (빌더에 총 시간/가격 포함)
         Reservation reservation = Reservation.builder()
                 .shop(shop)
                 .customer(customer)
                 .status(ReservationStatus.TEMPORARY)
+                .totalDurationMinutes(totalDurationMinutes)
+                .totalPrice(totalPriceAmount)
                 .build();
 
         reservationRepository.save(reservation);
 
         // 시술 연결
         ReservationTreatment resTreatment = ReservationTreatment.builder()
+                .id(new ReservationTreatmentId(reservation.getId(), treatment.getId()))
                 .reservation(reservation)
                 .treatment(treatment)
                 .build();
         reservationTreatmentRepository.save(resTreatment);
 
         // 옵션 연결
-        List<ReservationOption> reservationOptions = request.selectedOptions().stream()
-                .map(selectedOption -> {
-                    var optionItem = optionItemRepository.findById(selectedOption.optionItemId())
-                            .orElseThrow(() -> new RuntimeException("OptionItem not found"));
-                    return ReservationOption.builder()
-                            .reservation(reservation)
-                            .optionItem(optionItem)
-                            .build();
-                })
+        List<ReservationOption> reservationOptions = optionItems.stream()
+                .map(optionItem -> ReservationOption.builder()
+                        .reservation(reservation)
+                        .optionItem(optionItem)
+                        .build())
                 .collect(Collectors.toList());
-
         reservationOptionRepository.saveAll(reservationOptions);
 
         return reservation;
-    }
-    @Transactional
-    public Reservation saveTemporaryReservation(TemporaryReservationReq req, String kakaoId) {
-        User user = userRepository.findByKakaoId(kakaoId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-
-        Shop shop = shopRepository.findById(req.shopId())
-                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
-
-        Treatment treatment = treatmentRepository.findById(req.treatmentId())
-                .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
-
-        Reservation reservation = Reservation.builder()
-                .shop(shop)
-                .customer(user)
-                .status(ReservationStatus.TEMPORARY)
-                .paymentStatus(PaymentStatus.UNPAID)
-                .build();
-
-        reservationRepository.save(reservation);
-
-        ReservationTreatment resTreatment = ReservationTreatment.builder()
-                .reservation(reservation)
-                .treatment(treatment)
-                .build();
-        reservationTreatmentRepository.save(resTreatment);
-
-        List<ReservationOption> options = req.selectedOptions().stream()
-                .map(optReq -> {
-                    OptionItem item = optionItemRepository.findById(optReq.optionItemId())
-                            .orElseThrow(() -> new BeautiFlowException(OptionErrorCode.OPTION_ITEM_NOT_FOUND));
-                    return ReservationOption.builder()
-                            .reservation(reservation)
-                            .optionItem(item)
-                            .build();
-                }).toList();
-
-        reservationOptionRepository.saveAll(options);
-
-        return reservation;
-    }
-
-
-    public TemporaryReservationRes toTemporaryReservationRes(Reservation reservation) {
-        List<TemporaryReservationRes.SelectedOptionRes> selectedOptions = reservation.getReservationOptions().stream()
-                .map(opt -> {
-                    OptionItem item = opt.getOptionItem();
-                    return TemporaryReservationRes.SelectedOptionRes.builder()
-                            .optionGroupId(item.getOptionGroup().getId())
-                            .optionItemId(item.getId())
-                            .optionItemName(item.getName())
-                            .extraMinutes(item.getExtraMinutes())
-                            .extraPrice(item.getExtraPrice())
-                            .build();
-                }).toList();
-
-        int totalDuration = reservation.getReservationTreatments().stream()
-                .mapToInt(rt -> rt.getTreatment().getDurationMinutes() != null ? rt.getTreatment().getDurationMinutes() : 0)
-                .sum();
-        int totalExtraMinutes = reservation.getReservationOptions().stream()
-                .mapToInt(opt -> opt.getOptionItem().getExtraMinutes() != null ? opt.getOptionItem().getExtraMinutes() : 0)
-                .sum();
-        int durationMinutes = totalDuration + totalExtraMinutes;
-
-        int totalPrice = reservation.getReservationTreatments().stream()
-                .mapToInt(rt -> rt.getTreatment().getPrice() != null ? rt.getTreatment().getPrice() : 0)
-                .sum();
-        int totalExtraPrice = reservation.getReservationOptions().stream()
-                .mapToInt(opt -> opt.getOptionItem().getExtraPrice() != null ? opt.getOptionItem().getExtraPrice() : 0)
-                .sum();
-        int price = totalPrice + totalExtraPrice;
-
-        return TemporaryReservationRes.builder()
-                .treatmentId(reservation.getReservationTreatments().get(0).getTreatment().getId())
-                .name(reservation.getReservationTreatments().get(0).getTreatment().getName())
-                .durationMinutes(durationMinutes)
-                .price(price)
-                .selectedOptions(selectedOptions)
-                .build();
     }
 
     public Map<LocalDate, Boolean> getAvailableDates(Long shopId) {
@@ -241,17 +185,23 @@ public class ReservationService {
         return true;
     }
 
-    public Map<String, Boolean> getAvailableTimeSlots(Long shopId, LocalDate date, Long treatmentId, String kakaoId) {
+    public Map<String, Boolean> getAvailableTimeSlots(Long shopId, LocalDate date, Long treatmentId, User customer) {
 
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         Treatment treatment = treatmentRepository.findById(treatmentId)
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
-        User user = userRepository.findByKakaoId(kakaoId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
-        Reservation tempReservation = (Reservation) reservationRepository.findTemporaryByCustomerAndShopAndReservationTreatments(user, shop, treatment)
+        // 1) 먼저 임시 예약 조회 (예약과 유저, 샵으로)
+        Reservation tempReservation = reservationRepository.findTemporaryByCustomerAndShop(customer, shop)
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 2) ReservationTreatmentId 복합키 생성
+        ReservationTreatmentId rtId = new ReservationTreatmentId(tempReservation.getId(), treatment.getId());
+
+        // 3) ReservationTreatment 조회
+        ReservationTreatment resTreatment = reservationTreatmentRepository.findById(rtId)
                 .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
 
         int treatmentDuration = treatment.getDurationMinutes() != null ? treatment.getDurationMinutes() : 0;
@@ -281,7 +231,8 @@ public class ReservationService {
         Map<String, Boolean> result = new LinkedHashMap<>();
 
         for (LocalTime slot = open; !slot.plusMinutes(totalMinutes).isAfter(close); slot = slot.plusMinutes(30)) {
-            boolean overlapsBreak = !(slot.plusMinutes(totalMinutes).isBefore(breakStart) || slot.isAfter(breakEnd));
+            boolean overlapsBreak = !(slot.plusMinutes(totalMinutes).isBefore(breakStart) || slot.plusMinutes(totalMinutes).equals(breakStart)
+                    || slot.isAfter(breakEnd));
             boolean isPast = date.equals(LocalDate.now()) && slot.isBefore(LocalTime.now());
 
             LocalTime finalSlot = slot;
@@ -299,26 +250,37 @@ public class ReservationService {
 
         return result;
     }
-    public List<AvailableDesignerRes> getAvailableDesigners(Long shopId) {
-        List<User> designers = designerRepository.findByShopMemberships_Shop_IdAndRoles_Id_Role(
-                shopId, GlobalRole.STAFF
+    public List<AvailableDesignerRes> getAvailableDesigners(Long shopId, LocalDate date, LocalTime time) {
+        // 1. 해당 샵의 승인된 OWNER or DESIGNER만 조회
+        List<ShopMember> members = shopMemberRepository.findByShopIdAndStatus(
+                shopId,
+                ApprovalStatus.APPROVED
         );
 
-        return designers.stream()
-                .map(user -> new AvailableDesignerRes(
-                        user.getId(),
-                        user.getName(),
-                        user.getStyleImages().isEmpty() ? null : user.getStyleImages().get(0).getImageUrl(), // 예시: 프로필 이미지 (없으면 null)
-                        isOwner(user), // 예: 원장 여부 판별 메서드 구현 필요
-                        user.getIntro()
+        // 2. 멤버별 예약 충돌 검사
+        return members.stream()
+                .filter(member -> isAvailableAt(member.getUser(), date, time))
+                .map(member -> new AvailableDesignerRes(
+                        member.getUser().getId(),
+                        member.getUser().getName(),
+                        member.getProfileImage(),
+                        member.getRole() == ShopRole.OWNER,
+                        member.getUser().getIntro()
                 ))
                 .collect(Collectors.toList());
     }
 
-    private boolean isOwner(User user) {
-        // userRole 중에 원장 역할이 있으면 true (원장 역할 별도 구현에 따라 조정 필요)
-        return user.getRoles().stream()
-                .anyMatch(role -> role.getRole().equals(GlobalRole.STAFF)); // 예시, 실제 role 이름 확인 필요
+    private boolean isAvailableAt(User user, LocalDate date, LocalTime time) {
+        List<Reservation> reservations = reservationRepository
+                .findByDesigner_IdAndReservationDateAndStatus(user.getId(), date, ReservationStatus.CONFIRMED);
+
+        // 해당 시간대와 겹치는 예약이 있는지 확인
+        return reservations.stream().noneMatch(res -> {
+            LocalTime start = res.getStartTime();
+            LocalTime end = res.getEndTime();
+            return !time.isBefore(start) && time.isBefore(end); // 겹치면 false
+        });
     }
+
 
 }

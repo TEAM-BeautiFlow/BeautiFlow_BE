@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Builder;
 
 public record TemporaryReservationRes(
-        Long treatmentId,
+        Long id,
         String name,
         Integer durationMinutes,
         Integer price,
@@ -16,10 +16,7 @@ public record TemporaryReservationRes(
 
     public record SelectedOptionRes(
             Long optionGroupId,
-            Long optionItemId,
-            String optionItemName,
-            Integer extraMinutes,
-            Integer extraPrice
+            Long optionItemId
     ) {
         @Builder
         public SelectedOptionRes {}

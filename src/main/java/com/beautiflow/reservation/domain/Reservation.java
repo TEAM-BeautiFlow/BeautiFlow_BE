@@ -67,6 +67,10 @@ public class Reservation extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus;
 
+    private Integer totalDurationMinutes;
+
+    private Integer totalPrice;
+
 	@OneToMany(mappedBy = "reservation")
 	private List<ReservationTreatment> reservationTreatments = new ArrayList<>();
 

@@ -42,6 +42,7 @@ public class User extends BaseTimeEntity {
 
 	private String intro;
 
+
 	@OneToMany(mappedBy = "user")
 	private List<UserRole> roles = new ArrayList<>();
 
