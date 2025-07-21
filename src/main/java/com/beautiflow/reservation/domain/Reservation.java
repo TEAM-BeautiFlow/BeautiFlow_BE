@@ -76,5 +76,12 @@ public class Reservation extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "reservation")
 	private List<ReservationOption> reservationOptions = new ArrayList<>();
+
+	public void updateSchedule(LocalDate reservationDate, LocalTime startTime, LocalTime endTime, User designer) {
+		this.reservationDate = reservationDate;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.designer = designer;
+	}
 }
 

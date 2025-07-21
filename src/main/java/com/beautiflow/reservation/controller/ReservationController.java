@@ -9,7 +9,7 @@ import com.beautiflow.reservation.dto.response.AvailableDatesRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.dto.response.AvailableTimeSlotsRes;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
-import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
+import com.beautiflow.reservation.dto.request.UpdateReservationDateTimeDesignerReq;
 import com.beautiflow.reservation.service.ReservationService;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
@@ -59,6 +59,35 @@ public class ReservationController {
 
         return ResponseEntity.ok("시술과 옵션 임시 저장에 성공했습니다 예약 ID: " + reservation.getId());
     }
+
+    @PatchMapping("/shops/{shopId}/reservations/temp-save")
+    public ResponseEntity<?> updateTempReservationTimeDesigner(
+            @PathVariable Long shopId,
+            @RequestBody @Valid UpdateReservationDateTimeDesignerReq request,
+            @AuthenticationPrincipal CustomOAuth2User principal
+    ) {
+        Long userId = principal.getUserId();
+        User customer = userRepository.findById(userId)
+                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+        reservationService.updateReservationDateTimeAndDesigner(shopId, customer, request.date(), request.time(), request.designerId());
+
+        return ResponseEntity.ok("임시 예약의 날짜, 시간, 디자이너 정보가 성공적으로 업데이트 되었습니다.");
+    }
+
+
+    @Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
+    @GetMapping("/shops/{shopId}/available-dates")
+    public ResponseEntity<ApiResponse<AvailableDatesRes>> getAvailableDates(
+            @Parameter(description = "조회할 shop ID", example = "1")
+            @PathVariable Long shopId
+    ) {
+        Map<LocalDate, Boolean> availableDates = reservationService.getAvailableDates(shopId);
+        AvailableDatesRes res = new AvailableDatesRes(availableDates);
+
+        return ResponseEntity.ok(ApiResponse.success(res));
+    }
+
 
     @GetMapping("/shops/{shopId}/available-times")
     public ResponseEntity<ApiResponse<AvailableTimeSlotsRes>> getAvailableTimeSlots(

@@ -49,6 +49,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +65,7 @@ public class ReservationService {
     private final ReservationOptionRepository reservationOptionRepository;
     private final BusinessHourRepository businessHourRepository;
     private final ShopMemberRepository shopMemberRepository;
+    private final RedissonClient redissonClient;
 
     @Transactional
     public Reservation tempSaveReservation(User customer, TemporaryReservationReq request) {
@@ -118,6 +122,55 @@ public class ReservationService {
         reservationOptionRepository.saveAll(reservationOptions);
 
         return reservation;
+    }
+    @Transactional
+    public void updateReservationDateTimeAndDesigner(Long shopId, User customer, LocalDate date, LocalTime time, Long designerId) {
+        // 1) 임시 예약 조회
+        Reservation tempReservation = reservationRepository
+                .findByCustomerAndShopAndStatus(
+                        customer,
+                        shopRepository.findById(shopId)
+                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)),
+                        ReservationStatus.TEMPORARY
+                )
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 2) 디자이너 존재 확인 및 승인 상태 확인
+        ShopMember member = shopMemberRepository.findByShopIdAndUserIdAndStatus(shopId, designerId, ApprovalStatus.APPROVED)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_MEMBER_NOT_FOUND));
+
+        // 3) 락 이름 정의 (ex: 예약 관련 중복방지를 위해 날짜+시간+디자이너 기반)
+        String lockName = "reservation-lock:" + shopId + ":" + date.toString() + ":" + time.toString() + ":" + designerId;
+
+        RLock lock = redissonClient.getLock(lockName);
+
+        boolean locked = false;
+        try {
+            // 락 최대 5초 대기
+            locked = lock.tryLock(5, TimeUnit.SECONDS);
+            if (!locked) {
+                throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCKED);
+            }
+
+            // 4) 같은 시간에 동일 디자이너가 이미 CONFIRMED 상태 예약 있는지 확인 (중복 예약 방지)
+            boolean conflictExists = reservationRepository.existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
+                    designerId, date, time.plusMinutes(tempReservation.getTotalDurationMinutes()), time, ReservationStatus.CONFIRMED);
+            if (conflictExists) {
+                throw new BeautiFlowException(ReservationErrorCode.RESERVATION_CONFLICT);
+            }
+
+            // 5) 임시 예약에 날짜, 시간, 디자이너 정보 업데이트
+            tempReservation.updateSchedule(date, time, time.plusMinutes(tempReservation.getTotalDurationMinutes()), member.getUser());
+
+            reservationRepository.save(tempReservation);
+
+        } catch (InterruptedException e) {
+            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCK_INTERRUPTED);
+        } finally {
+            if (locked) {
+                lock.unlock();
+            }
+        }
     }
 
     public Map<LocalDate, Boolean> getAvailableDates(Long shopId) {
