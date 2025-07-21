@@ -1,0 +1,15 @@
+# src/test/resources/application.yml
+# 이 파일은 테스트 코드를 실행할 때만 적용됩니다.
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb  # H2 인메모리 DB를 사용
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 테스트 시작 시 테이블을 만들고, 끝나면 삭제
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
