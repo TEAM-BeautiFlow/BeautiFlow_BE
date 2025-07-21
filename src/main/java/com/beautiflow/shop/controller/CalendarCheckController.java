@@ -3,6 +3,7 @@ package com.beautiflow.shop.controller;
 import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.global.common.CommonPageResponse;
 import com.beautiflow.global.common.security.CustomOAuth2User;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationListRes;
@@ -14,9 +15,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -68,16 +69,17 @@ public class CalendarCheckController {
     return ResponseEntity.ok(ApiResponse.success(customers));
   }
 
-  @GetMapping("/timeslots/paged") // 시간대별 조회 페이징
+  @GetMapping("/timeslots/paged")
   @Operation(summary = "특정 날짜 예약 리스트 조회 (페이징)")
-  public ResponseEntity<ApiResponse<Page<ReservationListRes>>> getReservationsByDate(
+  public ResponseEntity<ApiResponse<CommonPageResponse<ReservationListRes>>> getReservationsByDate(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-      @PageableDefault(size = 10, sort = "startTime") Pageable pageable
+      @ParameterObject Pageable pageable
   ) {
-    Page<ReservationListRes> result = calendarCheckService.getReservationsByDate(customOAuth2User.getUserId(), date, pageable);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  } //프론트에게 어떤식으로 반환값을 받고 싶은지
+    Page<ReservationListRes> page = calendarCheckService.getReservationsByDate(customOAuth2User.getUserId(), date, pageable);
+    CommonPageResponse<ReservationListRes> response = CommonPageResponse.of(page);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }//프론트에게 어떤식으로 반환값을 받고 싶은지
 
 
 }
