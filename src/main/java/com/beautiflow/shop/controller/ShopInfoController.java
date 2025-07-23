@@ -4,7 +4,7 @@ import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
 import com.beautiflow.reservation.dto.response.TreatmentRes;
-import com.beautiflow.shop.service.ShopService;
+import com.beautiflow.shop.service.ShopInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/shops")
 @RequiredArgsConstructor
-public class ShopController {
+public class ShopInfoController {
 
-    private final ShopService shopService;
+    private final ShopInfoService shopService;
 
     @Operation(summary = "매장 정보 조회", description = "shopId로 매장 정보 조회")
     @GetMapping("/{shopId}")

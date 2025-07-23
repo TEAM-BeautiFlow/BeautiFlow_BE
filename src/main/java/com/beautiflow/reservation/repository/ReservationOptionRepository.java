@@ -7,4 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationOptionRepository extends JpaRepository<ReservationOption, Long> {
 
+    void deleteByReservation(Reservation reservation);
+
+
 }
