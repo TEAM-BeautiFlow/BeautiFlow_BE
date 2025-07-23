@@ -2,6 +2,7 @@ package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.shop.dto.ShopApplyRes;
+import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.shop.dto.ShopDetailResponse;
 import com.beautiflow.global.common.security.CustomOAuth2User;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
@@ -37,8 +38,8 @@ public class ShopController {
 
     @Operation(summary = "매장 정보 조회", description = "shopId로 매장 정보 조회")
     @GetMapping("/{shopId}")
-    public ResponseEntity<ApiResponse<ShopDetailResponse>> getShopDetail(@PathVariable Long shopId) {
-        ShopDetailResponse response = shopService.getShopDetail(shopId);
+    public ResponseEntity<ApiResponse<ShopDetailRes>> getShopDetail(@PathVariable Long shopId) {
+        ShopDetailRes response = shopService.getShopDetail(shopId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
