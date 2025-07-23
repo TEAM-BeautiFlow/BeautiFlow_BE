@@ -36,9 +36,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDesigner_IdAndReservationDateAndStatus(Long designerId, LocalDate reservationDate, ReservationStatus status);
     List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
-<<<<<<< HEAD
 }
-
-=======
-}
->>>>>>> 2c81244 ([FEAT] 날짜, 시간, 디자이너 llock 건 후 ãtemp-save에 patch)
