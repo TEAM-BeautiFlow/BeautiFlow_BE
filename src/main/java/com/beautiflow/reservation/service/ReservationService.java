@@ -6,6 +6,7 @@ import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.common.lock.ReservationLockManager;
 import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.GlobalRole;
 import com.beautiflow.global.domain.PaymentStatus;
@@ -17,6 +18,7 @@ import com.beautiflow.reservation.domain.ReservationOption;
 import com.beautiflow.reservation.domain.ReservationTreatment;
 import com.beautiflow.reservation.domain.ReservationTreatmentId;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
+import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
 import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
@@ -42,6 +44,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -65,19 +68,21 @@ public class ReservationService {
     private final ReservationOptionRepository reservationOptionRepository;
     private final BusinessHourRepository businessHourRepository;
     private final ShopMemberRepository shopMemberRepository;
-    private final RedissonClient redissonClient;
+    private final ReservationLockManager reservationLockManager;
 
     @Transactional
-    public Reservation tempSaveReservation(User customer, TemporaryReservationReq request) {
-        Shop shop = shopRepository.findById(request.shopId())
+    public Reservation tempSaveOrUpdateReservation(Long shopId, User customer, TemporaryReservationReq request) {
+        Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
         Treatment treatment = treatmentRepository.findById(request.treatmentId())
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
         // 옵션 아이템 조회
-        List<OptionItem> optionItems = request.selectedOptions().stream()
+        List<OptionItem> optionItems = Optional.ofNullable(request.selectedOptions())
+                .orElse(List.of())
+                .stream()
                 .map(selectedOption -> optionItemRepository.findById(selectedOption.optionItemId())
-                        .orElseThrow(() -> new RuntimeException("OptionItem not found")))
+                        .orElseThrow(() -> new BeautiFlowException(OptionErrorCode.OPTION_ITEM_NOT_FOUND)))
                 .collect(Collectors.toList());
 
         // 총 시간, 총 가격 계산
@@ -93,16 +98,35 @@ public class ReservationService {
                 .sum();
         int totalPriceAmount = totalPrice + totalExtraPrice;
 
-        // Reservation 생성 (빌더에 총 시간/가격 포함)
-        Reservation reservation = Reservation.builder()
-                .shop(shop)
-                .customer(customer)
-                .status(ReservationStatus.TEMPORARY)
-                .totalDurationMinutes(totalDurationMinutes)
-                .totalPrice(totalPriceAmount)
-                .build();
+        // TEMPORARY 예약 있는지 먼저 조회
+        Optional<Reservation> optional = reservationRepository.findByCustomerAndShopAndStatus(
+                customer, shop, ReservationStatus.TEMPORARY
+        );
 
-        reservationRepository.save(reservation);
+        Reservation reservation;
+        if(optional.isPresent()) {
+            // PATCH: 기존 예약 수정
+            reservation = optional.get();
+
+            // 기존 시술/옵션 삭제
+            reservationTreatmentRepository.deleteByReservation(reservation);
+            reservationOptionRepository.deleteByReservation(reservation);
+
+            // 총 시간/가격 업데이트
+            reservation.updateTotalDurationAndPrice(totalDurationMinutes, totalPriceAmount);
+            reservation.clearSchedule();
+            reservation.clearRequestNotes();
+        } else {
+            // POST: 새 예약 생성
+            reservation = Reservation.builder()
+                    .shop(shop)
+                    .customer(customer)
+                    .status(ReservationStatus.TEMPORARY)
+                    .totalDurationMinutes(totalDurationMinutes)
+                    .totalPrice(totalPriceAmount)
+                    .build();
+            reservationRepository.save(reservation);
+        }
 
         // 시술 연결
         ReservationTreatment resTreatment = ReservationTreatment.builder()
@@ -112,17 +136,37 @@ public class ReservationService {
                 .build();
         reservationTreatmentRepository.save(resTreatment);
 
-        // 옵션 연결
-        List<ReservationOption> reservationOptions = optionItems.stream()
-                .map(optionItem -> ReservationOption.builder()
-                        .reservation(reservation)
-                        .optionItem(optionItem)
-                        .build())
-                .collect(Collectors.toList());
-        reservationOptionRepository.saveAll(reservationOptions);
-
+        // 옵션 연결 (옵션이 있을 때만)
+        if (!optionItems.isEmpty()) {
+            List<ReservationOption> reservationOptions = optionItems.stream()
+                    .map(optionItem -> ReservationOption.builder()
+                            .reservation(reservation)
+                            .optionItem(optionItem)
+                            .build())
+                    .collect(Collectors.toList());
+            reservationOptionRepository.saveAll(reservationOptions);
+        }
         return reservation;
     }
+
+    @Transactional
+    public void deleteTemporaryReservation(User customer, Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+        Reservation reservation = reservationRepository.findByCustomerAndShopAndStatus(
+                customer, shop, ReservationStatus.TEMPORARY
+        ).orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 관련된 시술 및 옵션 삭제
+        reservationTreatmentRepository.deleteByReservation(reservation);
+        reservationOptionRepository.deleteByReservation(reservation);
+
+        // 예약 삭제
+        reservationRepository.delete(reservation);
+    }
+
+
     @Transactional
     public void updateReservationDateTimeAndDesigner(Long shopId, User customer, LocalDate date, LocalTime time, Long designerId) {
         // 1) 임시 예약 조회
@@ -139,38 +183,100 @@ public class ReservationService {
         ShopMember member = shopMemberRepository.findByShopIdAndUserIdAndStatus(shopId, designerId, ApprovalStatus.APPROVED)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_MEMBER_NOT_FOUND));
 
-        // 3) 락 이름 정의 (ex: 예약 관련 중복방지를 위해 날짜+시간+디자이너 기반)
+        // 3) 락 이름 정의 (가게 + 날짜+시간+디자이너 기반)
         String lockName = "reservation-lock:" + shopId + ":" + date.toString() + ":" + time.toString() + ":" + designerId;
 
-        RLock lock = redissonClient.getLock(lockName);
-
-        boolean locked = false;
         try {
-            // 락 최대 5초 대기
-            locked = lock.tryLock(5, TimeUnit.SECONDS);
+            boolean locked = reservationLockManager.tryLock(tempReservation.getId(), lockName);
             if (!locked) {
                 throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCKED);
             }
 
-            // 4) 같은 시간에 동일 디자이너가 이미 CONFIRMED 상태 예약 있는지 확인 (중복 예약 방지)
-            boolean conflictExists = reservationRepository.existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
-                    designerId, date, time.plusMinutes(tempReservation.getTotalDurationMinutes()), time, ReservationStatus.CONFIRMED);
+            // 4) 중복 예약 체크
+            boolean conflictExists = reservationRepository
+                    .existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
+                            designerId,
+                            date,
+                            time.plusMinutes(tempReservation.getTotalDurationMinutes()),
+                            time,
+                            ReservationStatus.CONFIRMED
+                    );
             if (conflictExists) {
                 throw new BeautiFlowException(ReservationErrorCode.RESERVATION_CONFLICT);
             }
 
-            // 5) 임시 예약에 날짜, 시간, 디자이너 정보 업데이트
-            tempReservation.updateSchedule(date, time, time.plusMinutes(tempReservation.getTotalDurationMinutes()), member.getUser());
-
+            // 5) 예약 업데이트
+            tempReservation.updateSchedule(
+                    date,
+                    time,
+                    time.plusMinutes(tempReservation.getTotalDurationMinutes()),
+                    member.getUser()
+            );
+            tempReservation.clearRequestNotes();
             reservationRepository.save(tempReservation);
 
         } catch (InterruptedException e) {
             throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCK_INTERRUPTED);
-        } finally {
-            if (locked) {
-                lock.unlock();
-            }
         }
+        // 여기선 unlock 안 함 → saveReservation()에서 해제해야 하므로 유지
+    }
+
+    @Transactional
+    public void unlockTempReservation(Long shopId, User customer) {
+        // 1) 임시 예약 조회
+        Reservation tempReservation = reservationRepository
+                .findByCustomerAndShopAndStatus(
+                        customer,
+                        shopRepository.findById(shopId)
+                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)),
+                        ReservationStatus.TEMPORARY
+                )
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 2) lock 풀기
+        try {
+            reservationLockManager.unlock(tempReservation.getId());
+            tempReservation.clearSchedule();
+        } catch (IllegalStateException | NoSuchElementException e) {
+            // 이미 lock이 없거나, lock 풀 수 없는 상황
+            throw new BeautiFlowException(ReservationErrorCode.LOCK_NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public void updateReservationRequestNotes(Long shopId, User customer, UpdateRequestNotesReq request) {
+        // 1) 임시 예약 조회
+        Reservation tempReservation = reservationRepository
+                .findByCustomerAndShopAndStatus(
+                        customer,
+                        shopRepository.findById(shopId)
+                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)),
+                        ReservationStatus.TEMPORARY
+                )
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 2) 임시 예약에 요청 사항, 레퍼런스 이미지 정보 업데이트
+        tempReservation.updateRequestNotes(request.requestNotes(), request.styleImageUrls());
+
+        reservationRepository.save(tempReservation);
+    }
+
+    @Transactional
+    public void saveReservation(Long shopId, User customer) {
+        // 1) 임시 예약 조회
+        Reservation tempReservation = reservationRepository
+                .findByCustomerAndShopAndStatus(
+                        customer,
+                        shopRepository.findById(shopId)
+                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)),
+                        ReservationStatus.TEMPORARY
+                )
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        // 예약 상태를 PENDING으로 변경 + lock 풀기
+        tempReservation.updateStatus(ReservationStatus.PENDING);
+        reservationLockManager.unlock(tempReservation.getId());
+
     }
 
     public Map<LocalDate, Boolean> getAvailableDates(Long shopId) {

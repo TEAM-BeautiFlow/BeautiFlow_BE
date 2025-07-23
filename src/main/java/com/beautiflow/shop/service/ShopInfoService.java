@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ShopService {
+public class ShopInfoService {
 
     private final ShopRepository shopRepository;
     private final TreatmentRepository treatmentRepository;
