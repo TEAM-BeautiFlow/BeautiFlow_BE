@@ -1,17 +1,26 @@
 package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.shop.dto.ShopApplyRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
+import com.beautiflow.shop.dto.ShopDetailResponse;
+import com.beautiflow.global.common.security.CustomOAuth2User;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.shop.service.ShopService;
+import com.beautiflow.shop.dto.ShopRegistrationReq;
+import com.beautiflow.shop.dto.ShopRegistrationRes;
+import com.beautiflow.shop.service.ShopOnboardingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ShopController {
 
     private final ShopService shopService;
+    private final ShopOnboardingService shopOnboardingService;
+
+
 
     @Operation(summary = "매장 정보 조회", description = "shopId로 매장 정보 조회")
     @GetMapping("/{shopId}")
@@ -56,5 +68,25 @@ public class ShopController {
             @PathVariable Long treatmentId) {
         TreatmentDetailWithOptionResponse response = shopService.getTreatmentDetailWithOptions(shopId, treatmentId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "샵 등록", description = "새로운 샵을 등록하는 API입니다.")
+    @PostMapping
+    public ResponseEntity<ShopRegistrationRes> register(
+            @RequestBody ShopRegistrationReq shopRegistrationReq,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getUserId();
+        ShopRegistrationRes shopRegistrationRes = shopOnboardingService.registerShop(userId, shopRegistrationReq);
+        return ResponseEntity.ok(shopRegistrationRes);
+
+    }
+
+    @Operation(summary = "입사 신청", description = "직원이 샵에 입사를 신청하는 API입니다.")
+    @PostMapping("/{shopId}/apply")
+    public ResponseEntity<ShopApplyRes> applyToShop(@PathVariable Long shopId,
+            @AuthenticationPrincipal CustomOAuth2User currentUser) {
+        Long userId = currentUser.getUserId();
+        ShopApplyRes shopApplyRes = shopOnboardingService.ApplyToShop(userId, shopId);
+        return ResponseEntity.ok(shopApplyRes);
     }
 }
