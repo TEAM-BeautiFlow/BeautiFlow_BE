@@ -146,15 +146,16 @@ public class ReservationController {
         return ResponseEntity.ok("예약이 완료되었습니다.");
     }
 
-    @Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
-    @GetMapping("/shops/{shopId}/available-dates")
-    public ResponseEntity<ApiResponse<AvailableDatesRes>> getAvailableDates(
-            @PathVariable Long shopId
-    ) {
-        Map<LocalDate, Boolean> availableDates = reservationService.getAvailableDates(shopId);
+    // 302 에러 발생으로 주석 처리
+    //@Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
+    //@GetMapping("/shops/{shopId}/available-dates")
+    //public ResponseEntity<ApiResponse<AvailableDatesRes>> getAvailableDates(
+    //        @PathVariable Long shopId
+    //) {
+    //    Map<LocalDate, Boolean> availableDates = reservationService.getAvailableDates(shopId);
 
-        return ResponseEntity.ok(ApiResponse.success(new AvailableDatesRes(availableDates)));
-    }
+    //    return ResponseEntity.ok(ApiResponse.success(new AvailableDatesRes(availableDates)));
+    //}
 
 
 
