@@ -25,8 +25,6 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final JWTUtil jwtUtil;
-
     private final SignUpService signUpService;
     private final RefreshService refreshService;
 
@@ -34,17 +32,6 @@ public class UserController {
     public ResponseEntity<SignUpRes> signUp(@RequestBody SignUpReq signUpReq) {
         SignUpRes signUpRes = signUpService.signUp(signUpReq);
         return ResponseEntity.ok(signUpRes);
-    }
-
-    @PostMapping("/example")
-    public ResponseEntity<String> example(
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User
-    ) {
-        Long userId = customOAuth2User.getUserId();
-        String name = customOAuth2User.getName();
-
-        String message = "✅ 인증 성공! userId: " + userId + ", name: " + name;
-        return ResponseEntity.ok(message);
     }
 
 

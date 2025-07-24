@@ -1,17 +1,16 @@
 package com.beautiflow.global.common.util;
 
-import com.beautiflow.global.common.error.CommonErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.domain.GlobalRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
-import java.util.Optional;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,69 +36,87 @@ public class JWTUtil {
                 Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getProvider(String token) {
+
+    private Claims parseClaims(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token)
-                    .getPayload()
-                    .get("provider", String.class);
+                    .getPayload();
         } catch (ExpiredJwtException e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_EXPIRED);
+            throw new JwtException(UserErrorCode.JWT_TOKEN_EXPIRED.getMessage());
         } catch (Exception e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
+            throw new JwtException(UserErrorCode.JWT_TOKEN_INVALID.getMessage());
         }
+    }
+
+
+    private <T> T getClaim(String token, String key, Class<T> clazz) {
+        return parseClaims(token).get(key, clazz);
+    }
+
+    public String getProvider(String token) {
+        return getClaim(token, "provider", String.class);
     }
 
     public String getKakaoId(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("kakaoId", String.class);
-        } catch (ExpiredJwtException e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_EXPIRED);
-        } catch (Exception e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
-        }
+        return getClaim(token, "kakaoId", String.class);
     }
 
     public Long getUserId(String token) {
+        return getClaim(token, "userId", Number.class).longValue();
+    }
+
+    public boolean validateToken(String token) {
+        parseClaims(token);
+        return true;
+    }
+
+    //액세스토큰 만료되었으면 true반환
+    public boolean isTokenExpired(String token) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token)
-                    .getPayload()
-                    .get("userId", Number.class)
-                    .longValue();
+                    .getPayload();
+            return claims.getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
-            System.out.println("2");
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_EXPIRED);
+            return true;
         } catch (Exception e) {
-            System.out.println("3");
             throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
         }
     }
 
-    public Boolean isExpired(String token) {
-            return Jwts.parser()
+
+    public Claims parseRefresh(String refreshToken) {
+        // Claims 파싱 및 토큰 유효성 검사
+        Claims claims;
+        try {
+            claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration()
-                    .before(new Date());
+                    .parseSignedClaims(refreshToken)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new BeautiFlowException(UserErrorCode.REFRESH_ALSO_EXPIRED);
+        } catch (Exception e) {
+            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
+        }
 
+        // Redis저장값과 비교
+        Long userId = claims.get("userId", Number.class).longValue();
+        String redisKey = "refresh:" + userId;
+        String storedToken = redisTokenUtil.getValues(redisKey);
+
+        if (!refreshToken.equals(storedToken)) {
+            throw new BeautiFlowException(UserErrorCode.TOKEN_GENERATION_FAILED);
+        }
+
+        return claims;
     }
 
-
-    public boolean validateToken(String token) {
-        return !isExpired(token);
-    }
 
     public Authentication getAuthentication(String token) {
         String provider = getProvider(token);
@@ -142,25 +159,5 @@ public class JWTUtil {
         return refreshToken;
 
 
-    }
-
-    public Optional<Claims> checkRefreshToken(String refreshToken, String email) throws BeautiFlowException{
-        String redisRefreshToken = redisTokenUtil.getValues(email);
-        System.out.println(redisRefreshToken);
-        if (!refreshToken.equals(redisRefreshToken)) {
-            throw new BeautiFlowException(UserErrorCode.TOKEN_GENERATION_FAILED);
-        }
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(refreshToken)
-                    .getPayload();
-            return Optional.of(claims);
-        }catch (ExpiredJwtException e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_EXPIRED);
-        } catch (Exception e) {
-            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
-        }
     }
 }

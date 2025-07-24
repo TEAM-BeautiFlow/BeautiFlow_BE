@@ -1,7 +1,6 @@
 package com.beautiflow.global.common.util;
 
 import com.beautiflow.global.common.error.CommonErrorCode;
-import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import io.lettuce.core.RedisCommandTimeoutException;
 import java.time.Duration;
@@ -21,7 +20,7 @@ public class RedisTokenUtil {
         try {
             redisTemplate.opsForValue().set(key, value, duration);
         } catch (RedisConnectionFailureException | RedisCommandTimeoutException e) {
-            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BeautiFlowException(CommonErrorCode.REDIS_CONNECTION_FAILED);
         }
     }
 
@@ -30,7 +29,7 @@ public class RedisTokenUtil {
             ValueOperations<String, String> values = redisTemplate.opsForValue();
             return values.get(key);
         } catch (RedisConnectionFailureException | RedisCommandTimeoutException e) {
-            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BeautiFlowException(CommonErrorCode.REDIS_CONNECTION_FAILED);
         }
     }
 

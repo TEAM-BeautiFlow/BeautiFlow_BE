@@ -6,7 +6,6 @@ import com.beautiflow.global.common.util.JWTUtil;
 import com.beautiflow.user.dto.TokenReq;
 import com.beautiflow.user.dto.TokenRes;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,40 +19,17 @@ public class RefreshService {
         String refreshToken = tokenReq.refreshToken();
         String accessToken = tokenReq.accessToken();
 
-        Long userId = jwtUtil.getUserId(refreshToken);
-        String email = "refresh:" + userId;
+        Claims claims = jwtUtil.parseRefresh(refreshToken);
 
-        Claims claims = jwtUtil.checkRefreshToken(refreshToken, email)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.TOKEN_GENERATION_FAILED));
-
-        boolean isRefreshValid;
-        try {
-            isRefreshValid = jwtUtil.validateToken(refreshToken);
-        } catch (ExpiredJwtException e) {
-            isRefreshValid = false;
-        } catch (Exception e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
-        }
-
-        if (!isRefreshValid) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
-        }
-
-        boolean accessStillValid;
-        try {
-            accessStillValid = jwtUtil.validateToken(accessToken);
-        } catch (ExpiredJwtException e) {
-            accessStillValid = false;
-        } catch (Exception e) {
-            throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
-        }
-
-        if (accessStillValid) {
+        // access token이 아직 유효한 경우
+        if (!jwtUtil.isTokenExpired(accessToken)) {
             throw new BeautiFlowException(UserErrorCode.ACCESS_TOKEN_STILL_VALID);
         }
 
         String kakaoId = claims.get("kakaoId", String.class);
         String provider = claims.get("provider", String.class);
+        Long userId = claims.get("userId", Number.class).longValue();
+
 
         String newAccessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
 

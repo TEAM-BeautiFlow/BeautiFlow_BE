@@ -10,12 +10,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 //Filter에서 발생한 JWT관련 예외처리
-//JWT가 만료되었을 때
 @Component
 public class JWTExceptionFilter extends OncePerRequestFilter {
 
@@ -25,18 +24,17 @@ public class JWTExceptionFilter extends OncePerRequestFilter {
         try {
             chain.doFilter(request, response);
         } catch (JwtException ex) {
-            setResponse(request.getRequestURI(), response, HttpStatus.UNAUTHORIZED, ex);
+            setResponse(response, HttpStatus.UNAUTHORIZED, ex);
         }
     }
 
-    private void setResponse(String path, HttpServletResponse response, HttpStatus status, Throwable ex)
+    private void setResponse(HttpServletResponse response, HttpStatus status, Throwable ex)
             throws IOException {
 
         JWTErrorRes errorResponse = JWTErrorRes.builder()
-                .timestamp(LocalDateTime.now())
-                .status(status.value())
-                .error(ex.getMessage())
-                .path(path)
+                .success(false)
+                .code(status.value())
+                .message(ex.getMessage())
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
