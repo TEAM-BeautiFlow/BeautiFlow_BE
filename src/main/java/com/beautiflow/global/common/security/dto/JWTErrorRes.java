@@ -1,4 +1,4 @@
-package com.beautiflow.global.common.security;
+package com.beautiflow.global.common.security.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

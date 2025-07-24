@@ -1,7 +1,12 @@
 package com.beautiflow.global.common.util;
 
+import com.beautiflow.global.common.error.CommonErrorCode;
+import com.beautiflow.global.common.error.UserErrorCode;
+import com.beautiflow.global.common.exception.BeautiFlowException;
+import io.lettuce.core.RedisCommandTimeoutException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -12,14 +17,21 @@ public class RedisTokenUtil {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void setValues(String key, String data, Duration duration) {
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(key, data, duration);
+    public void setValues(String key, String value, Duration duration) {
+        try {
+            redisTemplate.opsForValue().set(key, value, duration);
+        } catch (RedisConnectionFailureException | RedisCommandTimeoutException e) {
+            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public String getValues(String key) {
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        return values.get(key); //return key or null when key does not exist
+        try {
+            ValueOperations<String, String> values = redisTemplate.opsForValue();
+            return values.get(key);
+        } catch (RedisConnectionFailureException | RedisCommandTimeoutException e) {
+            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

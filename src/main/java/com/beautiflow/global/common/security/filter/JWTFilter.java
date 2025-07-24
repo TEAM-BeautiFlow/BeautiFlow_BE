@@ -1,11 +1,6 @@
-package com.beautiflow.global.common.security;
+package com.beautiflow.global.common.security.filter;
 
-import com.beautiflow.global.common.error.UserErrorCode;
-import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.util.JWTUtil;
-import com.beautiflow.global.domain.GlobalRole;
-import com.beautiflow.user.domain.User;
-import com.beautiflow.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +21,7 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
 
         String authorization = request.getHeader("Authorization");
 

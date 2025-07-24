@@ -1,5 +1,6 @@
-package com.beautiflow.global.common.security;
+package com.beautiflow.global.common.security.filter;
 
+import com.beautiflow.global.common.security.dto.JWTErrorRes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,7 +14,8 @@ import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+//Filter에서 발생한 JWT관련 예외처리
+//JWT가 만료되었을 때
 @Component
 public class JWTExceptionFilter extends OncePerRequestFilter {
 

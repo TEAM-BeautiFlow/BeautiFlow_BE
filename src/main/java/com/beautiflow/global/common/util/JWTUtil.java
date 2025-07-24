@@ -1,8 +1,9 @@
 package com.beautiflow.global.common.util;
 
+import com.beautiflow.global.common.error.CommonErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.domain.GlobalRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -159,7 +160,7 @@ public class JWTUtil {
         }catch (ExpiredJwtException e) {
             throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_EXPIRED);
         } catch (Exception e) {
-            throw new BeautiFlowException(UserErrorCode.DATABASE_ERROR);
+            throw new BeautiFlowException(CommonErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }
