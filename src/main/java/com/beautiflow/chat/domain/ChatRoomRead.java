@@ -1,10 +1,7 @@
-package com.beautiflow.chat;
+package com.beautiflow.chat.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
-import com.beautiflow.global.domain.BaseTimeEntity;
-import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 
 import jakarta.persistence.Entity;
@@ -13,34 +10,33 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "chat_room_reads")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "chat_rooms")
-public class ChatRoom extends BaseTimeEntity {
+public class ChatRoomRead {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	private Shop shop;
+	private ChatRoom chatRoom;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	private User customer;
+	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User designer;
+	private LocalDateTime lastReadTime;
 
-	@OneToMany(mappedBy = "chatRoom")
-	private List<ChatMessage> messages = new ArrayList<>();
+	public void updateReadTime(LocalDateTime time) {
+		this.lastReadTime = time;
+	}
 }

@@ -1,6 +1,4 @@
-package com.beautiflow.chat;
-
-import java.time.LocalDateTime;
+package com.beautiflow.chat.domain;
 
 import com.beautiflow.global.domain.BaseTimeEntity;
 import com.beautiflow.global.domain.SenderType;
