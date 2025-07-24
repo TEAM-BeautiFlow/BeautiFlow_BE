@@ -5,6 +5,7 @@ import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.CommonPageResponse;
 import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationListRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
@@ -60,14 +61,20 @@ public class CalendarCheckController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  @GetMapping("/list") // 고객리스트 조회
+  @GetMapping("/list")
   @Operation(summary = "디자이너 고객 리스트 조회")
-  public ResponseEntity<ApiResponse<List<CustomerListRes>>> getCustomersByDesigner(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User
+  public ResponseEntity<ApiResponse<CommonPageResponse<CustomerListRes>>> getCustomersByDesigner(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) List<TargetGroup> groups,
+      @ParameterObject Pageable pageable
   ) {
-    List<CustomerListRes> customers = managedCustomerService.getCustomersByDesigner(customOAuth2User.getUserId());
-    return ResponseEntity.ok(ApiResponse.success(customers));
+    Page<CustomerListRes> page = managedCustomerService.getCustomersByDesigner(
+        customOAuth2User.getUserId(), keyword, groups, pageable
+    );
+    return ResponseEntity.ok(ApiResponse.success(CommonPageResponse.of(page)));
   }
+
 
   @GetMapping("/timeslots/paged")
   @Operation(summary = "특정 날짜 예약 리스트 조회 (페이징)")

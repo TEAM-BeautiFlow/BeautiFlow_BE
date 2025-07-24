@@ -3,9 +3,12 @@ package com.beautiflow.MangedCustomer.service;
 import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
 import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
+import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +28,15 @@ public class ManagedCustomerService {
   }
 
   @Transactional(readOnly = true)
-  public List<CustomerListRes> getCustomersByDesigner(Long designerId) {
-    return managedCustomerRepository.findByDesignerId(designerId).stream()
-        .map(CustomerListRes::from)
-        .toList(); // 고객 없으면 빈 리스트 반환됨
+  public Page<CustomerListRes> getCustomersByDesigner(
+      Long designerId,
+      String keyword,
+      List<TargetGroup> groups,
+      Pageable pageable
+  ) {
+    return managedCustomerRepository
+        .findFilteredByDesigner(designerId, keyword, groups, pageable)
+        .map(CustomerListRes::from);
   }
+
 }
