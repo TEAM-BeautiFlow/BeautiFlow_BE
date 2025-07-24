@@ -42,6 +42,9 @@ public class Shop {
 	@Column(unique = true)
 	private String businessRegistrationNumber;
 
+	@Column(nullable = true) // 예약금 때문에 필드 추가하였음
+	private Integer depositAmount;
+
 	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
 	private final List<ShopImage> shopImages = new ArrayList<>();
 
@@ -53,6 +56,7 @@ public class Shop {
 
 	@OneToMany(mappedBy = "shop")
 	private final List<Treatment> treatments = new ArrayList<>();
+
 
 	public void updateDetails(ShopUpdateReq requestDto) {
 		if (requestDto.shopName() != null) {
