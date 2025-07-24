@@ -13,7 +13,6 @@ import java.util.List;
 
 public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer, Long> {
 
-  List<ManagedCustomer> findByDesignerId(Long designerId);
 
   boolean existsByDesignerAndCustomer(User designer, User customer);
 
