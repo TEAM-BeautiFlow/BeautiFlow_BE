@@ -3,7 +3,7 @@ package com.beautiflow.shop.controller;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.shop.dto.ShopApplyRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
 import com.beautiflow.shop.service.ShopService;

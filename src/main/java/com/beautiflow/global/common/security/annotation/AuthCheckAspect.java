@@ -3,7 +3,7 @@ package com.beautiflow.global.common.security.annotation;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.shop.repository.ShopMemberRepository;

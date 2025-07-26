@@ -1,12 +1,8 @@
-package com.beautiflow.global.common.security;
+package com.beautiflow.global.common.security.authentication;
 
-import com.beautiflow.global.common.error.UserErrorCode;
-import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.util.JWTUtil;
-import com.beautiflow.global.domain.GlobalRole;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
-import com.beautiflow.user.repository.UserRoleRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
