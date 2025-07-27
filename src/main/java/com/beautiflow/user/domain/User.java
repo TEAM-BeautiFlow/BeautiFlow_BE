@@ -1,5 +1,6 @@
 package com.beautiflow.user.domain;
 
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "customer")
 	private List<Reservation> reservations = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user")
-	private List<UserStyleImage> styleImages = new ArrayList<>();
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<UserStyle> styles = new ArrayList<>();
+
 }

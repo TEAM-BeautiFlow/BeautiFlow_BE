@@ -1,7 +1,5 @@
 package com.beautiflow.user.domain;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -26,9 +24,8 @@ public class UserStyleImage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User user;
-
 	private String imageUrl;
-	private LocalDateTime createdAt;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private UserStyle userStyle;
 }
