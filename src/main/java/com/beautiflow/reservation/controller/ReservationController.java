@@ -6,6 +6,7 @@ import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
 import com.beautiflow.global.common.security.CustomOAuth2User;
 import com.beautiflow.reservation.domain.Reservation;
+import com.beautiflow.reservation.domain.TempReservation;
 import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
 import com.beautiflow.reservation.dto.response.AvailableDatesRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
@@ -71,9 +72,9 @@ public class ReservationController {
         User customer = userRepository.findById(userId)
                 .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
-        Reservation reservation = reservationService.tempSaveOrUpdateReservation(shopId, customer, request);
+        TempReservation tempReservation = reservationService.tempSaveOrUpdateReservation(shopId, customer, request);
 
-        return ResponseEntity.ok("시술과 옵션 임시 저장에 성공했습니다 예약 ID: " + reservation.getId());
+        return ResponseEntity.ok("시술과 옵션 임시 저장에 성공했습니다 예약 ID: " + tempReservation.getId());
     }
     @DeleteMapping("/shops/{shopId}/temp-save")
     @Operation(summary = "임시 예약 삭제", description = "인증된 사용자의 특정 샵 임시 예약 삭제")

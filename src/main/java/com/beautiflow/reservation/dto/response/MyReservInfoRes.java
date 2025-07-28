@@ -2,22 +2,18 @@ package com.beautiflow.reservation.dto.response;
 
 import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.reservation.domain.Reservation;
-import com.beautiflow.reservation.domain.ReservationOption;
-import com.beautiflow.reservation.domain.ReservationTreatment;
+import com.beautiflow.reservation.domain.TempReservation;
+import com.beautiflow.reservation.domain.TempReservationOption;
+import com.beautiflow.reservation.domain.TempReservationTreatment;
 import com.beautiflow.shop.domain.Shop;
-import com.beautiflow.treatment.domain.OptionGroup;
-import com.beautiflow.treatment.domain.OptionItem;
 import com.beautiflow.treatment.domain.Treatment;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record MyReservInfoRes(
         String customerName,
@@ -35,18 +31,16 @@ public record MyReservInfoRes(
 ) {
 
     public static MyReservInfoRes from(
-            Reservation reservation,
-            Optional<ReservationTreatment> reservationTreatment,
-            List<ReservationOption> reservationOptions,
+            TempReservation tempReservation,
+            List<TempReservationTreatment> tempReservationTreatment,
+            List<TempReservationOption> tempReservationOptions,
             Shop shop
     ) {
-        if(reservationTreatment.isEmpty()) {
+        if(tempReservationTreatment.isEmpty()) {
             throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
         }
+        TempReservationTreatment rt = tempReservationTreatment.get(0);
         Map<List<String>, Integer> payInfo = new HashMap<>();
-        ReservationTreatment rt = reservationTreatment.orElseThrow(() ->
-                new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND));
-
         Treatment treatment = rt.getTreatment();
         if (treatment == null) {
             throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
@@ -59,8 +53,8 @@ public record MyReservInfoRes(
         payInfo.put(List.of(treatmentName), treatmentPrice);
 
         // OptionGroup null-safe
-        if (reservationOptions != null) {
-            for (ReservationOption option : reservationOptions) {
+        if (tempReservationOptions != null) {
+            for (TempReservationOption option : tempReservationOptions) {
                 if (option == null) continue;
 
                 String groupName = "옵션그룹 없음";
@@ -91,12 +85,12 @@ public record MyReservInfoRes(
         shopAccountInfo.put("accountHolder", shop.getAccountHolder());
 
         return new MyReservInfoRes(
-                reservation.getCustomer().getName(),
-                reservation.getReservationDate(),
-                reservation.getStartTime(),
-                reservation.getTotalDurationMinutes(),
-                reservation.getShop().getShopName(),
-                reservation.getDesigner().getName(),
+                tempReservation.getCustomer().getName(),
+                tempReservation.getReservationDate(),
+                tempReservation.getStartTime(),
+                tempReservation.getTotalDurationMinutes(),
+                tempReservation.getShop().getShopName(),
+                tempReservation.getDesigner().getName(),
                 payInfo,
                 shopAccountInfo,
                 shop.getDeposit()
