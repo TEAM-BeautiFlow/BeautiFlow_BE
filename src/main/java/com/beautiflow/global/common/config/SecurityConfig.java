@@ -43,7 +43,7 @@ public class SecurityConfig {
                         request -> {
                             CorsConfiguration configuration = new CorsConfiguration();
                             configuration.setAllowedOrigins(
-                                    Collections.singletonList("http://localhost:3000"));
+                                    Collections.singletonList("http://localhost:5173"));
                             configuration.setAllowedMethods(Collections.singletonList("*"));
                             configuration.setAllowCredentials(true);
                             configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -66,6 +66,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
+                    "/connect/**",
                     "/users/signup",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",

@@ -30,12 +30,18 @@ public class StompHandler implements ChannelInterceptor {
 
 		if (StompCommand.CONNECT == accessor.getCommand()) {
 			String token = extractToken(accessor);
+			log.info("🔐 CONNECT 시도 - 토큰: {}", token);
 			try {
 				if (jwtUtill.isExpired(token)) {
+					log.warn("❌ JWT 만료됨");
 					throw new JwtException("token expired");
 				}
+				Long userId = jwtUtill.getUserId(token);
+				String kakaoId = jwtUtill.getKakaoId(token);
+				log.info("✅ CONNECT 인증 성공 - userId: {}, kakaoId: {}", userId, kakaoId);
 				log.info("CONNECT -JWT 유효성 통과");
 			} catch (Exception e) {
+				log.error("❌ CONNECT 인증 실패 - token: {} - message: {}", token, e.getMessage(), e);
 				throw new AuthenticationServiceException("JWT 인증 실패: " + e.getMessage());
 			}
 		}
@@ -72,6 +78,7 @@ public class StompHandler implements ChannelInterceptor {
 	private String extractToken(StompHeaderAccessor accessor) {
 		String bearerToken = accessor.getFirstNativeHeader("Authorization");
 		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+			log.warn("❌ Authorization 헤더 형식 오류: {}", bearerToken);
 			throw new AuthenticationServiceException("Authorization 헤더가 잘못되었습니다");
 		}
 		return bearerToken.substring(7).trim();
