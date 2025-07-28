@@ -19,6 +19,7 @@ import com.beautiflow.reservation.domain.ReservationTreatment;
 import com.beautiflow.reservation.domain.ReservationTreatmentId;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
+import com.beautiflow.reservation.dto.response.MyReservInfoRes;
 import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
@@ -313,11 +314,11 @@ public class ReservationService {
         Optional<BusinessHour> businessHourOpt = businessHourRepository.findByShopAndDayOfWeek(
                 shop, WeekDayConverter.toWeekDay(date.getDayOfWeek()));
 
-        if (businessHourOpt.isEmpty()) return true;
+        if (businessHourOpt.isEmpty()) return false;
 
         BusinessHour businessHour = businessHourOpt.get();
 
-        if (businessHour.isClosed()) return true;
+        if (businessHour.isClosed()) return false;
 
         LocalTime open = businessHour.getOpenTime();
         LocalTime close = businessHour.getCloseTime();
@@ -326,7 +327,13 @@ public class ReservationService {
 
         List<LocalTime> slots = new ArrayList<>();
         for (LocalTime time = open; time.plusHours(1).isBefore(close.plusSeconds(1)); time = time.plusHours(1)) {
-            if (time.isBefore(breakStart) || time.isAfter(breakEnd.minusHours(1))) {
+            boolean isDuringBreak = false;
+
+            if (breakStart != null && breakEnd != null) {
+                isDuringBreak = !time.isBefore(breakStart) && time.isBefore(breakEnd);
+            }
+
+            if (!isDuringBreak) {
                 slots.add(time);
             }
         }
@@ -439,6 +446,27 @@ public class ReservationService {
             LocalTime end = res.getEndTime();
             return !time.isBefore(start) && time.isBefore(end); // 겹치면 false
         });
+    }
+
+    public MyReservInfoRes myReservInfo(Long shopId, User customer) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+        Reservation tempReservation = reservationRepository
+                .findByCustomerAndShopAndStatus(
+                        customer,
+                        shop,
+                        ReservationStatus.TEMPORARY
+                )
+                    .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+       Optional<ReservationTreatment> reservationTreatment = reservationTreatmentRepository.findByReservation(tempReservation);
+        if (reservationTreatment.isEmpty()) {
+            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
+        }
+
+        List<ReservationOption> reservationOptions = reservationOptionRepository.findAllByReservation(tempReservation);
+
+
+        return MyReservInfoRes.from(tempReservation, reservationTreatment, reservationOptions, shop);
     }
 
 

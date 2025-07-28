@@ -44,6 +44,8 @@ public class Shop {
 	private String address;
 	private String introduction;
 
+	private Integer deposit;
+
 	@Column(unique = true)
 	private String businessRegistrationNumber;
 

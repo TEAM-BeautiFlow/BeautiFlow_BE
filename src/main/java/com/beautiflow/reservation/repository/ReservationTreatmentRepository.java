@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationTreatmentRepository extends
         JpaRepository<ReservationTreatment, ReservationTreatmentId> {
-    Optional<ReservationTreatment> findByTreatment(Treatment treatment);
+    Optional<ReservationTreatment> findByReservation(Reservation reservation);
     void deleteByReservation(Reservation reservation);
 
 

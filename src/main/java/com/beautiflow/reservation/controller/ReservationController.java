@@ -12,7 +12,9 @@ import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.dto.response.AvailableTimeSlotsRes;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.request.UpdateReservationDateTimeDesignerReq;
+import com.beautiflow.reservation.dto.response.MyReservInfoRes;
 import com.beautiflow.reservation.service.ReservationService;
+import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -146,16 +148,15 @@ public class ReservationController {
         return ResponseEntity.ok("예약이 완료되었습니다.");
     }
 
-    // 302 에러 발생으로 주석 처리
-    //@Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
-    //@GetMapping("/shops/{shopId}/available-dates")
-    //public ResponseEntity<ApiResponse<AvailableDatesRes>> getAvailableDates(
-    //        @PathVariable Long shopId
-    //) {
-    //    Map<LocalDate, Boolean> availableDates = reservationService.getAvailableDates(shopId);
+    @Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
+    @GetMapping("/shops/{shopId}/available-dates")
+    public ResponseEntity<ApiResponse<AvailableDatesRes>> getAvailableDates(
+            @PathVariable Long shopId
+    ) {
+        Map<LocalDate, Boolean> availableDates = reservationService.getAvailableDates(shopId);
 
-    //    return ResponseEntity.ok(ApiResponse.success(new AvailableDatesRes(availableDates)));
-    //}
+        return ResponseEntity.ok(ApiResponse.success(new AvailableDatesRes(availableDates)));
+    }
 
 
 
@@ -181,6 +182,21 @@ public class ReservationController {
 
         List<AvailableDesignerRes> available = reservationService.getAvailableDesigners(shopId, date, time);
         return ResponseEntity.ok(available);
+    }
+
+    @GetMapping("/shops/{shopId}/my-reserv-info")
+    public ResponseEntity<ApiResponse<MyReservInfoRes>> getMyReservInfo(
+            @PathVariable Long shopId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User
+    ) {
+        Long userId = customOAuth2User.getUserId();
+        User customer = userRepository.findById(userId)
+                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+        MyReservInfoRes res = reservationService.myReservInfo(shopId, customer);
+
+        return ResponseEntity.ok(ApiResponse.success(res));
+
     }
 
 
