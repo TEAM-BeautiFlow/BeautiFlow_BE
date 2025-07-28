@@ -1,29 +1,4 @@
 spring:
-  application:
-    name: beautiflow
-  sql:
-    init:
-      mode: never
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
-        default_batch_fetch_size: 1000
-  cloud:
-    aws:
-      s3:
-        bucket: beautiflow-dev-artifacts
-      region:
-        static: ap-northeast-2
-      stack:
-        auto: false
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 200MB
-      max-request-size: 300MB
+  profiles:
+    active: local
+---
