@@ -5,6 +5,7 @@ import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
 import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.domain.TempReservation;
 import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
@@ -14,6 +15,7 @@ import com.beautiflow.reservation.dto.response.AvailableTimeSlotsRes;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.request.UpdateReservationDateTimeDesignerReq;
 import com.beautiflow.reservation.dto.response.MyReservInfoRes;
+import com.beautiflow.reservation.dto.response.ReservationStatusRes;
 import com.beautiflow.reservation.service.ReservationService;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
@@ -200,6 +202,9 @@ public class ReservationController {
 
     }
 
-
-
+    @GetMapping("/my-reservation")
+    public ResponseEntity<List<ReservationStatusRes>> getReservationByStatus(@RequestParam ReservationStatus status){
+        List<ReservationStatusRes> result = reservationService.getReservationsByStatus(status);
+        return ResponseEntity.ok(result);
+    }
 }

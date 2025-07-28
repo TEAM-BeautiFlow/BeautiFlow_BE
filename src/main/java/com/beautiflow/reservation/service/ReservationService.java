@@ -4,12 +4,9 @@ import com.beautiflow.global.common.error.OptionErrorCode;
 import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
-import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
 import com.beautiflow.global.domain.ApprovalStatus;
-import com.beautiflow.global.domain.GlobalRole;
-import com.beautiflow.global.domain.PaymentStatus;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.ShopRole;
 import com.beautiflow.global.domain.WeekDay;
@@ -24,7 +21,8 @@ import com.beautiflow.reservation.domain.TempReservationTreatmentId;
 import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
 import com.beautiflow.reservation.dto.response.MyReservInfoRes;
-import com.beautiflow.reservation.dto.response.TemporaryReservationRes;
+import com.beautiflow.reservation.dto.response.ReservationStatusRes;
+import com.beautiflow.reservation.dto.response.ReservationTreatmentInfoRes;
 import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
 import com.beautiflow.reservation.repository.ReservationRepository;
@@ -55,13 +53,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 
 
 @Service
@@ -520,6 +515,14 @@ public class ReservationService {
 
 
         return MyReservInfoRes.from(tempReservation, tempReservationTreatment, tempReservationOptions, shop);
+    }
+
+    public List<ReservationStatusRes> getReservationsByStatus(ReservationStatus status) {
+        List<Reservation> reservations = reservationRepository.findByStatus(status);
+
+        return reservations.stream()
+                .map(ReservationStatusRes::from)
+                .toList();
     }
 
 

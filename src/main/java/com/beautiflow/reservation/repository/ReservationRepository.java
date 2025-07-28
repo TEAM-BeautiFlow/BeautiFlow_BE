@@ -36,4 +36,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDesigner_IdAndReservationDateAndStatus(Long designerId, LocalDate reservationDate, ReservationStatus status);
     List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
+    List<Reservation> findByStatus(ReservationStatus status);
+
 }
