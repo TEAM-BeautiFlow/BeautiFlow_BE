@@ -41,7 +41,7 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String contact;
 
-	private String intro;
+	private String email;
 
 	@OneToMany(mappedBy = "user")
 	private List<UserRole> roles = new ArrayList<>();
