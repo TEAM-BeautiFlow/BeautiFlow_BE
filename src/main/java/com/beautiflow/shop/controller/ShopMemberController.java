@@ -2,20 +2,17 @@ package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.CustomOAuth2User;
-import com.beautiflow.shop.dto.ShopApplyRes;
 import com.beautiflow.shop.dto.ShopMemberInfoReq;
 import com.beautiflow.shop.dto.ShopMemberInfoRes;
 import com.beautiflow.shop.service.ShopMemberService;
-import com.beautiflow.user.dto.UserStylePatchReq;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +34,16 @@ public class ShopMemberController {
             @RequestPart("image") MultipartFile image) {
         Long userId = currentUser.getUserId();
         ShopMemberInfoRes shopMemberInfoRes = shopMemberService.patchInfo(shopId, userId, shopMemberInfoReq, image);
+        return ResponseEntity.ok(ApiResponse.success(shopMemberInfoRes));
+    }
+
+    @GetMapping(value="/{shopId}")
+    public ResponseEntity<ApiResponse<ShopMemberInfoRes>> getInfo (
+            @PathVariable Long shopId,
+            @AuthenticationPrincipal CustomOAuth2User currentUser
+    ){
+        Long userId = currentUser.getUserId();
+        ShopMemberInfoRes shopMemberInfoRes = shopMemberService.getInfo(shopId, userId);
         return ResponseEntity.ok(ApiResponse.success(shopMemberInfoRes));
     }
 

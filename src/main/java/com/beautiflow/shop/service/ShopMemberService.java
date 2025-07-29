@@ -63,6 +63,27 @@ public class ShopMemberService {
                 .build();
     }
 
+    public ShopMemberInfoRes getInfo(Long shopId, Long designerId) {
+
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+        User user = userRepository.findById(designerId)
+                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+        ShopMember shopMember = shopMemberRepository.findByUserIdAndShopId(user.getId(), shopId)
+                .orElseThrow(() ->
+                        new BeautiFlowException(ShopErrorCode.SHOP_MEMBER_NOT_FOUND));
+
+        return ShopMemberInfoRes.builder()
+                .userId(user.getId())
+                .shopId(shop.getId())
+                .memberId(shopMember.getId())
+                .intro(shopMember.getIntro())
+                .imageUrl(shopMember.getImageUrl())
+                .build();
+    }
+
 
     private void deleteImages(ShopMember shopMember) {
 
