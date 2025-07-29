@@ -1,19 +1,28 @@
 package com.beautiflow.user.controller;
 
+import com.beautiflow.global.common.error.UserErrorCode;
+import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
+import com.beautiflow.global.common.util.JWTUtil;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.CustomOAuth2User;
 import com.beautiflow.user.dto.SignUpReq;
 import com.beautiflow.user.dto.SignUpRes;
+import com.beautiflow.user.dto.TokenReq;
+import com.beautiflow.user.dto.TokenRes;
+import com.beautiflow.user.service.RefreshService;
 import com.beautiflow.user.dto.UserStylePatchReq;
 import com.beautiflow.user.dto.UserStyleReq;
 import com.beautiflow.user.dto.UserStyleRes;
 import com.beautiflow.user.service.SignUpService;
+import io.jsonwebtoken.Claims;
 import com.beautiflow.user.service.UserStyleService;
 import java.net.MalformedURLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -30,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final SignUpService signUpService;
+    private final RefreshService refreshService;
     private final UserStyleService userStyleService;
 
 
@@ -38,6 +49,15 @@ public class UserController {
         SignUpRes signUpRes = signUpService.signUp(signUpReq);
         return ResponseEntity.ok(signUpRes);
     }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenRes> refresh(@RequestBody TokenReq tokenReq) {
+        TokenRes tokenRes = refreshService.reissue(tokenReq);
+        return ResponseEntity.ok(tokenRes);
+    }
+
+
 
     @PostMapping(value= "/style", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<UserStyleRes>> postStyle(
