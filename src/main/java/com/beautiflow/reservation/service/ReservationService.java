@@ -18,8 +18,9 @@ import com.beautiflow.reservation.domain.TempReservation;
 import com.beautiflow.reservation.domain.TempReservationOption;
 import com.beautiflow.reservation.domain.TempReservationTreatment;
 import com.beautiflow.reservation.domain.TempReservationTreatmentId;
-import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
-import com.beautiflow.reservation.dto.request.UpdateRequestNotesReq;
+import com.beautiflow.reservation.dto.request.RequestNotesStyleReq;
+import com.beautiflow.reservation.dto.request.TmpReservationReq;
+import com.beautiflow.reservation.dto.request.TreatOptionReq;
 import com.beautiflow.reservation.dto.response.MyReservInfoRes;
 import com.beautiflow.reservation.dto.response.ReservationStatusRes;
 import com.beautiflow.reservation.dto.response.ReservationTreatmentInfoRes;
@@ -79,7 +80,107 @@ public class ReservationService {
     private final TempReservationOptionRepository tempReservationOptionRepository;
 
     @Transactional
-    public TempReservation tempSaveOrUpdateReservation(Long shopId, User customer, TemporaryReservationReq request) {
+    public void processReservationFlow(Long shopId, User customer, TmpReservationReq request) throws InterruptedException {
+        try {
+            // 요청 내용에 따른 작업 수행
+            if (request.isDeleteTempReservation()) {
+                deleteTemporaryReservation(customer, shopId);
+                return;
+            }
+            if (request.tempSaveData() != null) {
+                tempSaveOrUpdateReservation(shopId, customer, request.tempSaveData());
+            }
+            if (request.dateTimeDesignerData() != null) {
+                // 이전 락 이름 (예: 이전 임시예약에 저장된 예약정보 기반)
+                String previousLockName = getPreviousLockName(shopId, customer);
+
+                // 새로운 락 이름 계산
+                String newLockName = calculateLockName(shopId, customer, request);
+
+                // 만약 락 이름이 다르면 기존 락 해제
+                if (previousLockName != null && !previousLockName.equals(newLockName)) {
+                    reservationLockManager.unlock(previousLockName);
+                }
+                // 새 락 걸기
+                boolean locked = reservationLockManager.tryLock(customer.getId(), newLockName);
+                if (!locked) {
+                    throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCKED);
+                }
+
+                updateReservationDateTimeAndDesigner(shopId, customer,
+                        request.dateTimeDesignerData().date(),
+                        request.dateTimeDesignerData().time(),
+                        request.dateTimeDesignerData().designerId());
+            }
+            if (request.requestNotesStyleData() != null) {
+                updateReservationRequestNotes(shopId, customer, request.requestNotesStyleData());
+            }
+            if (request.isSaveFinalReservation()) {
+                saveReservation(shopId, customer);
+            }
+        } finally {
+
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public String getPreviousLockName(Long shopId, User customer) {
+        // 임시 예약을 찾아서 예약 날짜, 시간, 디자이너 정보를 얻어 락 이름 생성
+        TempReservation tempReservation = tempReservationRepository.findByCustomerAndShop(customer,
+                        shopRepository.findById(shopId)
+                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)))
+                .orElse(null); // 없으면 null 반환
+
+        if (tempReservation == null || tempReservation.getReservationDate() == null
+                || tempReservation.getStartTime() == null || tempReservation.getDesigner() == null) {
+            return null;
+        }
+
+        // 기존 락 이름 생성 (가게+날짜+시간+디자이너)
+        return "reservation-lock:" + shopId + ":"
+                + tempReservation.getReservationDate().toString() + ":"
+                + tempReservation.getStartTime().toString() + ":"
+                + tempReservation.getDesigner().getId();
+    }
+
+    public String calculateLockName(Long shopId, User customer, TmpReservationReq request) {
+        // 기본적으로 기존 예약 정보에서 락 이름을 만들되,
+        // 날짜/시간/디자이너 변경 요청이 있으면 그걸 사용하여 새 락 이름 생성
+
+        LocalDate date;
+        LocalTime time;
+        Long designerId;
+
+        if (request.dateTimeDesignerData() != null) {
+            date = request.dateTimeDesignerData().date();
+            time = request.dateTimeDesignerData().time();
+            designerId = request.dateTimeDesignerData().designerId();
+        } else {
+            // 날짜/시간/디자이너 변경 요청이 없으면 기존 임시 예약 기준으로
+            TempReservation tempReservation = tempReservationRepository.findByCustomerAndShop(customer,
+                            shopRepository.findById(shopId)
+                                    .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND)))
+                    .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
+
+            date = tempReservation.getReservationDate();
+            time = tempReservation.getStartTime();
+            designerId = tempReservation.getDesigner() != null ? tempReservation.getDesigner().getId() : null;
+        }
+
+        if (date == null || time == null || designerId == null) {
+            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_MISSING_DATE_TIME_DESIGNER);
+        }
+
+        return "reservation-lock:" + shopId + ":"
+                + date.toString() + ":"
+                + time.toString() + ":"
+                + designerId;
+    }
+
+
+
+    @Transactional
+    public TempReservation tempSaveOrUpdateReservation(Long shopId, User customer, TreatOptionReq request) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
         Treatment treatment = treatmentRepository.findById(request.treatmentId())
@@ -250,7 +351,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservationRequestNotes(Long shopId, User customer, UpdateRequestNotesReq request) {
+    public void updateReservationRequestNotes(Long shopId, User customer, RequestNotesStyleReq request) {
         // 1) 임시 예약 조회
         TempReservation tempReservation = tempReservationRepository
                 .findByCustomerAndShop(
@@ -334,7 +435,8 @@ public class ReservationService {
         tempReservationRepository.delete(tempReservation);
 
     }
-        public Map<LocalDate, Boolean> getAvailableDates(Long shopId) {
+    @Transactional(readOnly = true)
+    public Map<LocalDate, Boolean> getAvailableDates(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
@@ -405,6 +507,7 @@ public class ReservationService {
         return true;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Boolean> getAvailableTimeSlots(Long shopId, LocalDate date, Long treatmentId, User customer) {
 
         Shop shop = shopRepository.findById(shopId)
@@ -451,8 +554,7 @@ public class ReservationService {
         Map<String, Boolean> result = new LinkedHashMap<>();
 
         for (LocalTime slot = open; !slot.plusMinutes(totalMinutes).isAfter(close); slot = slot.plusMinutes(30)) {
-            boolean overlapsBreak = !(slot.plusMinutes(totalMinutes).isBefore(breakStart) || slot.plusMinutes(totalMinutes).equals(breakStart)
-                    || slot.isAfter(breakEnd));
+            boolean overlapsBreak = slot.isBefore(breakEnd) && slot.plusMinutes(totalMinutes).isAfter(breakStart);
             boolean isPast = date.equals(LocalDate.now()) && slot.isBefore(LocalTime.now());
 
             LocalTime finalSlot = slot;
@@ -470,6 +572,8 @@ public class ReservationService {
 
         return result;
     }
+
+    @Transactional(readOnly = true)
     public List<AvailableDesignerRes> getAvailableDesigners(Long shopId, LocalDate date, LocalTime time) {
         // 1. 해당 샵의 승인된 OWNER or DESIGNER만 조회
         List<ShopMember> members = shopMemberRepository.findByShopIdAndStatus(
@@ -502,6 +606,7 @@ public class ReservationService {
         });
     }
 
+    @Transactional(readOnly = true)
     public MyReservInfoRes myReservInfo(Long shopId, User customer) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -510,8 +615,8 @@ public class ReservationService {
                         customer,
                         shop
                 )
-                    .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
-       List<TempReservationTreatment> tempReservationTreatment = tempReservationTreatmentRepository.findByTempReservation(tempReservation);
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
+        List<TempReservationTreatment> tempReservationTreatment = tempReservationTreatmentRepository.findByTempReservation(tempReservation);
         if (tempReservationTreatment.isEmpty()) {
             throw new BeautiFlowException(ReservationErrorCode.TEMP_RES_TRT_NOT_FOUND);
         }
@@ -522,6 +627,7 @@ public class ReservationService {
         return MyReservInfoRes.from(tempReservation, tempReservationTreatment, tempReservationOptions, shop);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationStatusRes> getReservationsByStatus(ReservationStatus status) {
         List<Reservation> reservations = reservationRepository.findByStatus(status);
 

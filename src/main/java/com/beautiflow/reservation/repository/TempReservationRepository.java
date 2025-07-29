@@ -23,11 +23,8 @@ public interface TempReservationRepository extends JpaRepository<TempReservation
 
     Optional<TempReservation> findByCustomerAndShop(User customer, Shop shop);
 
-    List<TempReservation> findByShopAndReservationDate(Shop shop, LocalDate date);
 
     Optional<TempReservation> findTemporaryByCustomerAndShop(User customer, Shop shop);
-    Optional<TempReservation> findTemporaryByCustomerAndShopAndTempReservationTreatments(User customer, Shop shop, TempReservationTreatment tempReservationTreatment);
 
-    List<TempReservation> findByDesigner_IdAndReservationDate(Long designerId, LocalDate reservationDate);
-    List<TempReservation> findByDesigner(User designer);
+
 }

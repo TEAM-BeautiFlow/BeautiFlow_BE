@@ -1,6 +1,7 @@
 package com.beautiflow.reservation.dto.response;
 
 import com.beautiflow.global.common.error.ReservationErrorCode;
+import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.reservation.domain.TempReservation;
 import com.beautiflow.reservation.domain.TempReservationOption;
@@ -36,23 +37,32 @@ public record MyReservInfoRes(
             List<TempReservationOption> tempReservationOptions,
             Shop shop
     ) {
-        if(tempReservationTreatment.isEmpty()) {
+        // 1. 기본 파라미터 null 체크
+        if (tempReservation == null) {
+            throw new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND);
+        }
+        if (shop == null) {
+            throw new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND);
+        }
+        if (tempReservationTreatment == null || tempReservationTreatment.isEmpty()) {
             throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
         }
+
         TempReservationTreatment rt = tempReservationTreatment.get(0);
         Map<List<String>, Integer> payInfo = new HashMap<>();
+
+        // 2. Treatment null 체크
         Treatment treatment = rt.getTreatment();
         if (treatment == null) {
             throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
         }
 
-        String treatmentName = treatment.getName();
-        int treatmentPrice = treatment.getPrice();
+        String treatmentName = treatment.getName() != null ? treatment.getName() : "이름 없음";
+        int treatmentPrice = treatment.getPrice() != null ? treatment.getPrice() : 0;
 
-        if (treatmentName == null) treatmentName = "이름 없음";
         payInfo.put(List.of(treatmentName), treatmentPrice);
 
-        // OptionGroup null-safe
+        // 3. OptionGroup null-safe
         if (tempReservationOptions != null) {
             for (TempReservationOption option : tempReservationOptions) {
                 if (option == null) continue;
@@ -78,22 +88,43 @@ public record MyReservInfoRes(
             }
         }
 
-
+        // 4. Shop 계좌 정보 null-safe
         Map<String, String> shopAccountInfo = new LinkedHashMap<>();
-        shopAccountInfo.put("bankName", shop.getBankName());
-        shopAccountInfo.put("accountNumber", shop.getAccountNumber());
-        shopAccountInfo.put("accountHolder", shop.getAccountHolder());
+        shopAccountInfo.put("bankName", shop.getBankName() != null ? shop.getBankName() : "");
+        shopAccountInfo.put("accountNumber", shop.getAccountNumber() != null ? shop.getAccountNumber() : "");
+        shopAccountInfo.put("accountHolder", shop.getAccountHolder() != null ? shop.getAccountHolder() : "");
+
+        // 5. TempReservation 필드들 null-safe 처리
+        String customerName = "";
+        if (tempReservation.getCustomer() != null && tempReservation.getCustomer().getName() != null) {
+            customerName = tempReservation.getCustomer().getName();
+        }
+
+        String shopName = "";
+        if (tempReservation.getShop() != null && tempReservation.getShop().getShopName() != null) {
+            shopName = tempReservation.getShop().getShopName();
+        }
+
+        String designerName = "";
+        if (tempReservation.getDesigner() != null && tempReservation.getDesigner().getName() != null) {
+            designerName = tempReservation.getDesigner().getName();
+        }
+
+        Integer totalDurationMinutes = tempReservation.getTotalDurationMinutes() != null ?
+                tempReservation.getTotalDurationMinutes() : 0;
+
+        Integer deposit = shop.getDeposit() != null ? shop.getDeposit() : 0;
 
         return new MyReservInfoRes(
-                tempReservation.getCustomer().getName(),
-                tempReservation.getReservationDate(),
-                tempReservation.getStartTime(),
-                tempReservation.getTotalDurationMinutes(),
-                tempReservation.getShop().getShopName(),
-                tempReservation.getDesigner().getName(),
+                customerName,
+                tempReservation.getReservationDate(), // null 가능 (비즈니스 로직상 허용)
+                tempReservation.getStartTime(),       // null 가능 (비즈니스 로직상 허용)
+                totalDurationMinutes,
+                shopName,
+                designerName,
                 payInfo,
                 shopAccountInfo,
-                shop.getDeposit()
+                deposit
         );
     }
 }

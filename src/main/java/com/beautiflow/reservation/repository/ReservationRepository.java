@@ -18,23 +18,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThanAndStatus(
-            Long designerId,
-            LocalDate reservationDate,
-            LocalTime endTime,
-            LocalTime startTime,
-            ReservationStatus status
-    );
-
-    Optional<Reservation> findByCustomerAndShopAndStatus(User customer, Shop shop, ReservationStatus status);
-
     List<Reservation> findByShopAndReservationDateAndStatus(Shop shop, LocalDate date, ReservationStatus status);
 
-    Optional<Reservation> findTemporaryByCustomerAndShop(User customer, Shop shop);
-    Optional<Reservation> findTemporaryByCustomerAndShopAndReservationTreatments(User customer, Shop shop, ReservationTreatment reservationTreatment);
-
     List<Reservation> findByDesigner_IdAndReservationDateAndStatus(Long designerId, LocalDate reservationDate, ReservationStatus status);
-    List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
     List<Reservation> findByStatus(ReservationStatus status);
 

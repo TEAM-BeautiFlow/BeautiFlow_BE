@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class ShopInfoService {
     private final TreatmentRepository treatmentRepository;
     private final ShopMemberRepository shopMemberRepository;
 
+    @Transactional(readOnly = true)
     public ShopDetailRes getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -37,6 +39,7 @@ public class ShopInfoService {
         return ShopConverter.toDto(shop);
     }
 
+    @Transactional(readOnly = true)
     public List<TreatmentRes> getTreatmentsByShopAndCategory(Long shopId, String category) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -58,6 +61,7 @@ public class ShopInfoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public TreatmentRes getTreatmentDetail(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -67,6 +71,8 @@ public class ShopInfoService {
 
         return TreatmentRes.from(treatment);
     }
+
+    @Transactional(readOnly = true)
     public TreatmentDetailWithOptionRes getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -77,6 +83,7 @@ public class ShopInfoService {
         return ShopConverter.toTreatmentDetailWithOptionResponse(treatment);
     }
 
+    @Transactional(readOnly = true)
     public List<ChatDesignerRes> getChatDesigner(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));

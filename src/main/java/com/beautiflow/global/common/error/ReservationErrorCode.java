@@ -17,7 +17,9 @@ public enum ReservationErrorCode implements ErrorCode{
     LOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "LOC404", "이미 해제되었거나 존재하지 않는 lock입니다."),
     TEMP_RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "TMPRES404", "임시 예약을 찾을 수 없습니다."),
     TEMP_RES_TRT_NOT_FOUND(HttpStatus.NOT_FOUND, "TMPRT404", "임시 예약 내 시술을 찾을 수 없습니다."),
-    UNLOCK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UNLOCK500", "UNLOCK에 실패했습니다.");
+    UNLOCK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UNLOCK500", "UNLOCK에 실패했습니다."),
+    RESERVATION_MISSING_DATE_TIME_DESIGNER(HttpStatus.BAD_REQUEST,"DTD400" , "예약 날짜, 시간, 디자이너 정보가 모두 필요합니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
