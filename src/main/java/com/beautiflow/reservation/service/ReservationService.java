@@ -636,5 +636,19 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+
+        if (reservation.getStatus() == ReservationStatus.PENDING ||
+                reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            reservation.changeStatus(ReservationStatus.CANCELLED);
+        } else {
+            throw new BeautiFlowException(ReservationErrorCode.INVALID_CANCEL_STATUS);
+        }
+    }
+
+
 
 }

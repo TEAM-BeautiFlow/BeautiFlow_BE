@@ -117,7 +117,7 @@ public class Reservation extends BaseTimeEntity {
 		this.styleImageUrls = null;
 	}
 
-	public void updateStatus(ReservationStatus status) {
+	public void changeStatus(ReservationStatus status) {
 		this.status = status;
 	}
 

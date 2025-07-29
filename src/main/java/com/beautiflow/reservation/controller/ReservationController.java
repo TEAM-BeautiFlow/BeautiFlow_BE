@@ -142,4 +142,11 @@ public class ReservationController {
         List<ReservationStatusRes> result = reservationService.getReservationsByStatus(status);
         return ResponseEntity.ok(result);
     }
+
+    @PatchMapping("/{reservationId}/cancel")
+    public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId) {
+        reservationService.cancelReservation(reservationId);
+        return ResponseEntity.ok("예약이 성공적으로 취소되었습니다: " + reservationId);
+    }
+
 }
