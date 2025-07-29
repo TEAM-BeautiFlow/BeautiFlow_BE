@@ -25,7 +25,7 @@ public class UserController {
 
     private final SignUpService signUpService;
     private final RefreshService refreshService;
-    private final UserExitService logoutService;
+    private final UserExitService userExitService;
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<SignUpRes>> signUp(@RequestBody SignUpReq signUpReq) {
@@ -43,14 +43,14 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>>logout(@AuthenticationPrincipal CustomOAuth2User user) {
         long userId = user.getUserId();
-        logoutService.logout(userId);
+        userExitService.logout(userId);
         return ResponseEntity.ok(ApiResponse.successWithNoData());
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal CustomOAuth2User user) {
         long userId = user.getUserId();
-        logoutService.delete(userId);
+        userExitService.delete(userId);
         return ResponseEntity.ok(ApiResponse.successWithNoData());
     }
 
