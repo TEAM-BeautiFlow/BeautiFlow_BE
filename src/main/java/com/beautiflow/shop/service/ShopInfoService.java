@@ -3,8 +3,12 @@ package com.beautiflow.shop.service;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.TreatmentCategory;
+import com.beautiflow.reservation.repository.ShopMemberRepository;
 import com.beautiflow.shop.converter.ShopConverter;
+import com.beautiflow.shop.domain.ShopMember;
+import com.beautiflow.shop.dto.ChatDesignerRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
 import com.beautiflow.reservation.dto.response.TreatmentRes;
@@ -24,6 +28,7 @@ public class ShopInfoService {
 
     private final ShopRepository shopRepository;
     private final TreatmentRepository treatmentRepository;
+    private final ShopMemberRepository shopMemberRepository;
 
     public ShopDetailRes getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
@@ -70,6 +75,19 @@ public class ShopInfoService {
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
         return ShopConverter.toTreatmentDetailWithOptionResponse(treatment);
+    }
+
+    public List<ChatDesignerRes> getChatDesigner(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+        List<ShopMember> members = shopMemberRepository.findByShopIdAndStatus(
+                shopId,
+                ApprovalStatus.APPROVED
+        );
+        return members.stream()
+                .map(ChatDesignerRes::from)
+                .toList();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.beautiflow.reservation.controller;
 
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
@@ -16,8 +17,10 @@ import com.beautiflow.reservation.dto.request.TemporaryReservationReq;
 import com.beautiflow.reservation.dto.request.UpdateReservationDateTimeDesignerReq;
 import com.beautiflow.reservation.dto.response.MyReservInfoRes;
 import com.beautiflow.reservation.dto.response.ReservationStatusRes;
+import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.reservation.service.ReservationService;
 import com.beautiflow.shop.domain.Shop;
+import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +61,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final UserRepository userRepository;
+    private final TreatmentRepository treatmentRepository;
     private final ReservationLockManager reservationLockManager;
 
     @Operation(summary = "시술 + 옵션 임시 저장", description = "예약 진행 중 선택한 시술과 옵션을 임시 저장")
@@ -73,7 +77,9 @@ public class ReservationController {
         Long userId = customOAuth2User.getUserId();
         User customer = userRepository.findById(userId)
                 .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-
+        if (request.treatmentId() == null) {
+            throw new BeautiFlowException(TreatmentErrorCode.INVALID_TREATMENT_PARAMETER);
+        }
         TempReservation tempReservation = reservationService.tempSaveOrUpdateReservation(shopId, customer, request);
 
         return ResponseEntity.ok("시술과 옵션 임시 저장에 성공했습니다 예약 ID: " + tempReservation.getId());
@@ -173,6 +179,9 @@ public class ReservationController {
         Long userId = customOAuth2User.getUserId();
         User customer = userRepository.findById(userId)
                 .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+        if (treatmentId == null) {
+            throw new BeautiFlowException(TreatmentErrorCode.INVALID_TREATMENT_PARAMETER);
+        }
         Map<String, Boolean> timeSlots = reservationService.getAvailableTimeSlots(shopId, date, treatmentId, customer);
         return ResponseEntity.ok(ApiResponse.success(new AvailableTimeSlotsRes(timeSlots)));
     }

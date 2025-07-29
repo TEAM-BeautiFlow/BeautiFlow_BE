@@ -55,6 +55,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,9 +64,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
     private final ShopRepository shopRepository;
     private final OptionItemRepository optionItemRepository;
-    private final UserRepository userRepository;
     private final TreatmentRepository treatmentRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTreatmentRepository reservationTreatmentRepository;
@@ -161,7 +163,7 @@ public class ReservationService {
 
         TempReservation tempReservation = tempReservationRepository.findByCustomerAndShop(
                 customer, shop
-        ).orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+        ).orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
         // 관련된 시술 및 옵션 삭제
         tempReservationTreatmentRepository.deleteByTempReservation(tempReservation);
@@ -181,7 +183,7 @@ public class ReservationService {
                         shopRepository.findById(shopId)
                                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND))
                 )
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
         // 2) 디자이너 존재 확인 및 승인 상태 확인
         ShopMember member = shopMemberRepository.findByShopIdAndUserIdAndStatus(shopId, designerId, ApprovalStatus.APPROVED)
@@ -226,23 +228,25 @@ public class ReservationService {
 
     @Transactional
     public void unlockTempReservation(Long shopId, User customer) {
-        // 1) 임시 예약 조회
         TempReservation tempReservation = tempReservationRepository
                 .findByCustomerAndShop(
                         customer,
                         shopRepository.findById(shopId)
                                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND))
                 )
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
-        // 2) lock 풀기
+        String lockName = "reservation-lock:" + shopId + ":" + tempReservation.getReservationDate().toString() + ":" + tempReservation.getStartTime().toString() + ":" + tempReservation.getDesigner();
+
         try {
-            reservationLockManager.unlock(tempReservation.getId());
-            tempReservation.clearSchedule();
-        } catch (IllegalStateException | NoSuchElementException e) {
-            // 이미 lock이 없거나, lock 풀 수 없는 상황
-            throw new BeautiFlowException(ReservationErrorCode.LOCK_NOT_FOUND);
+            reservationLockManager.unlock(lockName);
+            log.info("Unlocked reservation: {}", tempReservation.getId());
+        } catch (IllegalStateException e) {
+            log.warn("Unlock failed: {}", e.getMessage());
+            throw new BeautiFlowException(ReservationErrorCode.UNLOCK_FAILED);
         }
+
+        tempReservation.clearSchedule();
     }
 
     @Transactional
@@ -254,7 +258,7 @@ public class ReservationService {
                         shopRepository.findById(shopId)
                                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND))
                 )
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
         // 2) 임시 예약에 요청 사항, 레퍼런스 이미지 정보 업데이트
         tempReservation.updateRequestNotes(request.requestNotes(), request.styleImageUrls());
@@ -272,7 +276,7 @@ public class ReservationService {
         TempReservation tempReservation = tempReservationRepository
                 .findByCustomerAndShop(customer, shop)
                 .orElseThrow(
-                        () -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                        () -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
         // 3) Reservation 생성 및 저장
         Reservation reservation = Reservation.builder()
@@ -319,9 +323,10 @@ public class ReservationService {
                     .build();
             reservationOptionRepository.save(option);
         }
+        String lockName = "reservation-lock:" + shopId + ":" + tempReservation.getReservationDate().toString() + ":" + tempReservation.getStartTime().toString() + ":" + tempReservation.getDesigner();
 
         // 6) 예약 완료 → Lock 해제
-        reservationLockManager.unlock(tempReservation.getId());
+        reservationLockManager.unlock(lockName);
 
         // 7) 정책에 따라 임시 예약 삭제 (선택)
         tempReservationTreatmentRepository.deleteByTempReservation(tempReservation);
@@ -410,14 +415,14 @@ public class ReservationService {
 
         // 1) 먼저 임시 예약 조회 (예약과 유저, 샵으로)
         TempReservation tempReservation = tempReservationRepository.findTemporaryByCustomerAndShop(customer, shop)
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
 
         // 2) TempReservationTreatmentId 복합키 생성
         TempReservationTreatmentId rtId = new TempReservationTreatmentId(tempReservation.getId(), treatment.getId());
 
         // 3) ReservationTreatment 조회
         TempReservationTreatment resTreatment = tempReservationTreatmentRepository.findById(rtId)
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RES_TRT_NOT_FOUND));
 
         int treatmentDuration = treatment.getDurationMinutes() != null ? treatment.getDurationMinutes() : 0;
         int optionDuration = tempReservation.getTempReservationOptions().stream()
@@ -505,10 +510,10 @@ public class ReservationService {
                         customer,
                         shop
                 )
-                    .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                    .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
        List<TempReservationTreatment> tempReservationTreatment = tempReservationTreatmentRepository.findByTempReservation(tempReservation);
         if (tempReservationTreatment.isEmpty()) {
-            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_TREATMENT_NOT_FOUND);
+            throw new BeautiFlowException(ReservationErrorCode.TEMP_RES_TRT_NOT_FOUND);
         }
 
         List<TempReservationOption> tempReservationOptions = tempReservationOptionRepository.findByTempReservation(tempReservation);

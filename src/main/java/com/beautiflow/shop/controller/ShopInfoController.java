@@ -1,6 +1,8 @@
 package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
+import com.beautiflow.shop.dto.ChatDesignerRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
 import com.beautiflow.reservation.dto.response.TreatmentRes;
@@ -56,5 +58,14 @@ public class ShopInfoController {
             @PathVariable Long treatmentId) {
         TreatmentDetailWithOptionRes response = shopService.getTreatmentDetailWithOptions(shopId, treatmentId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "채팅할 디자이너 조회", description = "shopId로 가게 내 채팅 가능한 디자이너 조회")
+    @GetMapping("/{shopId}/designer")
+    public ResponseEntity<List<ChatDesignerRes>> getChatDesigner(
+            @PathVariable Long shopId
+    ) {
+        List<ChatDesignerRes> response = shopService.getChatDesigner(shopId);
+        return ResponseEntity.ok(ApiResponse.success(response).getData());
     }
 }
