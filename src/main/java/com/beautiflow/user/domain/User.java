@@ -1,5 +1,7 @@
 package com.beautiflow.user.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +46,7 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String contact;
 
-	private String intro;
+	private String email;
 
 	private boolean deleted = false;
 
@@ -57,8 +59,8 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "customer")
 	private List<Reservation> reservations = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user")
-	private List<UserStyleImage> styleImages = new ArrayList<>();
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private UserStyle style;
 
 
 	public void reactivate(String name, String contact) {
