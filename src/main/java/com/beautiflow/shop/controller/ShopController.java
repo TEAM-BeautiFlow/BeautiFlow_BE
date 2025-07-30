@@ -6,6 +6,7 @@ import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
 import com.beautiflow.reservation.dto.response.TreatmentResponse;
+import com.beautiflow.shop.dto.ShopExistsRes;
 import com.beautiflow.shop.service.ShopService;
 import com.beautiflow.shop.dto.ShopRegistrationReq;
 import com.beautiflow.shop.dto.ShopRegistrationRes;
@@ -87,5 +88,14 @@ public class ShopController {
         Long userId = currentUser.getUserId();
         ShopApplyRes shopApplyRes = shopOnboardingService.ApplyToShop(userId, shopId);
         return ResponseEntity.ok(shopApplyRes);
+    }
+
+    @GetMapping(value = "/exists", params = "businessNumber")
+    public ResponseEntity<ApiResponse<ShopExistsRes>>exists(
+            @AuthenticationPrincipal CustomOAuth2User currentUser
+            ,@RequestParam String businessNumber) {
+        Long userId = currentUser.getUserId();
+        ShopExistsRes shopExistsRes = shopOnboardingService.IsShopExists(userId, businessNumber);
+        return ResponseEntity.ok(ApiResponse.success(shopExistsRes));
     }
 }
