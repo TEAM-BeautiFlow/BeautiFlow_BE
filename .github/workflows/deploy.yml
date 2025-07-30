@@ -35,7 +35,7 @@ jobs:
           tar czf dist/beautiflow.tar.gz -C dist .
 
       - name: Upload package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: beautiflow-dist
           path: dist/beautiflow.tar.gz
