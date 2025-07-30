@@ -41,6 +41,7 @@ spring:
 
     validity:
       access: 3600000
+      refresh: 604800000
 
   data:
     redis:
