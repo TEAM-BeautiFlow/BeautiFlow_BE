@@ -38,3 +38,8 @@ spring:
   # JWT secret도 테스트에 필요하면 여기에 추가
   jwt:
     secret: test_jwt_secret_for_local_testing_and_github_actions_build # 테스트용 임의 값
+
+  data:
+    redis:
+      host: localhost # 테스트 환경에서는 실제 Redis 서버 없이 동작하도록 localhost로 설정
+      port: 6379    # 기본 포트 (실제 연결 시도 안함)
