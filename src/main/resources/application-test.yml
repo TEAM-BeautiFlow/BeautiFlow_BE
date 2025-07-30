@@ -43,3 +43,15 @@ spring:
     redis:
       host: localhost # 테스트 환경에서는 실제 Redis 서버 없이 동작하도록 localhost로 설정
       port: 6379    # 기본 포트 (실제 연결 시도 안함)
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      stack:
+        auto: false
+      credentials:
+        access-key: test-aws-access-key-id # 테스트용 더미 값
+        secret-key: test-aws-secret-access-key # 테스트용 더미 값
+      s3:
+        bucket: test-s3-bucket-name
