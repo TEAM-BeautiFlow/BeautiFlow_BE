@@ -55,4 +55,10 @@ public class User extends BaseTimeEntity {
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserStyle style;
+
+	public void patchUserInfo(String name, String email, String contact) {
+		this.name = name;
+		this.email = email;
+		this.contact = contact;
+	}
 }
