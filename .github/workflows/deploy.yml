@@ -69,14 +69,14 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Download package
+      - name: Download package # 이 스텝은 현재 그대로 두면 됩니다.
         uses: actions/download-artifact@v4
         with:
-          name: beautiflow-dist
+          name: beautiflow-dist # 이 이름으로 아티팩트가 다운로드되어 './beautiflow-dist/' 폴더에 저장됩니다.
 
       - name: Set up SSH private key
         run: |
-          mkdir -p ~/.ssh/ # ~/.ssh 디렉토리가 없으면 생성합니다.
+          mkdir -p ~/.ssh/
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
@@ -88,12 +88,12 @@ jobs:
       - name: Deploy to ${{ matrix.name }}
         run: |
           echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
-
-          # 1. Copy package and deploy script
-          scp -o StrictHostKeyChecking=no dist/beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
+          
+          # 1. 패키지 및 배포 스크립트 복사
+          scp -o StrictHostKeyChecking=no beautiflow-dist/beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
-
-          # 2. Execute deploy.sh on remote
+          
+          # 2. 원격에서 deploy.sh 실행
           ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} << 'EOF'
             chmod +x deploy.sh
             ./deploy.sh prod
