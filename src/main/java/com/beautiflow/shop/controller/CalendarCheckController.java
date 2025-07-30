@@ -4,7 +4,7 @@ import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.CommonPageResponse;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationListRes;
