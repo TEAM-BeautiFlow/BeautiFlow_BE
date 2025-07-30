@@ -90,7 +90,7 @@ jobs:
           echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
           
           # 1. 패키지 및 배포 스크립트 복사
-          scp -o StrictHostKeyChecking=no beautiflow-dist/beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           
           # 2. 원격에서 deploy.sh 실행
