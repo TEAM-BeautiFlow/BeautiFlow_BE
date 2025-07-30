@@ -93,11 +93,12 @@ jobs:
           echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
           
           # 1. 패키지 및 배포 스크립트 복사
+          # tar.gz 파일의 경로가 이제 올바르므로 그대로 둡니다.
           scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           
           # 2. 원격에서 deploy.sh 실행
           ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} << 'EOF'
             chmod +x deploy.sh
-            ./deploy.sh prod
+            ./deploy.sh ${{ matrix.serverType }} prod 
           EOF
