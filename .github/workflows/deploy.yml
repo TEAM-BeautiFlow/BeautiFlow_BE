@@ -48,14 +48,14 @@ jobs:
       matrix:
         include:
           - name: gateway
-            host: ${{ secrets.GATEWAY_HOST }}
+            hostSecret: GATEWAY_HOST
           - name: api
-            host: ${{ secrets.API_HOST }}
+            hostSecret: API_HOST
           - name: chat
-            host: ${{ secrets.CHAT_HOST }}
+            hostSecret: CHAT_HOST
 
     steps:
-      - name: Checkout scripts
+      - name: Checkout code & scripts
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
@@ -65,19 +65,26 @@ jobs:
         with:
           name: beautiflow-dist
 
+      - name: Set up SSH private key
+        run: |
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Resolve remote host
+        id: host
+        run: |
+          echo "HOST=${{ secrets[matrix.hostSecret] }}" >> $GITHUB_OUTPUT
+
       - name: Deploy to ${{ matrix.name }}
         run: |
-          echo "Deploying to ${{ matrix.name }} at ${{ matrix.host }}"
+          echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
 
           # 1. Copy package and deploy script
-          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
-            dist/beautiflow.tar.gz ubuntu@${{ matrix.host }}:/home/ubuntu/
-          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
-            scripts/deploy.sh ubuntu@${{ matrix.host }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no dist/beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
 
           # 2. Execute deploy.sh on remote
-          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
-            ubuntu@${{ matrix.host }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} << 'EOF'
             chmod +x deploy.sh
             ./deploy.sh prod
           EOF
