@@ -43,7 +43,7 @@ public class SecurityConfig {
                 request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOrigins(
-                        Collections.singletonList("http://localhost:3000"));
+                        List.of("http://localhost:3000","http://localhost:8080", "https://beautiflow.co.kr"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -70,7 +70,8 @@ public class SecurityConfig {
                     "/users/refresh",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/health"
                 ).permitAll()                        .anyRequest().authenticated())
 
                 .sessionManagement(
