@@ -26,7 +26,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon --parallel
 
       - name: Package as tar.gz
         run: |
@@ -46,10 +46,13 @@ jobs:
 
     strategy:
       matrix:
-        server:
-          - { name: "gateway", ip: "${{ secrets.GATEWAY_HOST }}" }
-          - { name: "api", ip: "${{ secrets.API_HOST }}" }
-          - { name: "chat", ip: "${{ secrets.CHAT_HOST }}" }
+        include:
+          - name: gateway
+            host: ${{ secrets.GATEWAY_HOST }}
+          - name: api
+            host: ${{ secrets.API_HOST }}
+          - name: chat
+            host: ${{ secrets.CHAT_HOST }}
 
     steps:
       - name: Checkout scripts
@@ -58,18 +61,23 @@ jobs:
           fetch-depth: 1
 
       - name: Download package
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: beautiflow-dist
 
-      - name: Deploy to ${{ matrix.server.name }}
+      - name: Deploy to ${{ matrix.name }}
         run: |
+          echo "Deploying to ${{ matrix.name }} at ${{ matrix.host }}"
+
           # 1. Copy package and deploy script
-          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no dist/beautiflow.tar.gz ubuntu@${{ matrix.server.ip }}:/home/ubuntu/
-          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ matrix.server.ip }}:/home/ubuntu/
-          
+          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
+            dist/beautiflow.tar.gz ubuntu@${{ matrix.host }}:/home/ubuntu/
+          scp -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
+            scripts/deploy.sh ubuntu@${{ matrix.host }}:/home/ubuntu/
+
           # 2. Execute deploy.sh on remote
-          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no ubuntu@${{ matrix.server.ip }} << 'EOF'
+          ssh -i ${{ secrets.EC2_PRIVATE_KEY }} -o StrictHostKeyChecking=no \
+            ubuntu@${{ matrix.host }} << 'EOF'
             chmod +x deploy.sh
             ./deploy.sh prod
           EOF
