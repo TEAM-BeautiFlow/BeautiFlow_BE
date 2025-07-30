@@ -58,10 +58,13 @@ jobs:
         include:
           - name: gateway
             hostSecret: GATEWAY_HOST
+            serverType: gateway
           - name: api
             hostSecret: API_HOST
+            serverType: api
           - name: chat
             hostSecret: CHAT_HOST
+            serverType: chat
 
     steps:
       - name: Checkout code & scripts
