@@ -9,8 +9,7 @@ public record TreatmentResponse(
         Long id,
         String category,
         String name,
-        Integer minPrice,
-        Integer maxPrice,
+        Integer price,
         Integer durationMinutes,
         String description,
         List<TreatmentImageResponse> images
@@ -20,8 +19,7 @@ public record TreatmentResponse(
                 treatment.getId(),
                 treatment.getCategory().name(),
                 treatment.getName(),
-                treatment.getMinPrice(),
-                treatment.getMaxPrice(),
+                treatment.getPrice(),
                 treatment.getDurationMinutes(),
                 treatment.getDescription(),
                 treatment.getImages().stream()

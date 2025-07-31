@@ -1,24 +1,21 @@
 package com.beautiflow.MangedCustomer.domain;
 
-import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.FetchType.LAZY;
 
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ManagedCustomer {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = LAZY)
@@ -31,4 +28,13 @@ public class ManagedCustomer {
 	private TargetGroup targetGroup;
 
 	private String memo;
+
+	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup, String memo) {
+		this.designer = designer;
+		this.customer = customer;
+		this.targetGroup = targetGroup;
+		this.memo = memo;
+	}
 }
+
+
