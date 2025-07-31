@@ -134,6 +134,7 @@ public class JWTUtil {
         return new UsernamePasswordAuthenticationToken(customOAuth2User, userId, customOAuth2User.getAuthorities());
     }
 
+
     public String createAccessToken(String provider, String kakaoId, Long userId) {
 
         return Jwts.builder()

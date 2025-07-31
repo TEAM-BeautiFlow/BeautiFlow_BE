@@ -43,7 +43,7 @@ public class SecurityConfig {
                 request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOrigins(
-                        List.of("http://localhost:3000","http://localhost:8080", "https://beautiflow.co.kr"));
+                        List.of("http://localhost:3000","http://localhost:5173","http://localhost:8080", "https://beautiflow.co.kr"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -66,6 +66,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
+					"/connect/**",
                     "/users/signup",
                     "/users/refresh",
                     "/swagger-ui/**",

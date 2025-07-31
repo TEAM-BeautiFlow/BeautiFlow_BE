@@ -1,7 +1,10 @@
 package com.beautiflow.reservation.repository;
 
+import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
+import com.beautiflow.user.domain.User;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +15,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+	List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
+
 
   @Query("SELECT new com.beautiflow.reservation.dto.ReservationMonthRes(r.reservationDate, COUNT(r)) " +
       "FROM Reservation r " +
