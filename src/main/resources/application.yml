@@ -1,3 +1,41 @@
+# ===================================================================
+# 모든 환경(local, prod 등)에서 공통으로 사용되는 기본 설정 파일입니다.
+# ===================================================================
+
 spring:
-  profiles:
-    active: prod
+  application:
+    name: beautiflow
+#  datasource:
+#    hikari:
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 1000
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      stack:
+        auto: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 300MB
+
+server:
+  port: 8080
