@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.beautiflow.chat.dto.GroupMessageSendReq;
 import com.beautiflow.chat.service.GroupMessageService;
 import com.beautiflow.global.common.ApiResponse;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 
 import lombok.RequiredArgsConstructor;
 

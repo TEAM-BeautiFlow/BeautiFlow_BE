@@ -41,8 +41,7 @@ public class Treatment {
 	@Enumerated(EnumType.STRING)
 	private TreatmentCategory category;
 	private String name;
-	private Integer minPrice;
-	private Integer maxPrice;
+	private Integer price;
 	private Integer durationMinutes;
 	private String description;
 

@@ -32,7 +32,7 @@ public class StompHandler implements ChannelInterceptor {
 			String token = extractToken(accessor);
 			log.info("🔐 CONNECT 시도 - 토큰: {}", token);
 			try {
-				if (jwtUtill.isExpired(token)) {
+				if (jwtUtill.isTokenExpired(token)) {
 					log.warn("❌ JWT 만료됨");
 					throw new JwtException("token expired");
 				}

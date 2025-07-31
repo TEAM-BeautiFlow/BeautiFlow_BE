@@ -18,7 +18,7 @@ import com.beautiflow.chat.dto.messageTemplateDto.MessageTemplateSummaryRes;
 import com.beautiflow.chat.dto.messageTemplateDto.MessageTemplateUpdateReq;
 import com.beautiflow.chat.service.MessageTemplateService;
 import com.beautiflow.global.common.ApiResponse;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

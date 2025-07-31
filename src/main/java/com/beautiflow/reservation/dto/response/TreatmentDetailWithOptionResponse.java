@@ -8,8 +8,7 @@ public record TreatmentDetailWithOptionResponse(
         Long id,
         String name,
         Integer durationMinutes,
-        Integer minPrice,
-        Integer maxPrice,
+        Integer price,
         String description,
         List<TreatmentImageDto> images,
         List<OptionGroupDto> optionGroups

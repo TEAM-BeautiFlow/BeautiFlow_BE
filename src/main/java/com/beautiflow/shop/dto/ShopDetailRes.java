@@ -1,4 +1,4 @@
-package com.beautiflow.reservation.dto.response;
+package com.beautiflow.shop.dto;
 
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.global.domain.WeekDay;
@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import lombok.Builder;
 
-public record ShopDetailResponse (
+public record ShopDetailRes(
     Long id,
     String name,
     String contact,
@@ -19,7 +19,7 @@ public record ShopDetailResponse (
 
 ) {
     @Builder
-    public ShopDetailResponse {}
+    public ShopDetailRes {}
 
     public record NoticeDto(Long id, String title, String content) {
         @Builder
@@ -42,8 +42,7 @@ public record ShopDetailResponse (
             Long id,
             TreatmentCategory category,
             String name,
-            Integer minPrice,
-            Integer maxPrice,
+            Integer price,
             Integer durationMinutes,
             String description,
             List<TreatmentImageDto> images

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -22,6 +23,19 @@ public class RedisConfig {
 
 	@Value("${spring.data.redis.port}")
 	private int port;
+
+	@Bean
+	@Primary
+	public RedisConnectionFactory defaultRedisConnectionFactory() {
+		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+		return new LettuceConnectionFactory(config);
+	}
+
+	@Bean
+	@Primary
+	public StringRedisTemplate redisTemplate() {
+		return new StringRedisTemplate(defaultRedisConnectionFactory());
+	}
 
 	//연결 기본 객체
 	@Bean
@@ -61,4 +75,6 @@ public class RedisConfig {
 		//RedisPubSubService의 특정 메서드가 수신된 메시지를 처리할 수 있도록 지정
 		return new MessageListenerAdapter(redisPubSubService,"onMessage");
 	}
+
+
 }

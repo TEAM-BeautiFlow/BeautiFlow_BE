@@ -20,8 +20,8 @@ import com.beautiflow.global.common.error.ChatRoomErrorCode;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
-import com.beautiflow.reservation.repository.ShopRepository;
 import com.beautiflow.shop.domain.Shop;
+import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 
