@@ -21,7 +21,8 @@ public enum UserErrorCode implements ErrorCode {
 	JWT_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "USER_010", "JWT 토큰이 만료되었습니다."),
 	ACCESS_TOKEN_STILL_VALID(HttpStatus.BAD_REQUEST,"USER_011","Access 토큰이 아직 유효합니다."),
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "USER_012", "로그인이 필요합니다."),
-	REFRESH_ALSO_EXPIRED(HttpStatus.BAD_REQUEST, "USER_013","Refresh Token도 만료되었습니다.")
+	REFRESH_ALSO_EXPIRED(HttpStatus.BAD_REQUEST, "USER_013","Refresh Token도 만료되었습니다."),
+	USER_ALREADY_DELETED(HttpStatus.BAD_REQUEST,"USER_014","탈퇴한 사용자입니다.")
 	;
 
 

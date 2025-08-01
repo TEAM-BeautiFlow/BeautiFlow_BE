@@ -33,7 +33,19 @@ public class SignUpService {
 
         User user = userRepository.findByKakaoId(kakaoId).orElse(null);
 
-        if (user == null) {
+        //이미 가입되어있는경우 (탈퇴한 유저 포함)
+        if (user != null) {
+            if(user.isDeleted()) {
+
+                // 탈퇴한 경우 - deleted 필드 false로 바꾸고 이름과 전화번호 갱신
+                user.reactivate(name, contact);
+
+            } else {
+                // 가입된 경우
+                throw new BeautiFlowException(UserErrorCode.DUPLICATE_KAKAO_ID);
+            }
+        }else{
+            //신규 사용자
             user = User.builder()
                     .kakaoId(kakaoId)
                     .name(name)
@@ -44,6 +56,7 @@ public class SignUpService {
             } catch (Exception e) {
                 throw new BeautiFlowException(UserErrorCode.USER_SAVE_FAILED);
             }
+
         }
 
         GlobalRole globalRole = switch (provider) {
@@ -51,12 +64,6 @@ public class SignUpService {
             case "kakao-staff" -> GlobalRole.STAFF;
             default -> throw new BeautiFlowException(UserErrorCode.USER_ROLE_NOT_FOUND);
         };
-
-        //기존 Role에 새로운 Role을 추가할 수 있게 함
-        boolean hasSameRole = userRoleRepository.existsByUserAndRole(user, globalRole);
-        if (hasSameRole) {
-            throw new BeautiFlowException(UserErrorCode.DUPLICATE_KAKAO_ID);
-        }
 
         UserRole userRole = UserRole.builder()
                 .id(new UserRoleId(user.getId(), globalRole))
@@ -79,6 +86,7 @@ public class SignUpService {
                 .provider(provider)
                 .name(user.getName())
                 .contact(user.getContact())
+                .deleted(user.isDeleted())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

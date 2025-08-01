@@ -33,4 +33,14 @@ public class RedisTokenUtil {
         }
     }
 
+
+    public void deleteValues(String key) {
+        try {
+            redisTemplate.delete(key);
+        } catch (RedisConnectionFailureException | RedisCommandTimeoutException e) {
+            throw new BeautiFlowException(CommonErrorCode.REDIS_CONNECTION_FAILED);
+        }
+    }
+
+
 }
