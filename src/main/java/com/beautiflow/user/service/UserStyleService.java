@@ -51,13 +51,13 @@ public class UserStyleService {
                 .images(new ArrayList<>())
                 .build();
 
-        userStyleRepository.save(userStyle);
+        UserStyle savedStyle = userStyleRepository.save(userStyle);
 
         if (images != null && !images.isEmpty()) {
             uploadNewImages(userStyle, images);
         }
 
-        return UserStyleRes.from(userStyle);
+        return UserStyleRes.from(savedStyle);
 
     }
 

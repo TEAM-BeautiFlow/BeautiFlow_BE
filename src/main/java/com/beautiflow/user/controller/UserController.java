@@ -71,7 +71,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserStyleRes>> patchStyle(
             @AuthenticationPrincipal CustomOAuth2User user,
             @RequestPart("request")UserStylePatchReq userStylePatchReq,
-            @RequestPart("newImages") List<MultipartFile> newImages
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages
+
     ) {
         UserStyleRes res = userStyleService.patchUserStyle(user.getUserId(), userStylePatchReq, newImages);
         return ResponseEntity.ok(ApiResponse.success(res));
