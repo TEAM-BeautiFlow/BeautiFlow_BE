@@ -31,7 +31,7 @@ public class ShopMemberController {
             @PathVariable Long shopId,
             @AuthenticationPrincipal CustomOAuth2User currentUser,
             @RequestPart("request") ShopMemberInfoReq shopMemberInfoReq,
-            @RequestPart("image") MultipartFile image) {
+            @RequestPart(value= "image", required = false) MultipartFile image) {
         Long userId = currentUser.getUserId();
         ShopMemberInfoRes shopMemberInfoRes = shopMemberService.patchInfo(shopId, userId, shopMemberInfoReq, image);
         return ResponseEntity.ok(ApiResponse.success(shopMemberInfoRes));
