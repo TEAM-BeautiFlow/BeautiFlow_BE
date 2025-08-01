@@ -8,6 +8,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
@@ -19,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class JWTUtil {
 
     @Value("${spring.jwt.validity.access}")
@@ -33,7 +37,7 @@ public class JWTUtil {
     public JWTUtil(RedisTokenUtil redisTokenUtil, @Value("${spring.jwt.secret}") String secret) {
         this.redisTokenUtil = redisTokenUtil;
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),
-                Jwts.SIG.HS256.key().build().getAlgorithm());
+            Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
 
@@ -85,6 +89,7 @@ public class JWTUtil {
         } catch (ExpiredJwtException e) {
             return true;
         } catch (Exception e) {
+            log.error("🔥 JWT parsing error in isTokenExpired(): {}", e.getMessage(), e); // 👈 로그 찍기
             throw new BeautiFlowException(UserErrorCode.JWT_TOKEN_INVALID);
         }
     }
