@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,6 +127,17 @@ public class UserStyleService {
     }
 
     private void deleteImages(UserStyle userStyle, List<Long> imageIdsToDelete) {
+
+        Set<Long> existingIds = userStyle.getImages().stream()
+                .map(UserStyleImage::getId)
+                .collect(Collectors.toSet());
+
+        for (Long id : imageIdsToDelete) {
+            if (!existingIds.contains(id)) {
+                throw new BeautiFlowException(UserErrorCode.USER_STYLE_IMAGE_NOT_FOUND);
+            }
+        }
+
         Iterator<UserStyleImage> iterator = userStyle.getImages().iterator();
         while (iterator.hasNext()) {
             UserStyleImage image = iterator.next();
