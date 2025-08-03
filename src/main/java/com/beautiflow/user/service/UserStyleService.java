@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserStyleService {
 
     private final UserRepository userRepository;
@@ -124,17 +125,13 @@ public class UserStyleService {
     }
 
     private void deleteImages(UserStyle userStyle, List<Long> imageIdsToDelete) {
-        // 삭제할 이미지 ID에 대해 유효성 검사 수행
-        for (Long imageId : imageIdsToDelete) {
-            // 해당 ID 이미지 찾기
-            UserStyleImage imageToRemove = userStyle.getImages().stream()
-                    .filter(shopImage -> shopImage.getId().equals(imageId))
-                    .findFirst()
-                    .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_STYLE_NOT_FOUND));
-
-            // S3에 있는 실제 파일 삭제
-            s3Service.deleteFile(imageToRemove.getStoredFilePath());
-            userStyle.getImages().remove(imageToRemove);
+        Iterator<UserStyleImage> iterator = userStyle.getImages().iterator();
+        while (iterator.hasNext()) {
+            UserStyleImage image = iterator.next();
+            if (imageIdsToDelete.contains(image.getId())) {
+                s3Service.deleteFile(image.getStoredFilePath());
+                iterator.remove();
+            }
         }
     }
 
