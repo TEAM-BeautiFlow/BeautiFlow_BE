@@ -1,15 +1,19 @@
 package com.beautiflow.user.controller;
 
 import com.beautiflow.global.common.ApiResponse;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
+import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.user.dto.SignUpReq;
 import com.beautiflow.user.dto.SignUpRes;
+import com.beautiflow.user.dto.TokenReq;
+import com.beautiflow.user.dto.TokenRes;
+import com.beautiflow.user.service.UserExitService;
+import com.beautiflow.user.service.RefreshService;
 import com.beautiflow.user.dto.UserStylePatchReq;
 import com.beautiflow.user.dto.UserStyleReq;
 import com.beautiflow.user.dto.UserStyleRes;
 import com.beautiflow.user.service.SignUpService;
 import com.beautiflow.user.service.UserStyleService;
-import java.net.MalformedURLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -17,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,14 +35,40 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final SignUpService signUpService;
+    private final RefreshService refreshService;
+    private final UserExitService userExitService;
     private final UserStyleService userStyleService;
 
 
     @PostMapping("/signup")
-    public ResponseEntity<SignUpRes> signUp(@RequestBody SignUpReq signUpReq) {
+    public ResponseEntity<ApiResponse<SignUpRes>> signUp(@RequestBody SignUpReq signUpReq) {
         SignUpRes signUpRes = signUpService.signUp(signUpReq);
-        return ResponseEntity.ok(signUpRes);
+        return ResponseEntity.ok(ApiResponse.success(signUpRes));
     }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<TokenRes>> refresh(@RequestBody TokenReq tokenReq) {
+        TokenRes tokenRes = refreshService.reissue(tokenReq);
+        return ResponseEntity.ok(ApiResponse.success(tokenRes));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>>logout(@AuthenticationPrincipal CustomOAuth2User user) {
+        long userId = user.getUserId();
+        userExitService.logout(userId);
+        return ResponseEntity.ok(ApiResponse.successWithNoData());
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal CustomOAuth2User user) {
+        long userId = user.getUserId();
+        userExitService.delete(userId);
+        return ResponseEntity.ok(ApiResponse.successWithNoData());
+    }
+
+
+
 
     @PostMapping(value= "/style", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<UserStyleRes>> postStyle(
@@ -59,7 +90,8 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserStyleRes>> patchStyle(
             @AuthenticationPrincipal CustomOAuth2User user,
             @RequestPart("request")UserStylePatchReq userStylePatchReq,
-            @RequestPart("newImages") List<MultipartFile> newImages
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages
+
     ) {
         UserStyleRes res = userStyleService.patchUserStyle(user.getUserId(), userStylePatchReq, newImages);
         return ResponseEntity.ok(ApiResponse.success(res));

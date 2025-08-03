@@ -1,0 +1,51 @@
+# ===================================================================
+# 'prod' (운영) 환경에서만 적용되는 설정 파일입니다.
+# ===================================================================
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jwt:
+    secret: ${JWT_SECRET}
+    validity:
+      access: 3600000
+      refresh: 604800000
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao-customer:
+            provider: kakao
+            client-id: 3bf719af0ae3e4d20aee3e5f01a24433
+            redirect-uri: https://beautiflow.co.kr/login/oauth2/code/kakao-customer
+            authorization-grant-type: authorization_code
+            scope: account_email, profile_nickname
+          kakao-staff:
+            provider: kakao
+            client-id: 08057b53ef72f6e0564cc3d60822b01a
+            redirect-uri: https://beautiflow.co.kr/login/oauth2/code/kakao-staff
+            authorization-grant-type: authorization_code
+            scope: account_email, profile_nickname
+
+  cloud:
+    aws:
+      s3:
+        bucket: beautiflow-dev-artifacts

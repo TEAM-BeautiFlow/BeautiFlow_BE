@@ -1,7 +1,5 @@
 package com.beautiflow.shop.domain;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 
 import com.beautiflow.global.domain.ApprovalStatus;
@@ -17,8 +15,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,10 +47,13 @@ public class ShopMember {
 	private ApprovalStatus status;
 
 	private String imageUrl;
+
 	private String originalFileName;
+
 	private String storedFilePath;
 
 	private LocalDateTime appliedAt;
+
 	private LocalDateTime processedAt;
 
 

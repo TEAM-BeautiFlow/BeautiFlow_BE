@@ -9,21 +9,36 @@ public record UserStyleRes(
         Long styleId,
         Long userId,
         String description,
-        List<String> imageUrls
-
-
+        List<UserStyleImage> images
 ) {
 
     public static UserStyleRes from(UserStyle userStyle) {
         return UserStyleRes.builder()
+                .styleId(userStyle.getId())
                 .userId(userStyle.getUser().getId())
                 .description(userStyle.getDescription())
-                .imageUrls(
+                .images(
                         userStyle.getImages().stream()
-                                .map(image -> image.getImageUrl())
+                                .map(UserStyleImage::from)
                                 .toList()
                 )
                 .build();
     }
 
+    @Builder
+    public record UserStyleImage(
+            Long id,
+            String imageUrl,
+            String originalFileName,
+            String storedFilePath
+    ) {
+        public static UserStyleImage from(com.beautiflow.user.domain.UserStyleImage img) {
+            return UserStyleImage.builder()
+                    .id(img.getId())
+                    .imageUrl(img.getImageUrl())
+                    .originalFileName(img.getOriginalFileName())
+                    .storedFilePath(img.getStoredFilePath())
+                    .build();
+        }
+    }
 }

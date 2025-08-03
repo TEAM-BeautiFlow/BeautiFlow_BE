@@ -4,7 +4,7 @@ import java.util.List;
 
 public record UserStylePatchReq(
         String description,
-        List<String> deleteImageUrls
+        List<Long> deleteImageIds
 ) {
 
 }

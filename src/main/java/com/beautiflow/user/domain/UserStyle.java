@@ -1,7 +1,6 @@
 package com.beautiflow.user.domain;
 
 
-import com.beautiflow.user.dto.UserStylePatchReq;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -20,7 +19,8 @@ public class UserStyle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(length = 100)
