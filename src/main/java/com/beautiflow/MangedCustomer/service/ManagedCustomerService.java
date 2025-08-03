@@ -1,6 +1,7 @@
 package com.beautiflow.MangedCustomer.service;
 
 import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
+import com.beautiflow.MangedCustomer.dto.CustomerDetailRes;
 import com.beautiflow.MangedCustomer.dto.CustomerListRes;
 import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
 import com.beautiflow.global.domain.TargetGroup;
@@ -39,4 +40,11 @@ public class ManagedCustomerService {
         .map(CustomerListRes::from);
   }
 
-}
+  @Transactional(readOnly = true)
+  public CustomerDetailRes getCustomerDetail(Long designerId, Long customerId) {
+    return managedCustomerRepository.findByDesignerIdAndCustomerId(designerId, customerId)
+        .map(CustomerDetailRes::from)
+        .orElse(null);
+  }
+
+  }
