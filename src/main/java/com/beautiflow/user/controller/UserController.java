@@ -74,7 +74,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserStyleRes>> postStyle(
             @AuthenticationPrincipal CustomOAuth2User user,
             @RequestPart("request") UserStyleReq userStyleReq,
-            @RequestPart("images") List<MultipartFile> images) {
+            @RequestPart(value="images", required = false) List<MultipartFile> images) {
         Long userId =user.getUserId();
         UserStyleRes userStyleRes = userStyleService.postUserStyle(userId,userStyleReq, images);
         return ResponseEntity.ok((ApiResponse.success(userStyleRes)));

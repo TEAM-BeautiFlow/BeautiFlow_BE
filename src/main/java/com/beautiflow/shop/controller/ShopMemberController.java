@@ -1,7 +1,9 @@
 package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
-import com.beautiflow.global.common.security.CustomOAuth2User;
+import com.beautiflow.global.common.security.annotation.AuthCheck;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
+import com.beautiflow.global.domain.ShopRole;
 import com.beautiflow.shop.dto.ShopMemberInfoReq;
 import com.beautiflow.shop.dto.ShopMemberInfoRes;
 import com.beautiflow.shop.service.ShopMemberService;
@@ -25,6 +27,7 @@ public class ShopMemberController {
 
     private final ShopMemberService shopMemberService;
 
+    @AuthCheck({ShopRole.DESIGNER,ShopRole.OWNER})
     @Operation(summary = "디자이너 정보 수정")
     @PatchMapping(value="/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ShopMemberInfoRes>>patchInfo (
@@ -37,6 +40,7 @@ public class ShopMemberController {
         return ResponseEntity.ok(ApiResponse.success(shopMemberInfoRes));
     }
 
+    @AuthCheck({ShopRole.DESIGNER,ShopRole.OWNER})
     @GetMapping(value="/{shopId}")
     public ResponseEntity<ApiResponse<ShopMemberInfoRes>> getInfo (
             @PathVariable Long shopId,

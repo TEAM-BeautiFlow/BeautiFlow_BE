@@ -8,7 +8,10 @@ public record ShopMemberInfoRes(
         Long userId,
         Long memberId,
         String intro,
-        String imageUrl
+        String imageUrl,
+        String originalFileName,
+        String storedFilePath
+
 
 ) {
 

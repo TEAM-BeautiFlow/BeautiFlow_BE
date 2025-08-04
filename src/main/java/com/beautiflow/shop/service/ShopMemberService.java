@@ -44,10 +44,16 @@ public class ShopMemberService {
                 .orElseThrow(() ->
                         new BeautiFlowException(ShopErrorCode.SHOP_MEMBER_NOT_FOUND));
 
-        if (shopMemberInfoReq.patchImage()) {
-            deleteImages(shopMember);
 
-            if (image != null && !image.isEmpty()) {
+        if (shopMemberInfoReq.patchImage()) {
+
+            //삭제만 하는 경우
+            if (image == null || image.isEmpty()) {
+                deleteImages(shopMember);
+            }
+            //새로 올리는 경우
+            else {
+                deleteImages(shopMember);
                 uploadNewImages(shopMember, image);
             }
         }
@@ -60,6 +66,8 @@ public class ShopMemberService {
                 .memberId(shopMember.getId())
                 .intro(shopMember.getIntro())
                 .imageUrl(shopMember.getImageUrl())
+                .originalFileName(shopMember.getOriginalFileName())
+                .storedFilePath(shopMember.getStoredFilePath())
                 .build();
     }
 
@@ -81,6 +89,8 @@ public class ShopMemberService {
                 .memberId(shopMember.getId())
                 .intro(shopMember.getIntro())
                 .imageUrl(shopMember.getImageUrl())
+                .originalFileName(shopMember.getOriginalFileName())
+                .storedFilePath(shopMember.getStoredFilePath())
                 .build();
     }
 
@@ -89,6 +99,7 @@ public class ShopMemberService {
 
         if (shopMember.getStoredFilePath() == null) {
             return;
+
         }
         s3Service.deleteFile(shopMember.getStoredFilePath());
         shopMember.clearImageInfo();
