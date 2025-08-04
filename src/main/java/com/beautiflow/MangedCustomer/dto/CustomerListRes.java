@@ -8,7 +8,7 @@ public record CustomerListRes(
     String name,
     String contact,
     TargetGroup targetGroup,
-    String memo
+    String styleDescription // ← 이름 변경 권장
 ) {
   public static CustomerListRes from(ManagedCustomer managedCustomer) {
     return new CustomerListRes(
@@ -16,7 +16,9 @@ public record CustomerListRes(
         managedCustomer.getCustomer().getName(),
         managedCustomer.getCustomer().getContact(),
         managedCustomer.getTargetGroup(),
-        managedCustomer.getMemo()
+        managedCustomer.getCustomer().getStyle() != null
+            ? managedCustomer.getCustomer().getStyle().getDescription()
+            : null
     );
   }
 }
