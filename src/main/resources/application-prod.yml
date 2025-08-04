@@ -59,6 +59,10 @@ spring:
   config:
     activate:
       on-profile: "gateway" # "gateway" 프로파일이 활성화될 때만 아래 설정 적용
+
+  main:
+    web-application-type: reactive
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
