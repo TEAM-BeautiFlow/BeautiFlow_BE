@@ -61,6 +61,7 @@ spring:
 
   main:
     web-application-type: reactive # 👈 웹 서버를 Netty로 강제 (충돌 해결)
+    lazy-initialization: true
 
   autoconfigure:
     exclude: # 👈 불필요한 DB 기능 비활성화 (성능 향상)
