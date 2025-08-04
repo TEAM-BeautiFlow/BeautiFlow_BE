@@ -9,7 +9,8 @@ spring:
     password: ${DB_PASSWORD}
 
   jwt:
-    secret: ${JWT_SECRET}
+#    secret: ${JWT_SECRET}
+    secret: BeautiFlowProjectFinalSecretKeyForJWT2025August
     validity:
       access: 3600000
       refresh: 604800000
@@ -49,3 +50,17 @@ spring:
     aws:
       s3:
         bucket: beautiflow-dev-artifacts
+
+# (기존 application-prod.yml 내용은 그대로 위에 둡니다)
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "gateway" # "gateway" 프로파일이 활성화될 때만 아래 설정 적용
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
