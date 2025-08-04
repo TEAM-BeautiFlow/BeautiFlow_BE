@@ -54,7 +54,7 @@ public class ManagedCustomerService {
         .findByDesignerIdAndCustomerId(designerId, customerId)
         .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.MANAGED_CUSTOMER_ERROR_CODE));
 
-    managed.updateInfo(req.styleDescription(), req.targetGroup());
+    managed.updateInfo(req.targetGroup());
 
     User customer = managed.getCustomer();
     UserStyle style = customer.getStyle(); // 연관관계 필요

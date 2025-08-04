@@ -35,7 +35,7 @@ public class ManagedCustomer {
 		this.targetGroup = targetGroup;
 	}
 
-	public void updateInfo(String memo, TargetGroup targetGroup) {
+	public void updateInfo(TargetGroup targetGroup) {
 		this.targetGroup = targetGroup;
 	}
 
