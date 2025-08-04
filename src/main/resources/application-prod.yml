@@ -51,19 +51,18 @@ spring:
       s3:
         bucket: beautiflow-dev-artifacts
 
-# (기존 application-prod.yml 내용은 그대로 위에 둡니다)
 
 ---
 
 spring:
   config:
     activate:
-      on-profile: "gateway" # "gateway" 프로파일이 활성화될 때만 아래 설정 적용
+      on-profile: "gateway" # "gateway" 프로파일일 때만 아래 설정 적용
 
   main:
-    web-application-type: reactive
+    web-application-type: reactive # 👈 웹 서버를 Netty로 강제 (충돌 해결)
 
   autoconfigure:
-    exclude:
+    exclude: # 👈 불필요한 DB 기능 비활성화 (성능 향상)
       - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
