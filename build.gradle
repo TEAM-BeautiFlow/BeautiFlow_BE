@@ -26,47 +26,44 @@ repositories {
 dependencyManagement {
 	imports {
 		mavenBom "io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"
-		// Spring Cloud 버전 관리를 위한 BOM 추가
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.3"
 	}
 }
 
 dependencies {
-	// ===================================================================
-	// 1. 공통 의존성 (모든 서버가 공통으로 사용)
-	// ===================================================================
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
-	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
-	implementation 'software.amazon.awssdk:s3'
+
+	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// Database Drivers
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Test Dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'com.h2database:h2'
+	// testImplementation
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// OpenAPI / Swagger UI
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// ===================================================================
-	// 2. 게이트웨이 전용 의존성
-	// ===================================================================
-	if (project.hasProperty('serverType') && project.getProperty('serverType') == 'gateway') {
-		implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-		implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	}
+	// AWS S3
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+	implementation 'software.amazon.awssdk:s3'
 
-	// ===================================================================
-	// 3. API & Chat 서버 전용 의존성
-	// ===================================================================
-	if (!project.hasProperty('serverType') || !['gateway'].contains(project.getProperty('serverType'))) {
-		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-		implementation 'org.springframework.boot:spring-boot-starter-web'
-		runtimeOnly 'com.mysql:mysql-connector-j'
-		implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
-		testImplementation 'com.h2database:h2'
-	}
+	// AOP
+	implementation("org.springframework.boot:spring-boot-starter-aop")
 }
 
 tasks.named('test') {

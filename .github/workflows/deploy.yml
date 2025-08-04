@@ -7,16 +7,11 @@ concurrency:
 on:
   push:
     branches:
-      - main
+      - main # main 브랜치에 push될 때 실행됩니다.
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 👇 [수정] build 잡에 matrix 전략 추가
-    strategy:
-      matrix:
-        serverType: [gateway, api, chat]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,30 +22,47 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+#          restore-keys: |
+#            ${{ runner.os }}-gradle-
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle for ${{ matrix.serverType }}
-        # 👇 [수정] 빌드 시 -PserverType 프로퍼티 전달
-        run: ./gradlew build -PserverType=${{ matrix.serverType }} --no-daemon --parallel -x test
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon --parallel
 
       - name: Package as tar.gz
         run: |
+          sleep 5
           mkdir -p dist
-          # 👇 [수정] JAR 파일 이름을 역할별로 다르게 지정
-          mv build/libs/beautiflow-0.0.1-SNAPSHOT.jar dist/${{ matrix.serverType }}.jar
-          tar czf ${{ matrix.serverType }}.tar.gz -C dist .
+          cp build/libs/*.jar dist/
+          tar czf beautiflow.tar.gz -C build/libs/ .
+          mv beautiflow.tar.gz dist/beautiflow.tar.gz
 
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          # 👇 [수정] 아티팩트 이름도 역할별로 다르게 지정
-          name: ${{ matrix.serverType }}-dist
-          path: ${{ matrix.serverType }}.tar.gz
+          name: beautiflow-dist
+          path: dist/beautiflow.tar.gz
+
+      - name: Upload Test Reports # 이 스텝의 이름
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-reports
+          path: build/reports/
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         include:
@@ -70,15 +82,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Download package
+      - name: Download package # 이 스텝은 현재 그대로 두면 됩니다.
         uses: actions/download-artifact@v4
         with:
-          # 👇 [수정] 배포할 서버 역할에 맞는 아티팩트를 다운로드
-          name: ${{ matrix.serverType }}-dist
-
-      # 👇 [추가] 다운로드한 파일 이름을 deploy.sh가 예상하는 이름으로 변경
-      - name: Rename package for deployment
-        run: mv ${{ matrix.serverType }}.tar.gz beautiflow.tar.gz
+          name: beautiflow-dist # 이 이름으로 아티팩트가 다운로드되어 './beautiflow-dist/' 폴더에 저장됩니다.
 
       - name: Set up SSH private key
         run: |
@@ -95,10 +102,13 @@ jobs:
         run: |
           echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
           
+          # 1. 패키지 및 배포 스크립트 복사
+          # tar.gz 파일의 경로가 이제 올바르므로 그대로 둡니다.
           scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} '
+          # 2. 원격에서 deploy.sh 실행
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} << 'EOF'
             chmod +x deploy.sh
             ./deploy.sh ${{ matrix.serverType }} prod 
-          '
+          EOF
