@@ -49,3 +49,15 @@ spring:
     aws:
       s3:
         bucket: beautiflow-dev-artifacts
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "gateway"
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
