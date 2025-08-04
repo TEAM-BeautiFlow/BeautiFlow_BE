@@ -27,14 +27,6 @@ public class ManagedCustomer {
 	@Enumerated(EnumType.STRING)
 	private TargetGroup targetGroup;
 
-	//유저스타일에서 메모 불러오기
-
-	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup) {
-		this.designer = designer;
-		this.customer = customer;
-		this.targetGroup = targetGroup;
-	}
-
 	public void updateInfo(TargetGroup targetGroup) {
 		this.targetGroup = targetGroup;
 	}
