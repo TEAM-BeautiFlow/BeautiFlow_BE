@@ -6,12 +6,10 @@ import com.beautiflow.MangedCustomer.dto.CustomerUpdateReq;
 import com.beautiflow.MangedCustomer.dto.CustomerUpdateRes;
 import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
 import com.beautiflow.global.common.error.ManagedCustomerErrorCode;
-import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
-import com.beautiflow.user.domain.UserStyleImage;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +27,7 @@ public class ManagedCustomerService {
   public void autoRegister(User designer, User customer) {
     boolean exists = managedCustomerRepository.existsByDesignerAndCustomer(designer, customer);
     if (!exists) {
-      ManagedCustomer entity = new ManagedCustomer(designer, customer, null, null);
+      ManagedCustomer entity = new ManagedCustomer(designer.getId(), customer, null, null);
       managedCustomerRepository.save(entity);
     }
   }

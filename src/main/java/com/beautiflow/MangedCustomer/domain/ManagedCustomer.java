@@ -29,7 +29,7 @@ public class ManagedCustomer {
 
 	//유저스타일에서 메모 불러오기
 
-	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup, String memo) {
+	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup) {
 		this.designer = designer;
 		this.customer = customer;
 		this.targetGroup = targetGroup;
