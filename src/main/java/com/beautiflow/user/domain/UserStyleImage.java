@@ -39,10 +39,6 @@ public class UserStyleImage {
 	@JoinColumn(name = "user_style_id", nullable = false)
 	private UserStyle userStyle;
 
-	private String extractFileName(String url) {
-		return url.substring(url.lastIndexOf("/") + 1);
-	}
-
 
 
 }
