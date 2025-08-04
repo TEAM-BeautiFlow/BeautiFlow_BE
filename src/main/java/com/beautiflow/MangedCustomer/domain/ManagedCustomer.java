@@ -27,14 +27,18 @@ public class ManagedCustomer {
 	@Enumerated(EnumType.STRING)
 	private TargetGroup targetGroup;
 
-	private String memo;
+	//유저스타일에서 메모 불러오기
 
 	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup, String memo) {
 		this.designer = designer;
 		this.customer = customer;
 		this.targetGroup = targetGroup;
-		this.memo = memo;
 	}
+
+	public void updateInfo(String memo, TargetGroup targetGroup) {
+		this.targetGroup = targetGroup;
+	}
+
 }
 
 
