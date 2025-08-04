@@ -3,6 +3,7 @@ package com.beautiflow.MangedCustomer.repository;
 import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,9 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
       @Param("groups") List<TargetGroup> groups,
       Pageable pageable
   );
+
+  Optional<ManagedCustomer> findByDesignerIdAndCustomerId(Long designerId, Long customerId);
+
+
 }
+
