@@ -6,6 +6,7 @@ import com.beautiflow.global.common.security.authentication.CustomSuccessHandler
 import com.beautiflow.global.common.security.filter.JWTExceptionFilter;
 import com.beautiflow.global.common.security.filter.JWTFilter;
 import com.beautiflow.global.common.util.JWTUtil;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -29,10 +31,10 @@ public class SecurityConfig {
     public final JWTExceptionFilter jwtExceptionFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Bean
-    public JWTFilter jwtFilter() {
-        return new JWTFilter(jwtUtil);
-    }
+//    @Bean
+//    public JWTFilter jwtFilter() {
+//        return new JWTFilter(jwtUtil);
+//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,18 +46,18 @@ public class SecurityConfig {
                     CorsConfiguration configuration = new CorsConfiguration();
                     configuration.setAllowedOrigins(
                         List.of("http://localhost:3000","http://localhost:8080", "https://beautiflow.co.kr"));
-                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowedMethods(
+                      Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     configuration.setAllowCredentials(true);
-                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
                     configuration.setMaxAge(3600L);
-                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                    configuration.setExposedHeaders(List.of("Authorization"));
                     return configuration;
                 }))
 
+            .requestCache(cache -> cache.requestCache(new NullRequestCache()))
             .csrf(csrf -> csrf.disable())
-
             .formLogin(form -> form.disable())
-
             .httpBasic(httpBasic -> httpBasic.disable())
 
             .oauth2Login((oauth2) -> oauth2
@@ -72,7 +74,8 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/health"
-                ).permitAll()                        .anyRequest().authenticated())
+                ).permitAll()
+                .anyRequest().authenticated())
 
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

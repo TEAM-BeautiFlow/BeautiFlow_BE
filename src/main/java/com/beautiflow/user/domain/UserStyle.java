@@ -32,5 +32,11 @@ public class UserStyle {
 
     private LocalDateTime createdAt;
 
+    public void updateDescription(String description) {
+        if (description != null) {
+            this.description = description;
+        }
+    }
+
 }
 
