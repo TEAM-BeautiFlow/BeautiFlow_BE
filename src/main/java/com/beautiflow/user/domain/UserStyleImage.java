@@ -39,5 +39,17 @@ public class UserStyleImage {
 	@JoinColumn(name = "user_style_id", nullable = false)
 	private UserStyle userStyle;
 
+	public UserStyleImage(UserStyle userStyle, String url) {
+		this.userStyle = userStyle;
+		this.imageUrl = url;
+		this.originalFileName = extractFileName(url); // 너가 정의한 로직
+		this.storedFilePath = url;
+	}
+
+	private String extractFileName(String url) {
+		return url.substring(url.lastIndexOf("/") + 1);
+	}
+
+
 
 }
