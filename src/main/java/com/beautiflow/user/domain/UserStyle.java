@@ -23,6 +23,7 @@ public class UserStyle {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Setter
     @Column(length = 100)
     private String description;
 
@@ -31,6 +32,7 @@ public class UserStyle {
 
 
     private LocalDateTime createdAt;
+
 
 }
 
