@@ -41,18 +41,18 @@ public class UserStyleService {
     @Transactional
     public UserStyleRes postUserStyle(Long userId, UserStyleReq req, List<MultipartFile> images) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
         if (userStyleRepository.findByUserId(userId).isPresent()) {
             throw new BeautiFlowException(UserErrorCode.USER_STYLE_ALREADY_EXISTS);
         }
 
         UserStyle userStyle = UserStyle.builder()
-                .user(user)
-                .description(req.description())
-                .createdAt(LocalDateTime.now())
-                .images(new ArrayList<>())
-                .build();
+            .user(user)
+            .description(req.description())
+            .createdAt(LocalDateTime.now())
+            .images(new ArrayList<>())
+            .build();
 
         UserStyle savedStyle = userStyleRepository.save(userStyle);
 
@@ -67,22 +67,22 @@ public class UserStyleService {
     public UserStyleRes getUserStyle(Long userId) {
 
         userRepository.findById(userId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
         UserStyle userStyle = userStyleRepository.findByUserId(userId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_STYLE_NOT_FOUND));
+            .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_STYLE_NOT_FOUND));
 
         return UserStyleRes.from(userStyle);
     }
 
     @Transactional
     public UserStyleRes patchUserStyle(Long userId, UserStylePatchReq patchReq,
-            List<MultipartFile> newImages) {
+        List<MultipartFile> newImages) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
         UserStyle userStyle = userStyleRepository.findByUserId(userId)
-                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_STYLE_NOT_FOUND));
+            .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_STYLE_NOT_FOUND));
 
         if (patchReq.description() != null) {
             userStyle.updateDescription(patchReq.description());
@@ -110,11 +110,11 @@ public class UserStyleService {
             S3UploadResult result = s3Service.uploadFile(file, dir);
             System.out.println(result);
             UserStyleImage userStyleImage = UserStyleImage.builder()
-                    .userStyle(userStyle)
-                    .originalFileName(file.getOriginalFilename())
-                    .storedFilePath(result.fileKey())
-                    .imageUrl(result.imageUrl())
-                    .build();
+                .userStyle(userStyle)
+                .originalFileName(file.getOriginalFilename())
+                .storedFilePath(result.fileKey())
+                .imageUrl(result.imageUrl())
+                .build();
 
             try {
                 userStyle.getImages().add(userStyleImage);
@@ -129,8 +129,8 @@ public class UserStyleService {
     private void deleteImages(UserStyle userStyle, List<Long> imageIdsToDelete) {
 
         Set<Long> existingIds = userStyle.getImages().stream()
-                .map(UserStyleImage::getId)
-                .collect(Collectors.toSet());
+            .map(UserStyleImage::getId)
+            .collect(Collectors.toSet());
 
         for (Long id : imageIdsToDelete) {
             if (!existingIds.contains(id)) {

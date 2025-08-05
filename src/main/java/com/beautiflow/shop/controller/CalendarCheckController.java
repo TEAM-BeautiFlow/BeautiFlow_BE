@@ -1,7 +1,7 @@
 package com.beautiflow.shop.controller;
 
-import com.beautiflow.MangedCustomer.dto.CustomerListRes;
-import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
+import com.beautiflow.ManagedCustomer.dto.CustomerListRes;
+import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.CommonPageResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
@@ -59,20 +59,6 @@ public class CalendarCheckController {
   ) {
     UpdateReservationStatusRes response = calendarCheckService.updateStatus(reservationId, request.status());
     return ResponseEntity.ok(ApiResponse.success(response));
-  }
-
-  @GetMapping("/list")
-  @Operation(summary = "디자이너 고객 리스트 조회")
-  public ResponseEntity<ApiResponse<CommonPageResponse<CustomerListRes>>> getCustomersByDesigner(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) List<TargetGroup> groups,
-      @ParameterObject Pageable pageable
-  ) {
-    Page<CustomerListRes> page = managedCustomerService.getCustomersByDesigner(
-        customOAuth2User.getUserId(), keyword, groups, pageable
-    );
-    return ResponseEntity.ok(ApiResponse.success(CommonPageResponse.of(page)));
   }
 
 

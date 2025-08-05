@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-	List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
+  List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
 
   @Query("SELECT new com.beautiflow.reservation.dto.ReservationMonthRes(r.reservationDate, COUNT(r)) " +
@@ -28,20 +28,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       @Param("month") String month
   );
 
-  //시간대별 예약 조회
-  // ReservationRepository.java
-  @Query("""
-    SELECT r FROM Reservation r
-    JOIN FETCH r.customer c
-    JOIN FETCH r.reservationTreatments rt
-    JOIN FETCH rt.treatment t
-    WHERE r.designer.id = :designerId
-      AND r.reservationDate = :date
-""")
-  List<Reservation> findReservationsWithTreatmentsByDesignerAndDate(
-      @Param("designerId") Long designerId,
-      @Param("date") LocalDate date
-  );
 
 
 
@@ -51,7 +37,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       "WHERE r.id = :id")
   Optional<Reservation> findFetchAllById(@Param("id") Long id);
 
-//페이지네이션추가
+  //페이지네이션추가
   @Query("""
     SELECT r FROM Reservation r
     JOIN FETCH r.customer c
@@ -65,6 +51,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       @Param("date") LocalDate date,
       Pageable pageable
   );
+
+
+  @Query("""
+    SELECT r FROM Reservation r
+    JOIN FETCH r.designer d
+    JOIN FETCH r.shop s
+    LEFT JOIN FETCH r.reservationOptions ro
+    LEFT JOIN FETCH ro.optionItem
+    WHERE d.id = :designerId AND r.customer.id = :customerId
+  """)
+  List<Reservation> findByDesignerIdAndCustomerIdWithAllRelations(Long designerId, Long customerId);
+
 
 
 }
