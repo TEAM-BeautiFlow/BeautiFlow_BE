@@ -30,4 +30,7 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
       @Param("groups") List<TargetGroup> groups,
       Pageable pageable
   );
+
+	List<ManagedCustomer> findByDesignerIdAndTargetGroupInAndCustomerIdIn(
+		Long designerId, List<TargetGroup> targetGroups, List<Long> customerIds);
 }

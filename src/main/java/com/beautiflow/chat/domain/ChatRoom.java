@@ -1,8 +1,10 @@
-package com.beautiflow.chat;
+package com.beautiflow.chat.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.global.domain.BaseTimeEntity;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
@@ -43,4 +45,28 @@ public class ChatRoom extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "chatRoom")
 	private List<ChatMessage> messages = new ArrayList<>();
+
+	private boolean customerExited = false;
+	private boolean designerExited = false;
+
+	public boolean isBothExited() {
+		return customerExited && designerExited;
+	}
+
+	public void exitBy(User user) {
+		if (user.equals(customer)) {
+			this.customerExited = true;
+		} else if (user.equals(designer)) {
+			this.designerExited = true;
+		} else {
+			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
+		}
+	}
+	public void reEnterBy(User sender) {
+		if (!this.customer.getId().equals(sender.getId()) &&
+			!this.designer.getId().equals(sender.getId())) {
+			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
+		}
+	}
+
 }
