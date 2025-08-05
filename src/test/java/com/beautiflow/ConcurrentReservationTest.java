@@ -26,7 +26,7 @@ public class ConcurrentReservationTest {
     @Autowired
     private ReservationService reservationService;
 
-    private static final int THREAD_COUNT = 10;
+    private static final int THREAD_COUNT = 100;
 
     @Test
     public void testConcurrentReservation() throws InterruptedException {
@@ -38,7 +38,7 @@ public class ConcurrentReservationTest {
 
         TreatOptionReq treatOptionReq = getMockTreatOptionReq();
         DateTimeDesignerReq dateTimeDesignerReq = DateTimeDesignerReq.builder()
-                .date(LocalDate.of(2025, 8, 13))
+                .date(LocalDate.of(2025, 8, 14))
                 .time(LocalTime.of(18, 0))
                 .designerId(2L)
                 .build();
