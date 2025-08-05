@@ -1,6 +1,6 @@
 package com.beautiflow.reservation.dto.response;
 
-public record TreatmentOptionItemResponse(
+public record TreatmentOptionItemRes(
         Long id,
         String name,
         Integer extraMinutes,

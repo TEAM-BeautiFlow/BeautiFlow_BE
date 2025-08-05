@@ -29,5 +29,6 @@ public class OptionItem {
 
 	private String name;
 	private Integer extraMinutes;
+	private Integer extraPrice;
 	private String description;
 }

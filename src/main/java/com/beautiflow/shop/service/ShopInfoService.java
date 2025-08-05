@@ -3,11 +3,15 @@ package com.beautiflow.shop.service;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.TreatmentCategory;
+import com.beautiflow.shop.repository.ShopMemberRepository;
 import com.beautiflow.shop.converter.ShopConverter;
+import com.beautiflow.shop.domain.ShopMember;
+import com.beautiflow.shop.dto.ChatDesignerRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
-import com.beautiflow.reservation.dto.response.TreatmentResponse;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
+import com.beautiflow.reservation.dto.response.TreatmentRes;
 import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.shop.domain.Shop;
@@ -17,14 +21,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ShopService {
+public class ShopInfoService {
 
     private final ShopRepository shopRepository;
     private final TreatmentRepository treatmentRepository;
+    private final ShopMemberRepository shopMemberRepository;
 
+    @Transactional(readOnly = true)
     public ShopDetailRes getShopDetail(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
@@ -32,7 +39,8 @@ public class ShopService {
         return ShopConverter.toDto(shop);
     }
 
-    public List<TreatmentResponse> getTreatmentsByShopAndCategory(Long shopId, String category) {
+    @Transactional(readOnly = true)
+    public List<TreatmentRes> getTreatmentsByShopAndCategory(Long shopId, String category) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
@@ -49,20 +57,23 @@ public class ShopService {
         }
 
         return treatments.stream()
-                .map(TreatmentResponse::from)
+                .map(TreatmentRes::from)
                 .collect(Collectors.toList());
     }
 
-    public TreatmentResponse getTreatmentDetail(Long shopId, Long treatmentId) {
+    @Transactional(readOnly = true)
+    public TreatmentRes getTreatmentDetail(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
         Treatment treatment = treatmentRepository.findByShopAndId(shop, treatmentId)
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
-        return TreatmentResponse.from(treatment);
+        return TreatmentRes.from(treatment);
     }
-    public TreatmentDetailWithOptionResponse getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
+
+    @Transactional(readOnly = true)
+    public TreatmentDetailWithOptionRes getTreatmentDetailWithOptions(Long shopId, Long treatmentId) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
@@ -70,6 +81,20 @@ public class ShopService {
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
         return ShopConverter.toTreatmentDetailWithOptionResponse(treatment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatDesignerRes> getChatDesigner(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+        List<ShopMember> members = shopMemberRepository.findByShopIdAndStatus(
+                shopId,
+                ApprovalStatus.APPROVED
+        );
+        return members.stream()
+                .map(ChatDesignerRes::from)
+                .toList();
     }
 
 }

@@ -2,7 +2,6 @@ package com.beautiflow.reservation.domain;
 
 import com.beautiflow.treatment.domain.OptionGroup;
 import com.beautiflow.treatment.domain.OptionItem;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,18 +20,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "reservation_options")
-public class ReservationOption {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+@Table(name = "temp_reservation_options")
+public class TempReservationOption {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Reservation reservation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TempReservation tempReservation;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private OptionGroup optionGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private OptionGroup optionGroup;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private OptionItem optionItem;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private OptionItem optionItem;
 }

@@ -1,21 +1,19 @@
 package com.beautiflow.reservation.dto.response;
 
-import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.treatment.domain.Treatment;
 import java.util.List;
-import lombok.Builder;
 
-public record TreatmentResponse(
+public record TreatmentRes(
         Long id,
         String category,
         String name,
         Integer price,
         Integer durationMinutes,
         String description,
-        List<TreatmentImageResponse> images
+        List<TreatmentImageRes> images
 ) {
-    public static TreatmentResponse from(Treatment treatment) {
-        return new TreatmentResponse(
+    public static TreatmentRes from(Treatment treatment) {
+        return new TreatmentRes(
                 treatment.getId(),
                 treatment.getCategory().name(),
                 treatment.getName(),
@@ -23,7 +21,7 @@ public record TreatmentResponse(
                 treatment.getDurationMinutes(),
                 treatment.getDescription(),
                 treatment.getImages().stream()
-                        .map(img -> new TreatmentImageResponse(img.getId(), img.getImageUrl()))
+                        .map(img -> new TreatmentImageRes(img.getId(), img.getImageUrl()))
                         .toList()
         );
     }

@@ -1,7 +1,7 @@
 package com.beautiflow.reservation.dto.response;
 
 
-public record TreatmentImageResponse(
+public record TreatmentImageRes(
         Long id,
         String imageUrl
 ) {}

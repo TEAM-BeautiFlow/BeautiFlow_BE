@@ -66,6 +66,9 @@ dependencies {
 
 	// AOP
 	implementation("org.springframework.boot:spring-boot-starter-aop")
+
+	// Redisson
+	implementation 'org.redisson:redisson:3.50.0'
 }
 
 tasks.named('test') {
