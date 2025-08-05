@@ -1,11 +1,9 @@
 package com.beautiflow.shop.controller;
 
-import com.beautiflow.ManagedCustomer.dto.CustomerListRes;
 import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.CommonPageResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
-import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.reservation.dto.ReservationDetailRes;
 import com.beautiflow.reservation.dto.ReservationListRes;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class CalendarCheckController {
 
   private final CalendarCheckService calendarCheckService;
-  private final ManagedCustomerService managedCustomerService;
 
   @GetMapping("/months") //월별 조회
   @Operation(summary = "월별 예약 유무 조회", description = "특정 월에 예약된 날짜별 예약 개수를 조회합니다.")

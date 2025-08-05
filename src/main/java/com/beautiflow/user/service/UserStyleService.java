@@ -1,12 +1,9 @@
 package com.beautiflow.user.service;
 
-import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.s3.S3Service;
 import com.beautiflow.global.common.s3.S3UploadResult;
-import com.beautiflow.shop.domain.Shop;
-import com.beautiflow.shop.domain.ShopImage;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
 import com.beautiflow.user.domain.UserStyleImage;
@@ -16,7 +13,6 @@ import com.beautiflow.user.dto.UserStyleRes;
 import com.beautiflow.user.repository.UserRepository;
 import com.beautiflow.user.repository.UserStyleImageRepository;
 import com.beautiflow.user.repository.UserStyleRepository;
-import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -2,7 +2,6 @@ package com.beautiflow.ManagedCustomer.service;
 
 import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.ManagedCustomer.dto.CustomerDetailRes;
-import com.beautiflow.ManagedCustomer.dto.CustomerListRes;
 import com.beautiflow.ManagedCustomer.dto.CustomerListSimpleRes;
 import com.beautiflow.ManagedCustomer.dto.CustomerReservationItem;
 import com.beautiflow.ManagedCustomer.dto.CustomerUpdateReq;
@@ -16,8 +15,6 @@ import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
