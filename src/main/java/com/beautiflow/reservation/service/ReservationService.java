@@ -290,64 +290,29 @@ public class ReservationService {
         ShopMember member = shopMemberRepository.findByShopIdAndUserIdAndStatus(shopId, designerId, ApprovalStatus.APPROVED)
                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_MEMBER_NOT_FOUND));
 
-        // 3) 락 이름 정의 (가게 + 날짜+시간+디자이너 기반)
-        String lockName = "reservation-lock:" + shopId + ":" + date.toString() + ":" + time.toString() + ":" + designerId;
-
-        try {
-            boolean locked = reservationLockManager.tryLock(tempReservation.getId(), lockName);
-            if (!locked) {
-                throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCKED);
-            }
-
-            // 4) 중복 예약 체크
-            boolean conflictExists = tempReservationRepository
-                    .existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                            designerId,
-                            date,
-                            time.plusMinutes(tempReservation.getTotalDurationMinutes()),
-                            time
-                    );
-            if (conflictExists) {
-                throw new BeautiFlowException(ReservationErrorCode.RESERVATION_CONFLICT);
-            }
-
-            // 5) 예약 업데이트
-            tempReservation.updateSchedule(
-                    date,
-                    time,
-                    time.plusMinutes(tempReservation.getTotalDurationMinutes()),
-                    member.getUser()
-            );
-            tempReservation.clearRequestNotes();
-            tempReservationRepository.save(tempReservation);
-
-        } catch (InterruptedException e) {
-            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_LOCK_INTERRUPTED);
+        // 4) 중복 예약 체크
+        boolean conflictExists = tempReservationRepository
+                .existsByDesigner_IdAndReservationDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                        designerId,
+                        date,
+                        time.plusMinutes(tempReservation.getTotalDurationMinutes()),
+                        time
+                );
+        if (conflictExists) {
+            throw new BeautiFlowException(ReservationErrorCode.RESERVATION_CONFLICT);
         }
+
+        // 5) 예약 업데이트
+        tempReservation.updateSchedule(
+                date,
+                time,
+                time.plusMinutes(tempReservation.getTotalDurationMinutes()),
+                member.getUser()
+        );
+        tempReservation.clearRequestNotes();
+        tempReservationRepository.save(tempReservation);
+
         // 여기선 unlock 안 함 → saveReservation()에서 해제해야 하므로 유지
-    }
-
-    @Transactional
-    public void unlockTempReservation(Long shopId, User customer) {
-        TempReservation tempReservation = tempReservationRepository
-                .findByCustomerAndShop(
-                        customer,
-                        shopRepository.findById(shopId)
-                                .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND))
-                )
-                .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
-
-        String lockName = "reservation-lock:" + shopId + ":" + tempReservation.getReservationDate().toString() + ":" + tempReservation.getStartTime().toString() + ":" + tempReservation.getDesigner();
-
-        try {
-            reservationLockManager.unlock(lockName);
-            log.info("Unlocked reservation: {}", tempReservation.getId());
-        } catch (IllegalStateException e) {
-            log.warn("Unlock failed: {}", e.getMessage());
-            throw new BeautiFlowException(ReservationErrorCode.UNLOCK_FAILED);
-        }
-
-        tempReservation.clearSchedule();
     }
 
     @Transactional

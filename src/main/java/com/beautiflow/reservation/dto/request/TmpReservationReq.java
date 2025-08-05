@@ -3,8 +3,10 @@ package com.beautiflow.reservation.dto.request;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 
+@Builder
 public record TmpReservationReq(
         boolean deleteTempReservation,
         TreatOptionReq tempSaveData,
