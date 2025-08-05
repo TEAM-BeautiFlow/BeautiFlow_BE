@@ -1,13 +1,12 @@
 package com.beautiflow.chat.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
-import com.beautiflow.MangedCustomer.repository.ManagedCustomerRepository;
+import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
+import com.beautiflow.ManagedCustomer.repository.ManagedCustomerRepository;
 import com.beautiflow.chat.domain.ChatMessage;
 import com.beautiflow.chat.domain.ChatRoom;
 import com.beautiflow.chat.dto.ChatMessageSendReq;

@@ -1,6 +1,6 @@
 package com.beautiflow.shop.service;
 
-import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
+import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.error.ReservationErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.ReservationStatus;
