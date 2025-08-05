@@ -1,11 +1,12 @@
 package com.beautiflow.shop.repository;
 
 import com.beautiflow.shop.domain.Shop;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, Long> {
-
-   boolean existsByBusinessRegistrationNumber(String buisnessRegistrationNumber);
+   Optional<Shop> findByBusinessRegistrationNumber(String buisnessRegistrationNumber);
+   Boolean existsByBusinessRegistrationNumber(String buisnessRegistrationNumber);
 }

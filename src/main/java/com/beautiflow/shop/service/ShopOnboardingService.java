@@ -10,6 +10,7 @@ import com.beautiflow.shop.converter.ShopConverter;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.shop.dto.ShopApplyRes;
+import com.beautiflow.shop.dto.ShopExistsRes;
 import com.beautiflow.shop.dto.ShopRegistrationReq;
 import com.beautiflow.shop.dto.ShopRegistrationRes;
 import com.beautiflow.shop.repository.ShopMemberRepository;
@@ -42,7 +43,6 @@ public class ShopOnboardingService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
-
 
         Shop shop = Shop.builder()
                 .shopName(name)
@@ -81,7 +81,6 @@ public class ShopOnboardingService {
 
         LocalDateTime now = LocalDateTime.now();
 
-
         ShopMember shopMember = ShopMember.builder()
                 .user(user)
                 .shop(shop)
@@ -94,6 +93,28 @@ public class ShopOnboardingService {
         shopMemberRepository.save(shopMember);
 
         return ShopConverter.toShopApplyRes(shop, shopMember);
+
+    }
+
+    public ShopExistsRes IsShopExists(Long userId, String businessNumber) {
+
+        userRepository.findById(userId).orElseThrow(()->new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+        var shopOpt = shopRepository.findByBusinessRegistrationNumber(businessNumber);
+
+        if (shopOpt.isEmpty()) {
+            return new ShopExistsRes(false, null);
+        }
+
+        var shop = shopOpt.get();
+        return new ShopExistsRes(
+                true,
+                new ShopExistsRes.ShopDto(
+                        shop.getId(),
+                        shop.getShopName(),
+                        shop.getAddress(),
+                        shop.getBusinessRegistrationNumber()
+                )
+        );
 
     }
 
