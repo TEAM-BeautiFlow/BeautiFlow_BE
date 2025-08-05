@@ -1,7 +1,8 @@
-package com.beautiflow.MangedCustomer.repository;
+package com.beautiflow.ManagedCustomer.repository;
 
-import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
+import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
+import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.user.domain.User;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,9 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
 
 
   boolean existsByDesignerAndCustomer(User designer, User customer);
+  List<ManagedCustomer> findByDesignerId(Long designerId);
+  List<ManagedCustomer> findByDesignerIdAndTargetGroupIn(Long designerId, List<TargetGroup> targetGroups);
+
 
   @Query("""
       SELECT mc
@@ -35,5 +39,14 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
   Optional<ManagedCustomer> findByDesignerIdAndCustomerId(Long designerId, Long customerId);
 
 
-}
+  @Query("SELECT r FROM Reservation r " +
+      "JOIN FETCH r.shop " +
+      "JOIN FETCH r.designer " +
+      "LEFT JOIN FETCH r.reservationOptions ro " +
+      "LEFT JOIN FETCH ro.optionItem " +
+      "WHERE r.designer.id = :designerId AND r.customer.id = :customerId")
+  List<Reservation> findByDesignerIdAndCustomerIdWithAllRelations(Long designerId, Long customerId);
 
+
+
+}
