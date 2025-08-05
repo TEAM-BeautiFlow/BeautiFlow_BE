@@ -62,7 +62,7 @@ Description=${SERVICE_NAME} Spring Boot Application
 After=syslog.target network.target
 
 [Service]
-ExecStart=/usr/bin/java -Xms512m -Xmx1024m -jar ${DEPLOY_DIR}/${COMMON_JAR_NAME} --spring.profiles.active=${PROFILE},${SERVER_TYPE}
+ExecStart=/usr/bin/java -jar ${DEPLOY_DIR}/${COMMON_JAR_NAME} --spring.profiles.active=${PROFILE},${SERVER_TYPE}
 User=ubuntu
 SuccessExitStatus=143
 StandardOutput=file:${LOG_DIR}/stdout.log
