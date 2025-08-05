@@ -1,6 +1,6 @@
-package com.beautiflow.MangedCustomer.dto;
+package com.beautiflow.ManagedCustomer.dto;
 
-import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
+import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
 
 public record CustomerListRes(
@@ -16,7 +16,9 @@ public record CustomerListRes(
         managedCustomer.getCustomer().getName(),
         managedCustomer.getCustomer().getContact(),
         managedCustomer.getTargetGroup(),
-        managedCustomer.getMemo()
+        managedCustomer.getCustomer().getStyle() != null
+            ? managedCustomer.getCustomer().getStyle().getDescription()
+            : null
     );
   }
 }

@@ -60,8 +60,7 @@ spring:
       on-profile: "gateway" # "gateway" 프로파일일 때만 아래 설정 적용
 
   main:
-    web-application-type: reactive # 👈 웹 서버를 Netty로 강제 (충돌 해결)
-    lazy-initialization: true
+    web-application-type: reactive
 
   autoconfigure:
     exclude: # 👈 불필요한 DB 기능 비활성화 (성능 향상)

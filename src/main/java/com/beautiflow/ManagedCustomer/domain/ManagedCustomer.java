@@ -1,4 +1,4 @@
-package com.beautiflow.MangedCustomer.domain;
+package com.beautiflow.ManagedCustomer.domain;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -35,6 +35,11 @@ public class ManagedCustomer {
 		this.targetGroup = targetGroup;
 		this.memo = memo;
 	}
+
+	public void updateInfo(TargetGroup targetGroup) {
+		this.targetGroup = targetGroup;
+	}
+
 }
 
 

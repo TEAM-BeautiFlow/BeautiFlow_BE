@@ -1,4 +1,6 @@
-name: Beautiflow CI/CD
+# .github/workflows/ci-cd.yml
+
+name: Beautiflow CI/CD (API & Chat)
 
 concurrency:
   group: beautiflow-${{ github.ref }}
@@ -22,16 +24,6 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-#      - name: Cache Gradle packages
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.gradle/caches
-#            ~/.gradle/wrapper
-#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-#          restore-keys: |
-#            ${{ runner.os }}-gradle-
-
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
@@ -40,10 +32,12 @@ jobs:
 
       - name: Package as tar.gz
         run: |
-          sleep 5
           mkdir -p dist
+          # build/libs/ 폴더의 모든 .jar 파일을 dist/로 복사
           cp build/libs/*.jar dist/
-          tar czf beautiflow.tar.gz -C build/libs/ .
+          # dist/ 폴더의 내용물을 tar.gz로 압축
+          tar czf beautiflow.tar.gz -C dist .
+          # 생성된 tar.gz 파일을 dist/ 폴더로 이동
           mv beautiflow.tar.gz dist/beautiflow.tar.gz
 
       - name: Upload package
@@ -52,7 +46,8 @@ jobs:
           name: beautiflow-dist
           path: dist/beautiflow.tar.gz
 
-      - name: Upload Test Reports # 이 스텝의 이름
+      # 테스트 리포트 업로드 (선택 사항)
+      - name: Upload Test Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -65,10 +60,11 @@ jobs:
 
     strategy:
       matrix:
+        # =================================================================
+        # 핵심 수정 사항: 배포 대상에서 gateway를 완전히 제거합니다.
+        # 이제 이 워크플로우는 오직 api와 chat 서버에만 배포합니다.
+        # =================================================================
         include:
-          - name: gateway
-            hostSecret: GATEWAY_HOST
-            serverType: gateway
           - name: api
             hostSecret: API_HOST
             serverType: api
@@ -82,10 +78,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Download package # 이 스텝은 현재 그대로 두면 됩니다.
+      - name: Download package
         uses: actions/download-artifact@v4
         with:
-          name: beautiflow-dist # 이 이름으로 아티팩트가 다운로드되어 './beautiflow-dist/' 폴더에 저장됩니다.
+          name: beautiflow-dist
 
       - name: Set up SSH private key
         run: |
@@ -103,7 +99,6 @@ jobs:
           echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
           
           # 1. 패키지 및 배포 스크립트 복사
-          # tar.gz 파일의 경로가 이제 올바르므로 그대로 둡니다.
           scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
           
