@@ -33,6 +33,5 @@ public class UserStyle {
 
     private LocalDateTime createdAt;
 
-
 }
 

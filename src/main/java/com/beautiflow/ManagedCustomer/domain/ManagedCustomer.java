@@ -1,4 +1,4 @@
-package com.beautiflow.MangedCustomer.domain;
+package com.beautiflow.ManagedCustomer.domain;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -26,6 +26,15 @@ public class ManagedCustomer {
 
 	@Enumerated(EnumType.STRING)
 	private TargetGroup targetGroup;
+
+	private String memo;
+
+	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup, String memo) {
+		this.designer = designer;
+		this.customer = customer;
+		this.targetGroup = targetGroup;
+		this.memo = memo;
+	}
 
 	public void updateInfo(TargetGroup targetGroup) {
 		this.targetGroup = targetGroup;

@@ -1,7 +1,7 @@
 package com.beautiflow.shop.controller;
 
-import com.beautiflow.MangedCustomer.dto.CustomerListRes;
-import com.beautiflow.MangedCustomer.service.ManagedCustomerService;
+import com.beautiflow.ManagedCustomer.dto.CustomerListRes;
+import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.CommonPageResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;

@@ -40,5 +40,4 @@ public class UserStyleImage {
 	private UserStyle userStyle;
 
 
-
 }

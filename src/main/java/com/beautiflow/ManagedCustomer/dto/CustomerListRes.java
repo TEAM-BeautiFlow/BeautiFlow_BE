@@ -1,6 +1,6 @@
-package com.beautiflow.MangedCustomer.dto;
+package com.beautiflow.ManagedCustomer.dto;
 
-import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
+import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
 
 public record CustomerListRes(
@@ -8,7 +8,7 @@ public record CustomerListRes(
     String name,
     String contact,
     TargetGroup targetGroup,
-    String styleDescription // ← 이름 변경 권장
+    String memo
 ) {
   public static CustomerListRes from(ManagedCustomer managedCustomer) {
     return new CustomerListRes(

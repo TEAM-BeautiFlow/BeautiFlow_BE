@@ -1,4 +1,4 @@
-package com.beautiflow.MangedCustomer.dto;
+package com.beautiflow.ManagedCustomer.dto;
 
 public record CustomerUpdateRes(Long customerId) {
 
