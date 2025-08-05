@@ -1,6 +1,6 @@
-package com.beautiflow.ManagedCustomer.repository;
+package com.beautiflow.MangedCustomer.repository;
 
-import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
+import com.beautiflow.MangedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import java.util.Optional;
@@ -16,9 +16,6 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
 
 
   boolean existsByDesignerAndCustomer(User designer, User customer);
-  List<ManagedCustomer> findByDesignerId(Long designerId);
-  List<ManagedCustomer> findByDesignerIdAndTargetGroupIn(Long designerId, List<TargetGroup> targetGroups);
-
 
   @Query("""
       SELECT mc
@@ -39,3 +36,4 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
 
 
 }
+
