@@ -133,12 +133,6 @@ public class JWTUtil {
 
         return new UsernamePasswordAuthenticationToken(customOAuth2User, userId, customOAuth2User.getAuthorities());
     }
-    public Long getUserId(String token) {
-        return Jwts.parser().verifyWith(secretKey).build()
-            .parseSignedClaims(token)
-            .getPayload()
-            .get("userId", Long.class);
-    }
 
     public String createAccessToken(String provider, String kakaoId, Long userId) {
 

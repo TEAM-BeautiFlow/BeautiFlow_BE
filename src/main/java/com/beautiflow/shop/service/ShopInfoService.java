@@ -5,7 +5,7 @@ import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.TreatmentCategory;
-import com.beautiflow.reservation.repository.ShopMemberRepository;
+import com.beautiflow.shop.repository.ShopMemberRepository;
 import com.beautiflow.shop.converter.ShopConverter;
 import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.shop.dto.ChatDesignerRes;

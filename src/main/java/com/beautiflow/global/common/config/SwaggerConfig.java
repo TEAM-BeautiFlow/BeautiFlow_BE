@@ -20,7 +20,7 @@ public class SwaggerConfig {
 		final String securitySchemeName = "Bearer Authentication";
 
 		// ✅ 이 부분을 추가하여 서버 URL을 명시합니다.
-		final Server server = new Server().url("https://beautiflow.co.kr")
+		final Server server = new Server().url("http://localhost:8080")
 				.description("Default Server URL");
 
 		return new OpenAPI()

@@ -28,7 +28,7 @@ import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.reservation.repository.ReservationOptionRepository;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import com.beautiflow.reservation.repository.ReservationTreatmentRepository;
-import com.beautiflow.reservation.repository.ShopMemberRepository;
+import com.beautiflow.shop.repository.ShopMemberRepository;
 import com.beautiflow.reservation.repository.TempReservationOptionRepository;
 import com.beautiflow.reservation.repository.TempReservationRepository;
 import com.beautiflow.reservation.repository.TempReservationTreatmentRepository;
