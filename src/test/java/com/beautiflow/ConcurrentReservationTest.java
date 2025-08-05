@@ -38,7 +38,7 @@ public class ConcurrentReservationTest {
 
         TreatOptionReq treatOptionReq = getMockTreatOptionReq();
         DateTimeDesignerReq dateTimeDesignerReq = DateTimeDesignerReq.builder()
-                .date(LocalDate.of(2025, 8, 14))
+                .date(LocalDate.of(2025, 8, 19))
                 .time(LocalTime.of(18, 0))
                 .designerId(2L)
                 .build();

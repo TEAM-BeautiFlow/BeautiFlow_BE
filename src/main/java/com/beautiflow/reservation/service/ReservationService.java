@@ -554,7 +554,7 @@ public class ReservationService {
                         member.getUser().getName(),
                         member.getProfileImage(),
                         member.getRole() == ShopRole.OWNER,
-                        member.getUser().getIntro()
+                        member.getIntro()
                 ))
                 .collect(Collectors.toList());
     }

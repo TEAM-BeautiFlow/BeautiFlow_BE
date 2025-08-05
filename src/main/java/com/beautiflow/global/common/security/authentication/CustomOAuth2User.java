@@ -1,4 +1,4 @@
-package com.beautiflow.global.common.security;
+package com.beautiflow.global.common.security.authentication;
 
 
 import com.beautiflow.global.domain.GlobalRole;

@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA를 위한 기본 생성자 보호
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "shop_images")
 public class ShopImage {
@@ -31,7 +31,7 @@ public class ShopImage {
   private String originalFileName;
 
   @Column(nullable = false)
-  private String storedFilePath; // S3에서 파일을 식별하는 키
+  private String storedFilePath;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "shop_id", nullable = false)

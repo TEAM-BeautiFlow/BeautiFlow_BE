@@ -1,14 +1,18 @@
 package com.beautiflow.global.common.error;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum ReservationErrorCode implements ErrorCode{
 
-    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RES404", "예약을 찾을 수 없습니다."),
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION400", "예약을 찾을 수 없습니다."),
+    RESERVATION_TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION401", "지정된 날짜의 예약을 찾을 수 없습니다."),
+    RESERVATION_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION402", "세부내역을 찾을 수 없습니다."),
+    RESERVATION_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION403", "예약상태를 확인할 수 없습니다."),
     RESERVATION_TREATMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "RT404", "예약 시술을 찾을 수 없습니다."),
     RESERVATION_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "RO404", "예약 시술 내 옵션을 찾을 수 없습니다."),
     RESERVATION_LOCKED(HttpStatus.CONFLICT, "RES409", "현재 같은 시간에 다른 예약 요청이 진행 중이어서 락을 획득할 수 없습니다."),
@@ -21,8 +25,9 @@ public enum ReservationErrorCode implements ErrorCode{
     RESERVATION_MISSING_DATE_TIME_DESIGNER(HttpStatus.BAD_REQUEST,"DTD400" , "예약 날짜, 시간, 디자이너 정보가 모두 필요합니다."),
     INVALID_CANCEL_STATUS(HttpStatus.BAD_REQUEST,"CANCL400" , "예약 상태가 취소할 수 있는 상태가 아닙니다.");
 
-
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
+
+
 }

@@ -32,6 +32,8 @@ public class ShopMember {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String intro;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Shop shop;
 
@@ -46,6 +48,12 @@ public class ShopMember {
 
 	@Enumerated(EnumType.STRING)
 	private ApprovalStatus status;
+
+	private String imageUrl;
+
+	private String originalFileName;
+
+	private String storedFilePath;
 
 	private LocalDateTime appliedAt;
 	private LocalDateTime processedAt;
