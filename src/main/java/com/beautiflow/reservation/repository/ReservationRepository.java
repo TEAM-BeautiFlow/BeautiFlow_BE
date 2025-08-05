@@ -4,6 +4,8 @@ import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.dto.ReservationMonthRes;
 import com.beautiflow.shop.domain.Shop;
+import com.beautiflow.user.domain.User;
+import io.lettuce.core.ScanIterator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -69,5 +71,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatus(ReservationStatus status);
 
+    List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
+
+
+    @Query("""
+    SELECT r FROM Reservation r
+    JOIN FETCH r.designer d
+    JOIN FETCH r.shop s
+    LEFT JOIN FETCH r.reservationOptions ro
+    LEFT JOIN FETCH ro.optionItem
+    WHERE d.id = :designerId AND r.customer.id = :customerId
+  """)
+    List<Reservation> findByDesignerIdAndCustomerIdWithAllRelations(Long designerId, Long customerId);
 
 }
