@@ -61,6 +61,7 @@ public class JWTFilter extends OncePerRequestFilter {
     private boolean isPublicPath(String requestURI) {
         List<String> publicPaths = Arrays.asList(
             "/",
+            "/login",
             "/users/signup",
             "/users/refresh",
             "/swagger-ui/**", //** 패턴을 사용하기 위해 AntPathMatcher 필요
