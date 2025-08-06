@@ -22,7 +22,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: false
@@ -50,19 +50,3 @@ spring:
     aws:
       s3:
         bucket: beautiflow-dev-artifacts
-
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: "gateway" # "gateway" 프로파일일 때만 아래 설정 적용
-
-  main:
-    web-application-type: reactive
-
-  autoconfigure:
-    exclude: # 👈 불필요한 DB 기능 비활성화 (성능 향상)
-      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
