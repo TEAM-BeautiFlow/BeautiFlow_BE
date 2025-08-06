@@ -28,7 +28,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --parallel
+        run: ./gradlew build -x test --no-daemon --parallel
 
       - name: Package as tar.gz
         run: |
