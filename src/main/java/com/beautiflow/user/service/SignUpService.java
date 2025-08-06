@@ -78,7 +78,7 @@ public class SignUpService {
 
         Long userId = user.getId();
         String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
-        String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
+//        String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
 
         return SignUpRes.builder()
                 .id(user.getId())
@@ -88,7 +88,7 @@ public class SignUpService {
                 .contact(user.getContact())
                 .deleted(user.isDeleted())
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+//                .refreshToken(refreshToken)
                 .build();
 
 
