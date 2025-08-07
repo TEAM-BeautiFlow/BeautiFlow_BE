@@ -1,5 +1,7 @@
 package com.beautiflow.user.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,6 +30,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class User extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +46,10 @@ public class User extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String contact;
 
-	private String intro;
+	private String email;
+
+	private boolean deleted = false;
+
 
 	@OneToMany(mappedBy = "user")
 	private List<UserRole> roles = new ArrayList<>();
@@ -51,6 +60,15 @@ public class User extends BaseTimeEntity {
 	@OneToMany(mappedBy = "customer")
 	private List<Reservation> reservations = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user")
-	private List<UserStyleImage> styleImages = new ArrayList<>();
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private UserStyle style;
+
+
+	public void reactivate(String name, String contact) {
+		this.deleted = false;
+		this.name = name;
+		this.contact = contact;
+	}
+
+
 }

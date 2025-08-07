@@ -1,0 +1,77 @@
+# .github/workflows/ci-cd.yml
+
+name: Beautiflow CI/CD (Single Server)
+
+concurrency:
+  group: beautiflow-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main # main 브랜치에 push될 때 실행됩니다.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon --parallel
+
+      - name: Package as tar.gz
+        run: |
+          mkdir -p dist
+          cp build/libs/*.jar dist/
+          tar czf beautiflow.tar.gz -C dist .
+          mv beautiflow.tar.gz dist/beautiflow.tar.gz
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: beautiflow-dist
+          path: dist/beautiflow.tar.gz
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code & scripts
+        uses: actions/checkout@v3
+
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: beautiflow-dist
+
+      - name: Set up SSH private key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy to Server
+        run: |
+          HOST=${{ secrets.EC2_HOST }} # GitHub Secrets에 EC2_HOST를 등록해주세요.
+          echo "Deploying to server at ${HOST}"
+          
+          # 1. 패키지 및 배포 스크립트 복사
+          scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${HOST}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${HOST}:/home/ubuntu/
+          
+          # 2. 원격에서 deploy.sh 실행 (이제 'prod' 프로파일만 인자로 전달)
+          ssh -o StrictHostKeyChecking=no ubuntu@${HOST} << 'EOF'
+            chmod +x deploy.sh
+            ./deploy.sh prod 
+          EOF

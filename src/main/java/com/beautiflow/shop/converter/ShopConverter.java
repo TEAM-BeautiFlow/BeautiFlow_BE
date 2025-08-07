@@ -1,15 +1,18 @@
 package com.beautiflow.shop.converter;
-
-import com.beautiflow.shop.dto.ShopDetailResponse;
-import com.beautiflow.shop.dto.ShopDetailResponse.BusinessHourDto;
-import com.beautiflow.shop.dto.ShopDetailResponse.NoticeDto;
-import com.beautiflow.shop.dto.ShopDetailResponse.TreatmentDto;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.OptionGroupDto;
-import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionResponse.TreatmentImageDto;
+import com.beautiflow.shop.domain.ShopMember;
+import com.beautiflow.shop.dto.ShopApplyRes;
+import com.beautiflow.shop.dto.ShopDetailRes;
+import com.beautiflow.shop.dto.ShopDetailRes.BusinessHourDto;
+import com.beautiflow.shop.dto.ShopDetailRes.NoticeDto;
+import com.beautiflow.shop.dto.ShopDetailRes.TreatmentDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes.OptionGroupDto;
+import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes.TreatmentImageDto;
 import com.beautiflow.shop.domain.BusinessHour;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopNotice;
+import com.beautiflow.shop.dto.ShopRegistrationRes;
+import com.beautiflow.shop.dto.ShopRegistrationRes.ShopMemberRes;
 import com.beautiflow.treatment.domain.OptionGroup;
 import com.beautiflow.treatment.domain.OptionItem;
 import com.beautiflow.treatment.domain.Treatment;
@@ -18,13 +21,14 @@ import java.util.stream.Collectors;
 
 public class ShopConverter {
 
-    public static ShopDetailResponse toDto(Shop shop) {
-        return ShopDetailResponse.builder()
+    public static ShopDetailRes toDto(Shop shop) {
+        return ShopDetailRes.builder()
                 .id(shop.getId())
                 .name(shop.getShopName())
                 .contact(shop.getContact())
-                .location(shop.getAddress())
+                .address(shop.getAddress())
                 .introText(shop.getIntroduction())
+                .mainImageUrl(shop.getShopImages().get(0).getImageUrl())
                 .notices(shop.getNotices().stream()
                         .map(ShopConverter::toNoticeDto)
                         .collect(Collectors.toList()))
@@ -79,8 +83,8 @@ public class ShopConverter {
                 .build();
     }
 
-    public static TreatmentDetailWithOptionResponse toTreatmentDetailWithOptionResponse(Treatment treatment) {
-        return TreatmentDetailWithOptionResponse.builder()
+    public static TreatmentDetailWithOptionRes toTreatmentDetailWithOptionResponse(Treatment treatment) {
+        return TreatmentDetailWithOptionRes.builder()
                 .id(treatment.getId())
                 .name(treatment.getName())
                 .durationMinutes(treatment.getDurationMinutes())
@@ -115,6 +119,35 @@ public class ShopConverter {
                 .name(item.getName())
                 .extraMinutes(item.getExtraMinutes())
                 .description(item.getDescription())
+                .build();
+    }
+
+    public static ShopRegistrationRes toShopRegistrationRes(Shop shop, ShopMember shopMember) {
+        return ShopRegistrationRes.builder()
+                .id(shop.getId())
+                .name(shop.getShopName())
+                .address(shop.getAddress())
+                .businessRegistrationNumber(shop.getBusinessRegistrationNumber())
+                .shopMember(
+                        ShopMemberRes.builder()
+                                .id(shopMember.getId())
+                                .shopId(shop.getId())
+                                .userId(shopMember.getUser().getId())
+                                .role(shopMember.getRole())
+                                .status(shopMember.getStatus())
+                                .appliedAt(shopMember.getAppliedAt())
+                                .processedAt(shopMember.getProcessedAt())
+                                .build()
+                )
+                .build();
+    }
+
+    public static ShopApplyRes toShopApplyRes(Shop shop, ShopMember shopMember) {
+        return ShopApplyRes.builder()
+                .shopId(shop.getId())
+                .userId(shopMember.getUser().getId())
+                .shopMemberId(shopMember.getId())
+                .status(shopMember.getStatus())
                 .build();
     }
 }

@@ -32,6 +32,8 @@ public class ShopMember {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String intro;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Shop shop;
 
@@ -41,8 +43,17 @@ public class ShopMember {
 	@Enumerated(EnumType.STRING)
 	private ShopRole role;
 
+	// 원장님, 디자이너 프로필 사진 추가
+	private String profileImage;
+
 	@Enumerated(EnumType.STRING)
 	private ApprovalStatus status;
+
+	private String imageUrl;
+
+	private String originalFileName;
+
+	private String storedFilePath;
 
 	private LocalDateTime appliedAt;
 	private LocalDateTime processedAt;

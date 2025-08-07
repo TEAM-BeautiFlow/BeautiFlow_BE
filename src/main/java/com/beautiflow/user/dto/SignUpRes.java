@@ -9,6 +9,7 @@ public record SignUpRes(
         String provider,
         String name,
         String contact,
+        boolean deleted,
         String accessToken,
         String refreshToken
 ) {

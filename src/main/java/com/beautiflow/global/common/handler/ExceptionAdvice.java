@@ -1,8 +1,10 @@
 package com.beautiflow.global.common.handler;
 
+import com.beautiflow.global.common.error.UserErrorCode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +36,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 		ErrorCode errorCode = CommonErrorCode.INVALID_PARAMETER;
 		return handleExceptionInternal(errorCode, ex.getMessage());
 	}
+
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex) {
+		log.warn("AuthenticationException: {}", ex.getMessage());
+		return handleExceptionInternal(UserErrorCode.LOGIN_REQUIRED);
+	}
+
 
 	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
