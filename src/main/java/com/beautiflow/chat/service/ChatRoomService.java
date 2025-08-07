@@ -20,6 +20,7 @@ import com.beautiflow.global.common.error.ChatRoomErrorCode;
 import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
+import com.beautiflow.global.common.sms.SmsService;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.user.domain.User;
@@ -37,6 +38,7 @@ public class ChatRoomService {
 	private final ShopRepository shopRepository;
 	private final ChatMessageRepository chatMessageRepository;
 	private final ChatRoomReadRepository chatRoomReadRepository;
+	private final SmsService smsService;
 
 	public RoomCreateRes createRoom(Long requesterId, RoomCreateReq roomCreateReq){
 		Optional<ChatRoom> optional = chatRoomRepository
@@ -66,6 +68,9 @@ public class ChatRoomService {
 			.build();
 
 		chatRoomRepository.save(newRoom);
+
+		smsService.sendNewContactAlert(designer.getContact());
+
 
 		return RoomCreateRes.of(newRoom);
 
