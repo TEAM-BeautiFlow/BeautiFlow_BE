@@ -35,7 +35,7 @@ public class SmsService {
 			Message message = new Message();
 			message.setFrom(smsProperties.getFromNumber());
 			message.setTo(toPhoneNumber);
-			message.setText("고객이 새로운 문의를 시작했습니다. BeautiFlow에서 확인해주세요.");
+			message.setText("새로운 문의를 시작했습니다. BeautiFlow에서 확인해주세요.");
 
 			SingleMessageSentResponse response = messageService.sendOne(new SingleMessageSendingRequest(message));
 			log.info("📤 SMS 발송 성공: {}", response.getMessageId());
