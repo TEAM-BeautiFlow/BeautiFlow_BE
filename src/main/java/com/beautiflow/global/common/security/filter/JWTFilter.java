@@ -67,7 +67,9 @@ public class JWTFilter extends OncePerRequestFilter {
             "/swagger-ui/**", //** 패턴을 사용하기 위해 AntPathMatcher 필요
             "/v3/api-docs/**",
             "/swagger-ui.html",
-            "/health"
+            "/health",
+            "/login/oauth2/**",
+            "/oauth2/**"
         );
 
         return publicPaths.stream().anyMatch(path -> pathMatcher.match(path, requestURI));
