@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
@@ -27,11 +28,20 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    @Value("${spring.data.redis.ssl.enabled}")
+    private boolean useSsl;
+
     @Bean
     @Primary
     public RedisConnectionFactory defaultRedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        return new LettuceConnectionFactory(config);
+        LettuceClientConfiguration clientConfig;
+        if (useSsl) {
+            clientConfig = LettuceClientConfiguration.builder().useSsl().build();
+        } else {
+            clientConfig = LettuceClientConfiguration.builder().build();
+        }
+        return new LettuceConnectionFactory(config,clientConfig);
     }
 
     @Bean
@@ -49,7 +59,13 @@ public class RedisConfig {
         configuration.setPort(port);
         //redis pub/sub 에서는 특정 데이터베이스에 의존적이지 않음.
         //configuration.setDatabase(0);
-        return new LettuceConnectionFactory(configuration);
+        LettuceClientConfiguration clientConfiguration;
+        if (useSsl) {
+            clientConfiguration = LettuceClientConfiguration.builder().useSsl().build();
+        } else {
+            clientConfiguration = LettuceClientConfiguration.builder().build();
+        }
+        return new LettuceConnectionFactory(configuration,clientConfiguration);
     }
 
     //publish 객체
