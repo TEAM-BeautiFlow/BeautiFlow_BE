@@ -45,7 +45,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             response.addCookie(createCookie("isUserAlreadyExist", "false"));
             response.addCookie(createCookie("kakaoId", kakaoId));
             response.addCookie(createCookie("provider", provider));
-            response.sendRedirect("https://beautiflow.co.kr");
+            response.sendRedirect("http://localhost:5173");
         } else {
             Long userId = user.getId();
             response.addCookie(createCookie("isUserAlreadyExist", "true"));
@@ -55,7 +55,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
             response.addCookie(createCookie("accessToken", accessToken));
             response.addCookie(createCookie("refreshToken", refreshToken));
-            response.sendRedirect("https://beautiflow.co.kr");
+            response.sendRedirect("http://localhost:5173");
         }
 
 
