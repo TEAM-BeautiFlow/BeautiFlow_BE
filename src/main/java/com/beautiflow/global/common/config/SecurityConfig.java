@@ -45,7 +45,7 @@ public class SecurityConfig {
                         request -> {
                             CorsConfiguration configuration = new CorsConfiguration();
                             configuration.setAllowedOrigins(
-                                    List.of("http://localhost:3000","http://localhost:8080", "https://beautiflow.co.kr","http://3.38.93.35"));
+                                    List.of("http://localhost:3000","http://localhost:5173","http://www.beautiflow.co.kr","http://localhost:8080", "https://beautiflow.co.kr","http://3.38.93.35"));
                             configuration.setAllowedMethods(
                                     Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                             configuration.setAllowCredentials(true);
