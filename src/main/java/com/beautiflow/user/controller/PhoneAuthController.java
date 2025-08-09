@@ -14,19 +14,19 @@ import com.beautiflow.user.service.PhoneAuthService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/auth/phone")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class PhoneAuthController {
 
 	private final PhoneAuthService phoneAuthService;
 
-	@PostMapping("/send-code")
+	@PostMapping("/auth/phone/send-code")
 	public ResponseEntity<ApiResponse<String>> sendCode(@RequestBody PhoneAuthReq request) {
 		phoneAuthService.sendVerificationCode(request.phoneNumber());
 		return ResponseEntity.ok(ApiResponse.success(request.phoneNumber()));
 	}
 
-	@PostMapping("/verify-code")
+	@PostMapping("/auth/phone/verify-code")
 	public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody VerifyCodeReq request) {
 		phoneAuthService.verifyCode(request.phoneNumber(), request.code());
 		return ResponseEntity.ok(ApiResponse.successWithNoData());
