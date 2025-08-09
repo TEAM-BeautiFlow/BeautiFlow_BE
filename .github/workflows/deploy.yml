@@ -61,11 +61,7 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Set up environment variables
-        run: |
-          echo "COOLSMS_API_KEY=${{ secrets.COOLSMS_API_KEY }}" >> $GITHUB_ENV
-          echo "COOLSMS_API_SECRET=${{ secrets.COOLSMS_API_SECRET }}" >> $GITHUB_ENV
-          echo "COOLSMS_FROM_NUMBER=${{ secrets.COOLSMS_FROM_NUMBER }}" >> $GITHUB_ENV
+    
 
       - name: Deploy to Server
         run: |
