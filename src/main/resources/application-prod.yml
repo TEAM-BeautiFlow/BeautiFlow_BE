@@ -11,8 +11,8 @@ spring:
   jwt:
     secret: ${JWT_SECRET}
     validity:
-      access: 3600000
-      refresh: 604800000
+      access: 2592000000
+      refresh: 25920000000
 
   data:
     redis:
