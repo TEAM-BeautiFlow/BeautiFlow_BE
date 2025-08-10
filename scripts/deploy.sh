@@ -82,7 +82,7 @@ sudo systemctl enable ${SERVICE_NAME}.service
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중 (최대 3분)..."
 HEALTH_CHECK_URL="http://localhost:80/health"
 for i in {1..36}; do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
+    HTTP_CODE=$(curl -s -H "Host: beautiflow.co.kr" -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
     if [ "$HTTP_CODE" -eq 200 ]; then
         echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스가 성공적으로 시작되었습니다. (HTTP 200 OK)"
 
