@@ -80,7 +80,7 @@ sudo systemctl enable ${SERVICE_NAME}.service
 # 4. 배포 후 검증
 # =========================================================================
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중 (최대 3분)..."
-HEALTH_CHECK_URL="http://localhost:8080/health"
+HEALTH_CHECK_URL="http://localhost:80/health"
 for i in {1..36}; do
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
     if [ "$HTTP_CODE" -eq 200 ]; then
