@@ -1,6 +1,7 @@
 package com.beautiflow.treatment.domain;
 
 import com.beautiflow.treatment.dto.TreatmentUpdateReq;
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class Treatment {
 	@OneToMany(mappedBy = "treatment")
 	private List<TreatmentImage> images = new ArrayList<>();
 
-	@OneToMany(mappedBy = "treatment")
+	@OneToMany(mappedBy = "treatment", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OptionGroup> optionGroups = new ArrayList<>();
 
 	public void updateTreatment(TreatmentUpdateReq requestDto) {

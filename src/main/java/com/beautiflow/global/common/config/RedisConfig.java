@@ -3,6 +3,7 @@ package com.beautiflow.global.common.config;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +38,11 @@ public class RedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         LettuceClientConfiguration clientConfig;
         if (useSsl) {
-            clientConfig = LettuceClientConfiguration.builder().useSsl().build();
+            clientConfig = LettuceClientConfiguration.builder()
+                .useSsl()
+                //여기
+                .disablePeerVerification()
+                .build();
         } else {
             clientConfig = LettuceClientConfiguration.builder().build();
         }
@@ -61,7 +66,11 @@ public class RedisConfig {
         //configuration.setDatabase(0);
         LettuceClientConfiguration clientConfiguration;
         if (useSsl) {
-            clientConfiguration = LettuceClientConfiguration.builder().useSsl().build();
+            clientConfiguration = LettuceClientConfiguration.builder()
+                .useSsl()
+                //여기
+                .disablePeerVerification()
+                .build();
         } else {
             clientConfiguration = LettuceClientConfiguration.builder().build();
         }
@@ -98,8 +107,11 @@ public class RedisConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
+        SingleServerConfig singleServerConfig = config.useSingleServer();
         config.useSingleServer()
             .setAddress("rediss://" + host + ":" + port);
+        //여기
+        singleServerConfig.setSslEnableEndpointIdentification(false);
         return Redisson.create(config);
     }
 

@@ -31,4 +31,15 @@ public class OptionItem {
 	private Integer extraMinutes;
 	private Integer extraPrice;
 	private String description;
+
+	public void updateDetails(String name, Integer extraPrice, Integer extraMinutes, String description) {
+		this.name = name;
+		this.extraPrice = extraPrice;
+		this.extraMinutes = extraMinutes;
+		this.description = description;
+	}
+
+	public void setOptionGroup(OptionGroup optionGroup) {
+		this.optionGroup = optionGroup;
+	}
 }

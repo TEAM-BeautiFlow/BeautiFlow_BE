@@ -11,7 +11,10 @@ public enum TreatmentErrorCode implements ErrorCode {
     TREATMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "TREATMENT404", "시술을 찾을 수 없습니다."),
     IMAGE_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "TREATMENT400_1", "시술 이미지는 최대 5개까지 등록할 수 있습니다."),
     INVALID_TREATMENT_PARAMETER(HttpStatus.BAD_REQUEST, "TREATMENT400", "유효하지 않은 시술 파라미터입니다."),
-    UNAUTHORIZED_TREATMENT_ACCESS(HttpStatus.FORBIDDEN, "TREATMENT403", "해당 시술에 접근할 수 있는 권한이 없습니다.");
+    UNAUTHORIZED_TREATMENT_ACCESS(HttpStatus.FORBIDDEN, "TREATMENT403", "해당 시술에 접근할 수 있는 권한이 없습니다."),
+    OPTION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "TREATMENT_003", "존재하지 않는 옵션 그룹 ID입니다."),
+    OPTION_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "TREATMENT_004", "존재하지 않는 옵션 아이템 ID입니다."),
+    S3_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "TREATMENT500", "S3 업로드에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

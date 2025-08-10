@@ -1,5 +1,6 @@
 package com.beautiflow.treatment.domain;
 
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,10 @@ public class OptionGroup {
 	private String name;
 	private boolean enabled;
 
-	@OneToMany(mappedBy = "optionGroup")
+	@OneToMany(mappedBy = "optionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OptionItem> items = new ArrayList<>();
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

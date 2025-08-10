@@ -4,8 +4,10 @@ import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.s3.S3Service;
 import com.beautiflow.global.common.s3.S3UploadResult;
+import com.beautiflow.shop.domain.BusinessHour;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopImage;
+import com.beautiflow.shop.dto.BusinessHourUpdateReq;
 import com.beautiflow.shop.dto.ShopInfoRes;
 import com.beautiflow.shop.dto.ShopUpdateReq;
 import com.beautiflow.shop.repository.ShopImageRepository;
@@ -24,6 +26,7 @@ public class ShopManageService {
   private final ShopImageRepository shopImageRepository;
   private final S3Service s3Service;
 
+  // 매장 상세 정보 조회
   @Transactional(readOnly = true)
   public ShopInfoRes getShopDetails(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -32,6 +35,7 @@ public class ShopManageService {
     return ShopInfoRes.from(shop);
   }
 
+  // 매장 정보 및 이미지 수정
   @Transactional
   public ShopInfoRes updateShopDetailsAndImages(
       Long shopId,
@@ -55,6 +59,34 @@ public class ShopManageService {
     shop.updateDetails(requestDto);
 
     return ShopInfoRes.from(shop);
+  }
+
+  // 매장 영업 시간 수정
+  @Transactional
+  public void updateBusinessHours(Long shopId, BusinessHourUpdateReq requestDto) {
+    // 1. 매장 엔티티 조회
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    // 2. 기존 영업시간 정보 모두 삭제
+    // orphanRemoval=true 덕분에, 리스트를 비우면 JPA가 알아서 DELETE 쿼리를 실행함
+    shop.getBusinessHours().clear();
+
+    // 3. 요청받은 새로운 영업시간 정보로 다시 채우기
+    List<BusinessHour> newBusinessHours = requestDto.dailySchedules().stream()
+        .map(scheduleDto -> BusinessHour.builder()
+            .shop(shop) // 부모(Shop)와의 연관관계 설정
+            .dayOfWeek(scheduleDto.dayOfWeek())
+            .isClosed(scheduleDto.isClosed())
+            .openTime(scheduleDto.isClosed() ? null : scheduleDto.openTime()) // 휴무일이면 시간은 null
+            .closeTime(scheduleDto.isClosed() ? null : scheduleDto.closeTime())
+            .breakStart(scheduleDto.isClosed() ? null : scheduleDto.breakStart())
+            .breakEnd(scheduleDto.isClosed() ? null : scheduleDto.breakEnd())
+            .build())
+        .toList();
+
+    // 4. Shop 엔티티에 새로 만든 영업시간 목록을 추가
+    shop.getBusinessHours().addAll(newBusinessHours);
   }
 
   // 매장 사업자 등록증 이미지 조회

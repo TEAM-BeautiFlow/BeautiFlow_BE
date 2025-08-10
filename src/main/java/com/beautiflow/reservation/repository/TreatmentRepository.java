@@ -1,4 +1,4 @@
-package com.beautiflow.treatment.repository;
+package com.beautiflow.reservation.repository;
 
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.shop.domain.Shop;

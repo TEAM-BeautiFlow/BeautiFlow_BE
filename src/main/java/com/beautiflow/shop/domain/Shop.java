@@ -58,7 +58,7 @@ public class Shop {
 	@OneToMany(mappedBy = "shop")
 	private final List<ShopNotice> notices = new ArrayList<>();
 
-	@OneToMany(mappedBy = "shop")
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
 	private final List<BusinessHour> businessHours = new ArrayList<>();
 
 	@OneToMany(mappedBy = "shop")

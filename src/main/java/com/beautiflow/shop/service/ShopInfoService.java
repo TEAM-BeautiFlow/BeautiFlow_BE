@@ -15,7 +15,7 @@ import com.beautiflow.reservation.dto.response.TreatmentRes;
 import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.treatment.domain.Treatment;
-import com.beautiflow.treatment.repository.TreatmentRepository;
+import com.beautiflow.reservation.repository.TreatmentRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
