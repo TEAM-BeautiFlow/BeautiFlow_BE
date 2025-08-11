@@ -45,7 +45,7 @@ public class SecurityConfig {
                         request -> {
                             CorsConfiguration configuration = new CorsConfiguration();
                             configuration.setAllowedOrigins(
-                                    List.of("http://localhost:3000","http://localhost:5173","http://www.beautiflow.co.kr","http://localhost:8080", "https://beautiflow.co.kr","http://3.38.93.35"));
+                                    List.of("http://localhost:3000","http://localhost:5173","https://www.beautiflow.co.kr","http://localhost:8080", "https://beautiflow.co.kr","http://3.38.93.35"));
                             configuration.setAllowedMethods(
                                     Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                             configuration.setAllowCredentials(true);
@@ -71,6 +71,9 @@ public class SecurityConfig {
                                 "/connect/**",
                                 "/users/auth/phone/send-code",
                                 "/users/auth/phone/verify-code",
+
+                                "/login/oauth2/code/kakao-customer",
+                                "/login/oauth2/code/kakao-staff",
                                 "/users/signup",
                                 "/users/refresh",
                                 "/swagger-ui/**",
