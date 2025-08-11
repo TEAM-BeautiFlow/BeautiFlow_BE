@@ -35,9 +35,16 @@ public class Shop {
 	private String contact;
 	private String link;
 	private String accountInfo;
+
+	private String bankName;
+	private String accountNumber;
+	private String accountHolder;
+
 	private String address;
 	private String introduction;
 	private String licenseImageUrl;
+
+	private Integer deposit;
 
 	@Column(unique = true)
 	private String businessRegistrationNumber;

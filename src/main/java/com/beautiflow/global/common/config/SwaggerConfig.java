@@ -20,7 +20,7 @@ public class SwaggerConfig {
 		final String securitySchemeName = "Bearer Authentication";
 
 		// ✅ 이 부분을 추가하여 서버 URL을 명시합니다.
-		final Server server = new Server().url("https://beautiflow.co.kr").description("Default Server URL");
+//		final Server server = new Server().url("http://localhost:8080").description("Default Server URL");
 
 		return new OpenAPI()
 				.info(new Info()
@@ -28,7 +28,14 @@ public class SwaggerConfig {
 						.version("1.0")
 						.description("BeautiFlow 백엔드 API 명세서입니다."))
 				// ✅ servers() 메서드 호출을 추가합니다.
-				.servers(List.of(server))
+				.servers(
+						// ✅ API 서버 주소를 추가합니다.
+						List.of(
+								new Server().url("http://localhost:8080").description("Local Dev Server"),
+								new Server().url("http://3.38.93.35").description("EC2 IP Address"),
+								new Server().url("https://beautiflow.co.kr").description("Production Domain")
+						)
+				)
 				.addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
 				.components(new Components()
 						.addSecuritySchemes(securitySchemeName,

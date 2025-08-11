@@ -43,6 +43,9 @@ public class ShopMember {
 	@Enumerated(EnumType.STRING)
 	private ShopRole role;
 
+	// 원장님, 디자이너 프로필 사진 추가
+	private String profileImage;
+
 	@Enumerated(EnumType.STRING)
 	private ApprovalStatus status;
 

@@ -5,9 +5,9 @@
 spring:
   application:
     name: beautiflow
-#  datasource:
-#    hikari:
-#      driver-class-name: com.mysql.cj.jdbc.Driver
+  #  datasource:
+  #    hikari:
+  #      driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: never

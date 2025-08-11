@@ -50,6 +50,7 @@ public class User extends BaseTimeEntity {
 
 	private boolean deleted = false;
 
+
 	@OneToMany(mappedBy = "user")
 	private List<UserRole> roles = new ArrayList<>();
 
