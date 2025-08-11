@@ -1,5 +1,6 @@
 package com.beautiflow.reservation.domain;
 
+import com.beautiflow.treatment.domain.OptionGroup;
 import com.beautiflow.treatment.domain.OptionItem;
 
 import jakarta.persistence.Entity;
@@ -28,6 +29,9 @@ public class ReservationOption {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Reservation reservation;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private OptionGroup optionGroup;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private OptionItem optionItem;

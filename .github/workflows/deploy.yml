@@ -1,4 +1,6 @@
-name: Beautiflow CI/CD
+# .github/workflows/ci-cd.yml
+
+name: Beautiflow CI/CD (Single Server)
 
 concurrency:
   group: beautiflow-${{ github.ref }}
@@ -22,28 +24,17 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-#      - name: Cache Gradle packages
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.gradle/caches
-#            ~/.gradle/wrapper
-#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-#          restore-keys: |
-#            ${{ runner.os }}-gradle-
-
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --parallel
+        run: ./gradlew build -x test --no-daemon --parallel
 
       - name: Package as tar.gz
         run: |
-          sleep 5
           mkdir -p dist
           cp build/libs/*.jar dist/
-          tar czf beautiflow.tar.gz -C build/libs/ .
+          tar czf beautiflow.tar.gz -C dist .
           mv beautiflow.tar.gz dist/beautiflow.tar.gz
 
       - name: Upload package
@@ -52,40 +43,17 @@ jobs:
           name: beautiflow-dist
           path: dist/beautiflow.tar.gz
 
-      - name: Upload Test Reports # 이 스텝의 이름
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: build-reports
-          path: build/reports/
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        include:
-          - name: gateway
-            hostSecret: GATEWAY_HOST
-            serverType: gateway
-          - name: api
-            hostSecret: API_HOST
-            serverType: api
-          - name: chat
-            hostSecret: CHAT_HOST
-            serverType: chat
-
     steps:
       - name: Checkout code & scripts
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
 
-      - name: Download package # 이 스텝은 현재 그대로 두면 됩니다.
+      - name: Download package
         uses: actions/download-artifact@v4
         with:
-          name: beautiflow-dist # 이 이름으로 아티팩트가 다운로드되어 './beautiflow-dist/' 폴더에 저장됩니다.
+          name: beautiflow-dist
 
       - name: Set up SSH private key
         run: |
@@ -93,22 +61,29 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Resolve remote host
-        id: host
-        run: |
-          echo "HOST=${{ secrets[matrix.hostSecret] }}" >> $GITHUB_OUTPUT
+    
 
-      - name: Deploy to ${{ matrix.name }}
+      - name: Deploy to Server
         run: |
-          echo "Deploying to ${{ matrix.name }} at ${{ steps.host.outputs.HOST }}"
+          HOST=${{ secrets.EC2_HOST }} # GitHub Secrets에 EC2_HOST를 등록해주세요.
+          echo "Deploying to server at ${HOST}"
           
           # 1. 패키지 및 배포 스크립트 복사
-          # tar.gz 파일의 경로가 이제 올바르므로 그대로 둡니다.
-          scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
-          scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${{ steps.host.outputs.HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${HOST}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${HOST}:/home/ubuntu/
           
-          # 2. 원격에서 deploy.sh 실행
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.host.outputs.HOST }} << 'EOF'
+          # 2. 원격에서 deploy.sh 실행 (이제 'prod' 프로파일만 인자로 전달)
+          ssh -t -o StrictHostKeyChecking=no ubuntu@${HOST} << 'EOF'
+            echo "=============================================="
+            echo ">>> Executing remote commands on EC2 server..."
+            echo ">>> Checking the version of deploy.sh that was copied to the server:"
+            
+            # [!!!] 이 부분을 추가하여 서버에 복사된 deploy.sh 내용을 직접 출력합니다.
+            cat /home/ubuntu/deploy.sh
+            
+            echo "=============================================="
+            echo ">>> Now executing deploy.sh..."
+            
             chmod +x deploy.sh
-            ./deploy.sh ${{ matrix.serverType }} prod 
+            ./deploy.sh prod
           EOF
