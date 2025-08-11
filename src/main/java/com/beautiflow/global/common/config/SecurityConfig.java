@@ -73,7 +73,7 @@ public class SecurityConfig {
                                 "/users/auth/phone/verify-code",
 
                                 "/login/oauth2/code/kakao-customer",
-                                "/login/oauth2/code/kakao-staffr",
+                                "/login/oauth2/code/kakao-staff",
                                 "/users/signup",
                                 "/users/refresh",
                                 "/swagger-ui/**",
