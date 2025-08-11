@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/chats")
+@RequestMapping("/chat")
 public class ChatImageController {
 
 	private final S3Service s3Service;
