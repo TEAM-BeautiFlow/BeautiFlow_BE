@@ -4,6 +4,7 @@ import com.beautiflow.global.domain.BaseTimeEntity;
 import com.beautiflow.global.domain.SenderType;
 import com.beautiflow.user.domain.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -40,5 +41,6 @@ public class ChatMessage extends BaseTimeEntity {
 	private SenderType senderType;
 
 	private String content;
+	@Column(name = "image_url", length = 1024)
 	private String imageUrl;
 }

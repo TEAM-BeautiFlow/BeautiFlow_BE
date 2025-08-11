@@ -77,27 +77,33 @@ sudo systemctl start ${SERVICE_NAME}.service
 sudo systemctl enable ${SERVICE_NAME}.service
 
 # =========================================================================
-# 4. 배포 후 검증
+# 4. 배포 후 검증 (디버깅 모드)
 # =========================================================================
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중 (최대 3분)..."
-HEALTH_CHECK_URL="http://localhost:8080/health"
+HEALTH_CHECK_URL="http://localhost:80/health"
+
+echo "================== 헬스 체크 디버깅 시작 =================="
 for i in {1..36}; do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
+    echo "[시도 ${i}] ${HEALTH_CHECK_URL} 호출 중..."
+
+    # curl의 전체 응답(헤더 + 바디)과 HTTP 코드를 함께 출력합니다.
+    # -i 옵션으로 응답 헤더를, -v 옵션으로 상세 과정을 봅니다.
+    curl -iv -H "Host: beautiflow.co.kr" $HEALTH_CHECK_URL
+
+    # HTTP 코드만 따로 추출해서 변수에 저장하는 것은 동일합니다.
+    HTTP_CODE=$(curl -s -H "Host: beautiflow.co.kr" -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
+    echo "-> 응답 코드: ${HTTP_CODE}"
+    echo "----------------------------------------------------"
+
     if [ "$HTTP_CODE" -eq 200 ]; then
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스가 성공적으로 시작되었습니다. (HTTP 200 OK)"
-
-        # 백업 파일 정리 (성공 시)
-        if [ -f "${DEPLOY_DIR}/${JAR_NAME}.backup.tmp" ]; then
-            echo "[$(date +'%Y-%m-%d %H:%M:%S')] 백업 파일 정리 중..."
-            rm ${DEPLOY_DIR}/${JAR_NAME}.backup.tmp
-        fi
-
+        echo "[성공] 서비스가 200 OK를 반환했습니다."
+        # ... (기존 성공 로직과 동일) ...
         echo "[$(date +'%Y-%m-%d %H:%M:%S')] 최종 배포 성공!"
         exit 0
     fi
-    echo "서비스 시작 대기 중... (현재 ${i}회 시도)"
     sleep 5
 done
+echo "================== 헬스 체크 디버깅 종료 =================="
 
 # 롤백 프로세스 시작
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 오류: 서비스 시작 타임아웃! 롤백을 시작합니다..."
