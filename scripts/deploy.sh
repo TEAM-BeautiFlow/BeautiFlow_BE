@@ -1,129 +1,133 @@
 #!/bin/bash
 
-SERVER_TYPE=$1
-PROFILE=$2
-
-# 인자 유효성 검사
-if [ -z "$SERVER_TYPE" ] || [ -z "$PROFILE" ]; then
-    echo "오류: 서버 타입 또는 프로파일이 누락되었습니다."
-    echo "사용법: ./deploy.sh [server_type] [profile]"
-    echo "예시: ./deploy.sh api prod"
-    exit 1
-fi
-
 # ===============================
-# 1. 공통 설정 및 서버별 동적 설정
+# 1. 설정
 # ===============================
+PROFILE=$1
+SERVICE_NAME="beautiflow-api" # 서비스 이름을 'beautiflow-api'로 고정
+JAR_NAME="beautiflow-0.0.1-SNAPSHOT.jar"
 TAR_NAME="beautiflow.tar.gz"
-
-COMMON_JAR_NAME="beautiflow-0.0.1-SNAPSHOT.jar"
-
-SERVICE_NAME="beautiflow-${SERVER_TYPE}" # 예: beautiflow-api, beautiflow-chat, beautiflow-gateway
-
 DEPLOY_DIR="/opt/${SERVICE_NAME}"
 LOG_DIR="/var/log/${SERVICE_NAME}"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 배포 시작: ${SERVER_TYPE} 서버 (${PROFILE} 프로파일)"
-echo "서비스 이름: ${SERVICE_NAME}"
-echo "JAR 파일 (압축 내부): ${COMMON_JAR_NAME}"
-echo "배포 디렉토리: ${DEPLOY_DIR}"
-echo "로그 디렉토리: ${LOG_DIR}"
+# 인자 유효성 검사
+if [ -z "$PROFILE" ]; then
+    echo "오류: 프로파일이 누락되었습니다."
+    echo "사용법: ./deploy.sh [profile]"
+    echo "예시: ./deploy.sh prod"
+    exit 1
+fi
+
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 배포 시작: ${SERVICE_NAME} (${PROFILE} 프로파일)"
 
 # =========================================================================
-# 2. 배포 준비 단계
+# 2. 배포 준비
 # =========================================================================
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 디렉토리 생성 및 권한 설정..."
+sudo mkdir -p ${DEPLOY_DIR} ${LOG_DIR}
+sudo chown -R ubuntu:ubuntu ${DEPLOY_DIR} ${LOG_DIR}
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 배포 디렉토리 (${DEPLOY_DIR}) 생성 및 권한 설정 중..."
-sudo mkdir -p ${DEPLOY_DIR}
-sudo chown -R ubuntu:ubuntu ${DEPLOY_DIR}
-sudo chmod -R 755 ${DEPLOY_DIR}
+# 현재 실행 중인 JAR 파일 백업
+if [ -f "${DEPLOY_DIR}/${JAR_NAME}" ]; then
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 기존 JAR 파일 백업 중..."
+    cp ${DEPLOY_DIR}/${JAR_NAME} ${DEPLOY_DIR}/${JAR_NAME}.backup
+fi
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 로그 디렉토리 (${LOG_DIR}) 생성 및 권한 설정 중..."
-sudo mkdir -p ${LOG_DIR}
-sudo chown -R ubuntu:ubuntu ${LOG_DIR}
-sudo chmod -R 755 ${LOG_DIR}
-
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 기존 배포 파일 정리 중..."
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 기존 배포 파일 정리 및 압축 해제..."
 rm -rf ${DEPLOY_DIR}/*
-
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 압축 파일 해제 중: /home/ubuntu/${TAR_NAME} -> ${DEPLOY_DIR}/"
 tar -xzf /home/ubuntu/${TAR_NAME} -C ${DEPLOY_DIR}/
 
-# =========================================================================
-# 3. 서비스 관리 단계
-# =========================================================================
+# 백업 파일 복원
+if [ -f "${DEPLOY_DIR}/${JAR_NAME}.backup" ]; then
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 백업 파일 보존 중..."
+    cp ${DEPLOY_DIR}/${JAR_NAME}.backup ${DEPLOY_DIR}/${JAR_NAME}.backup.tmp
+fi
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 기존 서비스 중지 중: ${SERVICE_NAME}.service"
+# =========================================================================
+# 3. 서비스 관리
+# =========================================================================
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 기존 서비스 중지: ${SERVICE_NAME}.service"
 sudo systemctl stop ${SERVICE_NAME}.service || true
 sleep 5
 
 SERVICE_FILE_CONTENT="[Unit]
 Description=${SERVICE_NAME} Spring Boot Application
-After=syslog.target network.target
+After=network.target
 
 [Service]
-ExecStart=/usr/bin/java -Xms512m -Xmx1024m -jar ${DEPLOY_DIR}/${COMMON_JAR_NAME} --spring.profiles.active=${PROFILE},${SERVER_TYPE}
 User=ubuntu
+# 환경 변수 파일 경로를 지정합니다.
+EnvironmentFile=/etc/beautiflow/beautiflow-api.conf
+# Spring 프로파일은 'prod'와 'api'를 활성화합니다.
+ExecStart=/usr/bin/java -Xms512m -Xmx1024m -jar ${DEPLOY_DIR}/${JAR_NAME} --spring.profiles.active=${PROFILE},api
 SuccessExitStatus=143
-StandardOutput=file:${LOG_DIR}/stdout.log
-StandardError=file:${LOG_DIR}/stderr.log
-SyslogIdentifier=${SERVICE_NAME}
-Restart=always
-RestartSec=10s
+Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] systemd 서비스 파일 생성/업데이트 중: /etc/systemd/system/${SERVICE_NAME}.service"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] systemd 서비스 파일 생성/업데이트..."
 echo "${SERVICE_FILE_CONTENT}" | sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null
 
 sudo systemctl daemon-reload
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 새 서비스 시작 및 활성화 중: ${SERVICE_NAME}.service"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 새 서비스 시작 및 활성화..."
 sudo systemctl start ${SERVICE_NAME}.service
 sudo systemctl enable ${SERVICE_NAME}.service
 
 # =========================================================================
-# 4. 배포 후 검증 단계 (수정된 부분)
+# 4. 배포 후 검증 (디버깅 모드)
 # =========================================================================
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중 (최대 3분)..."
+HEALTH_CHECK_URL="http://localhost:80/health"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중..."
+echo "================== 헬스 체크 디버깅 시작 =================="
+for i in {1..36}; do
+    echo "[시도 ${i}] ${HEALTH_CHECK_URL} 호출 중..."
 
-HEALTH_CHECK_URL="http://localhost:8080/health"
+    # curl의 전체 응답(헤더 + 바디)과 HTTP 코드를 함께 출력합니다.
+    # -i 옵션으로 응답 헤더를, -v 옵션으로 상세 과정을 봅니다.
+    curl -iv -H "Host: beautiflow.co.kr" $HEALTH_CHECK_URL
 
-TIMEOUT=180 # 최대 180초 (3분) 대기 (애플리케이션 시작 시간에 따라 조정)
-INTERVAL=5  # 5초마다 확인
+    # HTTP 코드만 따로 추출해서 변수에 저장하는 것은 동일합니다.
+    HTTP_CODE=$(curl -s -H "Host: beautiflow.co.kr" -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
+    echo "-> 응답 코드: ${HTTP_CODE}"
+    echo "----------------------------------------------------"
 
-for i in $(seq 1 $(($TIMEOUT / $INTERVAL))); do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
-
-    # HTTP 상태 코드가 200 (OK)인지 확인
     if [ "$HTTP_CODE" -eq 200 ]; then
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스가 성공적으로 시작되었습니다. HTTP 상태 코드: ${HTTP_CODE}"
-        break # 성공 시 루프 종료
-    else
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 시작 대기 중... HTTP 상태 코드: ${HTTP_CODE} (현재 ${i}회 시도, 총 $((i * INTERVAL))/${TIMEOUT}초 경과)"
-        sleep $INTERVAL # 다음 시도까지 대기
+        echo "[성공] 서비스가 200 OK를 반환했습니다."
+        # ... (기존 성공 로직과 동일) ...
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 최종 배포 성공!"
+        exit 0
     fi
-
-    # 타임아웃 검사
-    if [ $i -eq $(($TIMEOUT / $INTERVAL)) ]; then
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 오류: 서비스 시작 타임아웃! ${HEALTH_CHECK_URL} 응답 없음 또는 비정상."
-        # 추가 디버깅 정보 출력
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] systemd 서비스 로그 확인:"
-        journalctl -u ${SERVICE_NAME}.service --no-pager -n 50 # 최근 50줄 로그 출력
-        exit 1 # 스크립트 실패
-    fi
+    sleep 5
 done
+echo "================== 헬스 체크 디버깅 종료 =================="
 
-# 서비스가 active 상태인지 최종 확인
-SERVICE_STATUS=$(sudo systemctl is-active ${SERVICE_NAME}.service)
+# 롤백 프로세스 시작
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] 오류: 서비스 시작 타임아웃! 롤백을 시작합니다..."
 
-if [ "$SERVICE_STATUS" = "active" ]; then
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 최종 배포 성공! ${SERVICE_NAME}.service가 활성화되었습니다."
-    exit 0 # 성공 시 스크립트 종료
+# 백업 파일이 있는 경우 복원
+if [ -f "${DEPLOY_DIR}/${JAR_NAME}.backup.tmp" ]; then
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 이전 버전으로 롤백 중..."
+    mv ${DEPLOY_DIR}/${JAR_NAME}.backup.tmp ${DEPLOY_DIR}/${JAR_NAME}
+
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 롤백된 서비스 재시작 중..."
+    sudo systemctl restart ${SERVICE_NAME}.service
+
+    # 롤백 후 헬스 체크
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 롤백 후 서비스 헬스 체크 중..."
+    sleep 10
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
+    if [ "$HTTP_CODE" -eq 200 ]; then
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 롤백 성공! 이전 버전으로 서비스가 복원되었습니다."
+    else
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] 경고: 롤백 후에도 서비스가 정상 동작하지 않습니다."
+    fi
 else
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 최종 배포 실패! ${SERVICE_NAME}.service가 활성화되지 않았습니다."
-    echo "자세한 내용은 로그 파일 (${LOG_DIR}/stdout.log, ${LOG_DIR}/stderr.log) 및 'journalctl -u ${SERVICE_NAME}.service --no-pager' 를 확인하세요."
-    exit 1 # 실패 시 스크립트 종료
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] 경고: 롤백할 백업 파일이 없습니다."
 fi
+
+echo "로그를 확인해주세요: journalctl -u ${SERVICE_NAME}.service -n 50"
+exit 1
