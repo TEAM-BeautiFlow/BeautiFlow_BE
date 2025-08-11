@@ -40,8 +40,6 @@ public class RedisConfig {
         if (useSsl) {
             clientConfig = LettuceClientConfiguration.builder()
                 .useSsl()
-                //여기
-                .disablePeerVerification()
                 .build();
         } else {
             clientConfig = LettuceClientConfiguration.builder().build();
@@ -68,8 +66,6 @@ public class RedisConfig {
         if (useSsl) {
             clientConfiguration = LettuceClientConfiguration.builder()
                 .useSsl()
-                //여기
-                .disablePeerVerification()
                 .build();
         } else {
             clientConfiguration = LettuceClientConfiguration.builder().build();
@@ -110,8 +106,6 @@ public class RedisConfig {
         SingleServerConfig singleServerConfig = config.useSingleServer();
         config.useSingleServer()
             .setAddress("rediss://" + host + ":" + port);
-        //여기
-        singleServerConfig.setSslEnableEndpointIdentification(false);
         return Redisson.create(config);
     }
 

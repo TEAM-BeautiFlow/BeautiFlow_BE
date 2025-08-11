@@ -1,18 +1,33 @@
 package com.beautiflow.shop.service;
 
 import com.beautiflow.global.common.error.ShopErrorCode;
+import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.s3.S3Service;
 import com.beautiflow.global.common.s3.S3UploadResult;
+import com.beautiflow.global.domain.WeekDay;
+import com.beautiflow.reservation.repository.TreatmentImageRepository;
+import com.beautiflow.reservation.repository.TreatmentRepository;
 import com.beautiflow.shop.domain.BusinessHour;
+import com.beautiflow.shop.domain.RegularHoliday;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopImage;
+import com.beautiflow.shop.dto.BusinessHourRes;
 import com.beautiflow.shop.dto.BusinessHourUpdateReq;
+import com.beautiflow.shop.dto.RegularHolidayDto;
 import com.beautiflow.shop.dto.ShopInfoRes;
 import com.beautiflow.shop.dto.ShopUpdateReq;
+import com.beautiflow.shop.dto.TreatmentUpsertReq;
+import com.beautiflow.shop.dto.TreatmentUpsertRes;
 import com.beautiflow.shop.repository.ShopImageRepository;
 import com.beautiflow.shop.repository.ShopRepository;
+import com.beautiflow.treatment.domain.Treatment;
+import com.beautiflow.treatment.domain.TreatmentImage;
+import com.beautiflow.treatment.dto.TreatmentUpdateReq;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +40,8 @@ public class ShopManageService {
   private final ShopRepository shopRepository;
   private final ShopImageRepository shopImageRepository;
   private final S3Service s3Service;
+  private final TreatmentRepository treatmentRepository;
+  private final TreatmentImageRepository treatmentImageRepository;
 
   // 매장 상세 정보 조회
   @Transactional(readOnly = true)
@@ -61,32 +78,191 @@ public class ShopManageService {
     return ShopInfoRes.from(shop);
   }
 
-  // 매장 영업 시간 수정
-  @Transactional
-  public void updateBusinessHours(Long shopId, BusinessHourUpdateReq requestDto) {
-    // 1. 매장 엔티티 조회
+  @Transactional(readOnly = true)
+  public BusinessHourRes getBusinessHours(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
-    // 2. 기존 영업시간 정보 모두 삭제
-    // orphanRemoval=true 덕분에, 리스트를 비우면 JPA가 알아서 DELETE 쿼리를 실행함
+    List<BusinessHour> businessHours = shop.getBusinessHours();
+
+    // BusinessHour 엔티티 리스트를 BusinessHourRes DTO로 변환
+    return BusinessHourRes.from(businessHours);
+  }
+
+  @Transactional
+  public void updateRegularHolidays(Long shopId, List<RegularHolidayDto> requestDtos) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    // 기존 정기 휴무 규칙 모두 삭제
+    shop.getRegularHolidays().clear();
+
+    // 새로운 규칙으로 다시 설정
+    if (requestDtos != null) {
+      List<RegularHoliday> newHolidays = requestDtos.stream()
+          .map(dto -> RegularHoliday.builder()
+              .shop(shop)
+              .cycle(dto.getCycle())
+              .dayOfWeek(dto.getDayOfWeek())
+              .build())
+          .toList();
+      shop.getRegularHolidays().addAll(newHolidays);
+    }
+  }
+
+  @Transactional(readOnly = true)
+  public List<RegularHolidayDto> getRegularHolidays(Long shopId) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    return shop.getRegularHolidays().stream()
+        .map(RegularHolidayDto::from)
+        .collect(Collectors.toList());
+  }
+
+  // 매장 영업 시간 수정
+  @Transactional
+  public void updateBusinessHours(Long shopId, BusinessHourUpdateReq requestDto) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
     shop.getBusinessHours().clear();
 
-    // 3. 요청받은 새로운 영업시간 정보로 다시 채우기
-    List<BusinessHour> newBusinessHours = requestDto.dailySchedules().stream()
-        .map(scheduleDto -> BusinessHour.builder()
-            .shop(shop) // 부모(Shop)와의 연관관계 설정
-            .dayOfWeek(scheduleDto.dayOfWeek())
-            .isClosed(scheduleDto.isClosed())
-            .openTime(scheduleDto.isClosed() ? null : scheduleDto.openTime()) // 휴무일이면 시간은 null
-            .closeTime(scheduleDto.isClosed() ? null : scheduleDto.closeTime())
-            .breakStart(scheduleDto.isClosed() ? null : scheduleDto.breakStart())
-            .breakEnd(scheduleDto.isClosed() ? null : scheduleDto.breakEnd())
-            .build())
+    List<WeekDay> closedDays = requestDto.regularClosedDays();
+
+    List<BusinessHour> newBusinessHours = EnumSet.allOf(WeekDay.class).stream()
+        .map(day -> {
+          boolean isClosed = closedDays != null && closedDays.contains(day);
+          return BusinessHour.builder()
+              .shop(shop)
+              .dayOfWeek(day)
+              .isClosed(isClosed)
+              .openTime(isClosed ? null : requestDto.openTime())
+              .closeTime(isClosed ? null : requestDto.closeTime())
+              .breakStart(isClosed ? null : requestDto.breakStart())
+              .breakEnd(isClosed ? null : requestDto.breakEnd())
+              .build();
+        })
         .toList();
 
-    // 4. Shop 엔티티에 새로 만든 영업시간 목록을 추가
     shop.getBusinessHours().addAll(newBusinessHours);
+  }
+
+  @Transactional
+  public List<TreatmentUpsertRes> upsertTreatmentsWithoutImages(Long shopId, List<TreatmentUpsertReq> requestDtos) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+
+    List<Treatment> savedTreatments = requestDtos.stream()
+        .map(dto -> {
+          if (dto.id() == null) {
+            // 신규 생성
+            Treatment newTreatment = Treatment.builder()
+                .shop(shop)
+                .category(dto.category())
+                .name(dto.name())
+                .price(dto.price())
+                .durationMinutes(dto.durationMinutes())
+                .description(dto.description())
+                .build();
+            return treatmentRepository.save(newTreatment);
+          } else {
+            // 기존 수정
+            Treatment existingTreatment = treatmentRepository.findByShopAndId(shop, dto.id())
+                .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
+
+            TreatmentUpdateReq updateDto = new TreatmentUpdateReq(
+                dto.category(), dto.name(), dto.price(),
+                dto.durationMinutes(), dto.description(), dto.optionGroups()
+            );
+            existingTreatment.updateTreatment(updateDto);
+            return existingTreatment;
+          }
+        })
+        .toList();
+
+    return savedTreatments.stream()
+        .map(TreatmentUpsertRes::from)
+        .collect(Collectors.toList());
+  }
+
+  // [!!!] 2. 이미지만 업로드하는 새로운 서비스 메서드
+  @Transactional
+  public void uploadTreatmentImages(Long shopId, Long treatmentId, List<MultipartFile> images) {
+    Shop shop = shopRepository.findById(shopId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
+    Treatment treatment = treatmentRepository.findByShopAndId(shop, treatmentId)
+        .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
+
+    if (images != null && !images.isEmpty()) {
+      // 이전에 구현했던 이미지 업로드 헬퍼 메서드를 호출합니다.
+      uploadNewTreatmentImages(treatment, images);
+    }
+  }
+
+  @Transactional
+  public void deleteTreatmentImages(Long shopId, Long treatmentId, Long imageId) {
+    // 1. 매장과 시술 정보가 유효한지 먼저 확인 (보안 강화)
+    if (!treatmentRepository.existsByIdAndShopId(treatmentId, shopId)) {
+      throw new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND);
+    }
+
+    // 2. 삭제할 이미지 엔티티를 찾음
+    TreatmentImage image = treatmentImageRepository.findById(imageId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND));
+
+    // 3. (중요) 해당 이미지가 올바른 시술에 속해 있는지 다시 한번 확인
+    if (!image.getTreatment().getId().equals(treatmentId)) {
+      // 다른 시술의 이미지 ID를 추측해서 삭제하려는 시도를 방지
+      throw new BeautiFlowException(ShopErrorCode.UNAUTHORIZED_SHOP_ACCESS);
+    }
+
+    // 4. S3에서 파일 삭제
+    if (image.getStoredFilePath() != null && !image.getStoredFilePath().isEmpty()) {
+      s3Service.deleteFile(image.getStoredFilePath());
+    }
+
+    // 5. DB에서 이미지 정보 삭제
+    treatmentImageRepository.delete(image);
+  }
+
+  private void uploadNewTreatmentImages(Treatment treatment, List<MultipartFile> newImages) {
+    for (MultipartFile file : newImages) {
+      String dirName = String.format("shops/%d/treatments/%d", treatment.getShop().getId(), treatment.getId());
+
+      // 2. S3에 파일 업로드
+      S3UploadResult result = s3Service.uploadFile(file, dirName);
+
+      // 3. DB에 저장할 TreatmentImage 엔티티 생성
+      TreatmentImage newImage = TreatmentImage.builder()
+          .treatment(treatment)
+          .originalFileName(file.getOriginalFilename())
+          .storedFilePath(result.fileKey())
+          .imageUrl(result.imageUrl())
+          .build();
+
+      // 4. 연관관계 설정 (JPA가 관리하도록 리스트에 추가)
+      treatment.getImages().add(newImage);
+
+      treatmentImageRepository.save(newImage);
+    }
+  }
+
+  @Transactional
+  public void deleteTreatment(Long shopId, Long treatmentId) {
+    List<Treatment> treatments = treatmentRepository.findByShopIdAndId(shopId, treatmentId);
+
+    if (treatments.isEmpty()) {
+      throw new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND);
+    }
+
+    Treatment treatment = treatments.get(0);
+
+    treatment.getImages().forEach(image -> {
+      s3Service.deleteFile(image.getStoredFilePath());
+    });
+
+    treatmentRepository.delete(treatment);
   }
 
   // 매장 사업자 등록증 이미지 조회

@@ -15,4 +15,7 @@ public interface TreatmentRepository extends JpaRepository<Treatment, Long> {
 
   // 카테고리 필터링
   List<Treatment> findByShopIdAndCategory(Long shopId, TreatmentCategory category);
+  List<Treatment> findByShopIdAndId(Long shopId, Long treatmentId);
+
+  boolean existsByIdAndShopId(Long id, Long shopId);
 }

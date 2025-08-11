@@ -64,6 +64,10 @@ public class Shop {
 	@OneToMany(mappedBy = "shop")
 	private final List<Treatment> treatments = new ArrayList<>();
 
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<RegularHoliday> regularHolidays = new ArrayList<>();
+
 
 	public void updateDetails(ShopUpdateReq requestDto) {
 		if (requestDto.shopName() != null) {
