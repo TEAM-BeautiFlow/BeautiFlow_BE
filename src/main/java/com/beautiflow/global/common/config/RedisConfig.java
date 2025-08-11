@@ -99,7 +99,7 @@ public class RedisConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer()
-            .setAddress("rediss://" + host + ":" + port);
+            .setAddress("redis://" + host + ":" + port);
         return Redisson.create(config);
     }
 
