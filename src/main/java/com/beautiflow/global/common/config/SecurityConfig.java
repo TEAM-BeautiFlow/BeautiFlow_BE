@@ -71,6 +71,9 @@ public class SecurityConfig {
                                 "/connect/**",
                                 "/users/auth/phone/send-code",
                                 "/users/auth/phone/verify-code",
+
+                                "/login/oauth2/code/kakao-customer",
+                                "/login/oauth2/code/kakao-staff",
                                 "/users/signup",
                                 "/users/refresh",
                                 "/swagger-ui/**",
