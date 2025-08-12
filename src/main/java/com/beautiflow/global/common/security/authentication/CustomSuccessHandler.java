@@ -55,7 +55,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         redisTokenUtil.setValues(loginKey, om.writeValueAsString(payload), LOGIN_KEY_TTL);
 
         response.setStatus(HttpServletResponse.SC_FOUND);
-        String frontCallbackUrl = "/";
+        String frontCallbackUrl = "http://localhost:5173";
         response.setHeader("Location", frontCallbackUrl + "?loginKey=" + loginKey);
     }
 }
