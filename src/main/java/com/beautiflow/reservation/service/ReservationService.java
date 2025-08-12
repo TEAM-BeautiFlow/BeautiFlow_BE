@@ -250,6 +250,7 @@ public class ReservationService {
                     .map(optionItem -> TempReservationOption.builder()
                             .tempReservation(tempReservation)
                             .optionItem(optionItem)
+                            .optionGroup(optionItem.getOptionGroup())
                             .build())
                     .collect(Collectors.toList());
             tempReservationOptionRepository.saveAll(tempReservationOptions);
@@ -594,7 +595,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationStatusRes> getReservationsByStatus(ReservationStatus status) {
-        List<Reservation> reservations = reservationRepository.findByStatus(status);
+        List<Reservation> reservations = reservationRepository.findAllByStatusWithOptionsAndGroups(status);
 
         return reservations.stream()
                 .map(ReservationStatusRes::from)
