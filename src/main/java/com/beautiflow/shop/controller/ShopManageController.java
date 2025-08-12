@@ -40,13 +40,14 @@ public class ShopManageController {
 
   private final ShopManageService shopManageService;
 
-  @Operation(summary = "매장 상세 정보 조회", description = "shopId로 매장 상세 정보 조회")
-  @GetMapping
-  @AuthCheck(ShopRole.OWNER)
-  public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(@PathVariable Long shopId) {
-    ShopInfoRes shopDetails = shopManageService.getShopDetails(shopId);
-    return ResponseEntity.ok(ApiResponse.success(shopDetails));
-  }
+  // 상세 정보 api는 shopInfoController api 사용
+//  @Operation(summary = "매장 상세 정보 조회", description = "shopId로 매장 상세 정보 조회")
+//  @GetMapping
+//  @AuthCheck(ShopRole.OWNER)
+//  public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(@PathVariable Long shopId) {
+//    ShopInfoRes shopDetails = shopManageService.getShopDetails(shopId);
+//    return ResponseEntity.ok(ApiResponse.success(shopDetails));
+//  }
 
   @Operation(summary = "매장 정보 및 이미지 수정", description = "shopId로 매장 상세 정보/이미지 수정, 수정할 부분만 body에 포함시키면 됨")
   @PatchMapping
@@ -62,7 +63,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 영업시간 조회", description = "shopId로 매장 영업시간 정보 조회")
   @GetMapping("/business-hours")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<BusinessHourRes>> getBusinessHours(
       @Parameter(description = "매장 ID", required = true)
       @PathVariable("shopId") Long shopId
@@ -95,7 +95,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 정기 휴무 조회", description = "shopId로 매장의 정기 휴무 규칙 목록을 조회합니다.")
   @GetMapping("/holidays")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<List<RegularHolidayDto>>> getRegularHolidays(
       @Parameter(description = "매장 ID", required = true) @PathVariable Long shopId) {
     List<RegularHolidayDto> response = shopManageService.getRegularHolidays(shopId);
