@@ -12,11 +12,14 @@ import com.beautiflow.reservation.dto.UpdateReservationStatusRes;
 import com.beautiflow.shop.service.CalendarCheckService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,13 +32,13 @@ public class CalendarCheckController {
 
   private final CalendarCheckService calendarCheckService;
 
-  @GetMapping("/months") //월별 조회
-  @Operation(summary = "월별 예약 유무 조회", description = "특정 월에 예약된 날짜별 예약 개수를 조회합니다.")
-  public ResponseEntity<ApiResponse<List<ReservationMonthRes>>> getReservedDates(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @RequestParam String month
+  @GetMapping("/months") // 요청 파라미터 없이 당일 3개만 반환
+  @Operation(summary = "당일 예약 현황", description = "오늘 기준 PENDING/COMPLETED/CANCELLED 건수를 반환합니다.")
+  public ResponseEntity<ApiResponse<ReservationMonthRes>> getTodaySummary(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User
   ) {
-    List<ReservationMonthRes> result = calendarCheckService.getReservedDates(customOAuth2User.getUserId(), month);
+    ReservationMonthRes result =
+        calendarCheckService.getTodaySummary(customOAuth2User.getUserId());
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -60,16 +63,28 @@ public class CalendarCheckController {
 
 
   @GetMapping("/timeslots/paged")
-  @Operation(summary = "특정 날짜 예약 리스트 조회 (페이징)")
-  public ResponseEntity<ApiResponse<CommonPageResponse<ReservationListRes>>> getReservationsByDate(
+  @Operation(summary = "월별 예약 리스트 조회 (페이징)", description = "요청한 월(yyyy-MM)의 예약을 날짜 포함해 페이지로 반환합니다.")
+  public ResponseEntity<ApiResponse<CommonPageResponse<ReservationListRes>>> getReservationsByMonth(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
       @ParameterObject Pageable pageable
   ) {
-    Page<ReservationListRes> page = calendarCheckService.getReservationsByDate(customOAuth2User.getUserId(), date, pageable);
-    CommonPageResponse<ReservationListRes> response = CommonPageResponse.of(page);
-    return ResponseEntity.ok(ApiResponse.success(response));
-  }//프론트에게 어떤식으로 반환값을 받고 싶은지
+    // 기본 정렬: 날짜 ASC → 시작시간 ASC
+    Pageable sortedPageable = PageRequest.of(
+        pageable.getPageNumber(),
+        pageable.getPageSize(),
+        Sort.by("reservationDate").ascending()
+            .and(Sort.by("startTime").ascending())
+    );
+
+    Page<ReservationListRes> page =
+        calendarCheckService.getReservationsByMonth(customOAuth2User.getUserId(), month, sortedPageable);
+
+    return ResponseEntity.ok(ApiResponse.success(CommonPageResponse.of(page)));
+  }
+
+
+
 
 
 }
