@@ -83,6 +83,7 @@ public class SecurityConfig {
                     "/health",
                     "/shops/{shopId}",
                     "/shops/{shopId}/treatments",
+                    "/shops/{shopId}/treatments/{treatmentId}",
                     "/shops/{shopId}/notices"
                 ).permitAll()
                 .anyRequest().authenticated())
