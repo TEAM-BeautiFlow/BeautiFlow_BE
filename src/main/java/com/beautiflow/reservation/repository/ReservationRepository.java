@@ -73,7 +73,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
-
     @Query("""
     SELECT r FROM Reservation r
     JOIN FETCH r.designer d
@@ -92,6 +91,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     WHERE r.status = :status
 """)
     List<Reservation> findAllByStatusWithOptionsAndGroups(@Param("status") ReservationStatus status);
-
 
 }
