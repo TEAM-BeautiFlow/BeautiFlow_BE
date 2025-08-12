@@ -35,7 +35,7 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(shopDetails));
   }
 
-  // 매장 정보 및 이미지 수정 api
+  // 매장 정보 및 이미지 수정
   @PatchMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
       @PathVariable Long shopId,
