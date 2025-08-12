@@ -1,6 +1,7 @@
 package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.domain.TreatmentCategory;
 import com.beautiflow.shop.dto.ShopInfoRes;
 import com.beautiflow.shop.dto.ShopUpdateReq;
@@ -9,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,7 +31,9 @@ public class ShopManageController {
 
   // 매장 상세 정보 조회
   @GetMapping("/{shopId}")
-  public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(@PathVariable Long shopId) {
+  public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(
+      @PathVariable Long shopId,
+      @AuthenticationPrincipal CustomOAuth2User currentUser) {
     ShopInfoRes shopDetails = shopManageService.getShopDetails(shopId);
 
     return ResponseEntity.ok(ApiResponse.success(shopDetails));
@@ -40,6 +44,7 @@ public class ShopManageController {
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
       @PathVariable Long shopId,
       @RequestPart("requestDto") ShopUpdateReq requestDto,
+      @AuthenticationPrincipal CustomOAuth2User currentUser,
       @RequestParam(value = "newImages", required = false) List<MultipartFile> newImages
   ) {
     ShopInfoRes updatedShop = shopManageService.updateShopDetailsAndImages(shopId, requestDto, newImages);
@@ -48,7 +53,9 @@ public class ShopManageController {
 
   // 매장 사업자 등록증 이미지 조회
   @GetMapping("/{shopId}/license-image")
-  public ResponseEntity<ApiResponse<String>> getLicenseImage(@PathVariable Long shopId) {
+  public ResponseEntity<ApiResponse<String>> getLicenseImage(
+      @PathVariable Long shopId,
+      @AuthenticationPrincipal CustomOAuth2User currentUser) {
     String licenseImageUrl = shopManageService.getLicenseImageUrl(shopId);
     return ResponseEntity.ok(ApiResponse.success(licenseImageUrl));
   }
@@ -57,7 +64,8 @@ public class ShopManageController {
   @PostMapping(value = "/{shopId}/license-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<String>> uploadLicenseImage(
       @PathVariable Long shopId,
-      @RequestParam(value = "licenseImage") MultipartFile licenseImage
+      @RequestParam(value = "licenseImage") MultipartFile licenseImage,
+      @AuthenticationPrincipal CustomOAuth2User currentUser
   ){
     String licenseImageUrl = shopManageService.uploadLicenseImage(shopId, licenseImage);
     return ResponseEntity.ok(ApiResponse.success(licenseImageUrl));
