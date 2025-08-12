@@ -43,6 +43,7 @@ public class LoginService {
             JsonNode node = objectMapper.readTree(json);
             String kakaoId = node.path("kakaoId").asText();
             String provider = node.path("provider").asText();
+            String email = node.path("email").asText();
 
             boolean exists = userRepository.existsByKakaoId(kakaoId);
             System.out.println(kakaoId + ":" + provider + ":" + exists);
@@ -51,6 +52,7 @@ public class LoginService {
                 return LoginRes.builder()
                         .kakaoId(kakaoId)
                         .provider(provider)
+                        .email(email)
                         .isNewUser("true")
                         .accessToken(null)
                         .refreshToken(null)
@@ -61,12 +63,13 @@ public class LoginService {
 
                 if (user != null) {
 
-                    String accessToken = jwtUtil.createAccessToken(provider, kakaoId, user.getId());
+                    String accessToken = jwtUtil.createAccessToken(provider, kakaoId, user.getId(), email);
                     String refreshToken = jwtUtil.createRefreshToken(kakaoId, user.getId());
 
                     return LoginRes.builder()
                             .kakaoId(kakaoId)
                             .provider(provider)
+                            .email(email)
                             .isNewUser("false")
                             .accessToken(accessToken)
                             .refreshToken(refreshToken)

@@ -9,6 +9,7 @@ public record LoginRes(
         String kakaoId,
         String provider,
         String isNewUser,
+        String email,
         String accessToken,
         String refreshToken
 
