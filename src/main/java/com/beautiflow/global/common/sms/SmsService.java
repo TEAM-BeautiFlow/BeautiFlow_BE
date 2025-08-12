@@ -26,8 +26,7 @@ public class SmsService {
 		this.messageService = NurigoApp.INSTANCE.initialize(
 			smsProperties.getApiKey(),
 			smsProperties.getApiSecret(),
-			"https://api.coolsms.co.kr"
-		);
+			"https://api.solapi.com"		);
 	}
 
 	public void sendNewContactAlert(String toPhoneNumber) {
