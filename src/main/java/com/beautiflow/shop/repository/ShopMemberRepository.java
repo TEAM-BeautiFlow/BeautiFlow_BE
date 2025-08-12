@@ -1,6 +1,7 @@
 package com.beautiflow.shop.repository;
 
 import com.beautiflow.global.domain.ApprovalStatus;
+import com.beautiflow.global.domain.ShopRole;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.user.domain.User;
@@ -16,4 +17,5 @@ public interface ShopMemberRepository extends JpaRepository<ShopMember,Long> {
 
     Optional<ShopMember> findByShopIdAndUserIdAndStatus(Long shopId, Long userId, ApprovalStatus status);
 
+    boolean existsByUser_IdAndShop_IdAndRole(Long userId, Long shopId, ShopRole role);
 }
