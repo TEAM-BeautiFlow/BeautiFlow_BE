@@ -7,6 +7,7 @@ import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import io.lettuce.core.ScanIterator;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -73,6 +74,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByDesignerAndStatus(User designer, ReservationStatus status);
 
+
     @Query("""
     SELECT r FROM Reservation r
     JOIN FETCH r.designer d
@@ -84,6 +86,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDesignerIdAndCustomerIdWithAllRelations(Long designerId, Long customerId);
 
 
+    //고객자동등록  쿼리
+    @Query(""" 
+        select r from Reservation r
+        where r.reservationDate = :targetDate
+          and r.endTime <= :cutoff
+          and r.status in (
+              com.beautiflow.global.domain.ReservationStatus.CONFIRMED
+          )
+    """)
+    List<Reservation> findAutoCompleteTargets(
+            @Param("targetDate") LocalDate targetDate,
+            @Param("cutoff") LocalTime cutoff
+    );
     @Query("""
     SELECT DISTINCT r FROM Reservation r
     LEFT JOIN FETCH r.reservationOptions ro
