@@ -11,6 +11,7 @@ import com.beautiflow.global.common.error.ManagedCustomerErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.reservation.repository.ReservationRepository;
+import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
 import java.util.List;
@@ -101,6 +102,13 @@ public class ManagedCustomerService {
     managedCustomerRepository.delete(managed);
   }
 
+  @Transactional
+  public void autoRegister(User designer, User customer, Shop shop) {
+    boolean exists = managedCustomerRepository.existsByDesignerAndCustomer(designer, customer);
+    if (!exists) {
+      managedCustomerRepository.save(new ManagedCustomer(designer, customer, null, null));
+    }
+  }
 
 
 }

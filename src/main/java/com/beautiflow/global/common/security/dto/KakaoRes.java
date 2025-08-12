@@ -1,4 +1,4 @@
-package com.beautiflow.user.dto;
+package com.beautiflow.global.common.security.dto;
 
 import java.util.Map;
 import lombok.Builder;

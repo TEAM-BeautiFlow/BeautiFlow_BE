@@ -12,6 +12,17 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(
+		name = "managed_customer",
+		uniqueConstraints = @UniqueConstraint(
+				name = "uk_designer_customer",
+				columnNames = {"designer_id", "customer_id"}
+		),
+		indexes = {
+				@Index(name = "idx_designer", columnList = "designer_id"),
+				@Index(name = "idx_customer", columnList = "customer_id")
+		}
+)
 public class ManagedCustomer {
 
 	@Id

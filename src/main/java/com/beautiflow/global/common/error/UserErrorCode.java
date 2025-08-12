@@ -25,7 +25,8 @@ public enum UserErrorCode implements ErrorCode {
     USER_STYLE_NOT_FOUND(HttpStatus.NOT_FOUND,"USER_014","저장된 스타일이 존재하지 않습니다."),
     USER_STYLE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST,"USER_015","이미 해당 사용자의 스타일이 저장되어 있습니다."),
 	USER_STYLE_IMAGE_NOT_FOUND(HttpStatus.BAD_REQUEST,"USER_016","요청하신 사용자 스타일 이미지 ID를 찾을 수 없습니다."),
-	USER_ALREADY_DELETED(HttpStatus.BAD_REQUEST,"USER_017","이미 탈퇴한 사용자입니다.");
+	USER_ALREADY_DELETED(HttpStatus.BAD_REQUEST,"USER_017","이미 탈퇴한 사용자입니다."),
+	LOGIN_KEY_REQUIRED(HttpStatus.BAD_REQUEST,"USER_018","로그인 키가 필요합니다.");
 
 
 

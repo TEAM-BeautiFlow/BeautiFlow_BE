@@ -16,7 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +37,7 @@ public class ChatImageController {
 	private final RedisPubSubService pubSubService;
 
 	@PostMapping(value = "/{roomId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public void uploadImageAndBroadcast(
+	public ResponseEntity<S3UploadResult> uploadImageAndBroadcast(
 		@PathVariable Long roomId,
 		@RequestPart("file") MultipartFile file,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
@@ -60,6 +63,9 @@ public class ChatImageController {
 			.registerModule(new JavaTimeModule())
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		pubSubService.publish("chat", om.writeValueAsString(req));
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(uploaded);
+
 	}
 
 	private boolean isParticipant(ChatRoom room, Long userId) {
