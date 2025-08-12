@@ -14,6 +14,7 @@ public record CustomerReservationItem(
     String imageUrl,
     String shopName,
     String designerName,
+    String treatmentName,
     List<String> optionNames,
     LocalDate date,
     LocalTime time,
@@ -26,6 +27,10 @@ public record CustomerReservationItem(
         extractFirstImage(reservation.getStyleImageUrls()),
         reservation.getShop().getShopName(),
         reservation.getDesigner().getName(),
+        reservation.getReservationTreatments().stream()
+            .findFirst()
+            .map(rt -> rt.getTreatment().getName())
+            .orElse(null),
         reservation.getReservationOptions().stream()
             .map(ro -> ro.getOptionItem().getName())
             .toList(),
