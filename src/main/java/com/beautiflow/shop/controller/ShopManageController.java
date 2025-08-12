@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,10 +36,10 @@ public class ShopManageController {
   }
 
   // 매장 정보 및 이미지 수정
-  @PatchMapping("/{shopId}")
+  @PatchMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
       @PathVariable Long shopId,
-      @ModelAttribute ShopUpdateReq requestDto,
+      @RequestPart("requestDto") ShopUpdateReq requestDto,
       @RequestParam(value = "newImages", required = false) List<MultipartFile> newImages
   ) {
     ShopInfoRes updatedShop = shopManageService.updateShopDetailsAndImages(shopId, requestDto, newImages);
