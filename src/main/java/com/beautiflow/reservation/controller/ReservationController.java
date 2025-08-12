@@ -6,6 +6,7 @@ import com.beautiflow.global.common.error.UserErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
+import com.beautiflow.global.common.success.CommonSuccessCode;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.domain.TempReservation;
@@ -25,6 +26,7 @@ import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 import com.nimbusds.oauth2.sdk.SuccessResponse;
+import com.sun.net.httpserver.Authenticator.Success;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,7 +88,7 @@ public class ReservationController {
 
         reservationService.processReservationFlow(shopId, customer, request);
 
-        return ResponseEntity.ok("예약 작업이 성공적으로 처리되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success("예약 작업을 성공했습니다."));
     }
 
     @Operation(summary = "30일 이내 예약 가능 날짜 조회", description = "오늘부터 30일 이내 날짜 중, 휴무일/예약 마감 제외하고 예약 가능한 날짜를 반환합니다.")
