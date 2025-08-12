@@ -4,7 +4,8 @@ public record SignUpReq(
         String kakaoId,
         String provider,
         String name,
-        String contact
+        String contact,
+        String email
 ) {
 
 }

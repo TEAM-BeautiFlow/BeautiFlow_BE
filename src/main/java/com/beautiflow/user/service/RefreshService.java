@@ -28,10 +28,11 @@ public class RefreshService {
 
         String kakaoId = claims.get("kakaoId", String.class);
         String provider = claims.get("provider", String.class);
+        String email = claims.get("email", String.class);
         Long userId = claims.get("userId", Number.class).longValue();
 
 
-        String newAccessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
+        String newAccessToken = jwtUtil.createAccessToken(provider, kakaoId, userId, email);
 
         return new TokenRes(newAccessToken);
     }
