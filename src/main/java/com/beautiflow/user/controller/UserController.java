@@ -3,10 +3,13 @@ package com.beautiflow.user.controller;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import com.beautiflow.global.common.ApiResponse;
+import com.beautiflow.user.dto.LoginReq;
+import com.beautiflow.user.dto.LoginRes;
 import com.beautiflow.user.dto.SignUpReq;
 import com.beautiflow.user.dto.SignUpRes;
 import com.beautiflow.user.dto.TokenReq;
 import com.beautiflow.user.dto.TokenRes;
+import com.beautiflow.user.service.LoginService;
 import com.beautiflow.user.service.UserExitService;
 import com.beautiflow.user.service.RefreshService;
 import com.beautiflow.user.dto.UserStylePatchReq;
@@ -38,6 +41,13 @@ public class UserController {
     private final RefreshService refreshService;
     private final UserExitService userExitService;
     private final UserStyleService userStyleService;
+    private final LoginService loginService;
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginRes>> login(@RequestBody LoginReq loginReq){
+        LoginRes loginRes = loginService.login(loginReq);
+        return ResponseEntity.ok(ApiResponse.success(loginRes));
+    }
 
 
     @PostMapping("/signup")

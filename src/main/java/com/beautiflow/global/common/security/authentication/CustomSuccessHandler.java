@@ -1,13 +1,19 @@
 package com.beautiflow.global.common.security.authentication;
 
 import com.beautiflow.global.common.util.JWTUtil;
+import com.beautiflow.global.common.util.RedisTokenUtil;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -15,59 +21,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RedisTokenUtil redisTokenUtil;
+    private final ObjectMapper om = new ObjectMapper();
 
-    public CustomSuccessHandler(JWTUtil jwtUtil, UserRepository userRepository) {
+    //임시로 유효기간 길게
+    private static final Duration LOGIN_KEY_TTL = Duration.ofMinutes(80);
 
-        this.jwtUtil = jwtUtil;
+
+    public CustomSuccessHandler( UserRepository userRepository,
+            RedisTokenUtil redisTokenUtil) {
+
         this.userRepository = userRepository;
+        this.redisTokenUtil = redisTokenUtil;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+            Authentication authentication) throws IOException {
 
-        //OAuth2User
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String kakaoId = oAuth2User.getKakaoId();
         String provider = oAuth2User.getProvider();
 
-        User user = userRepository.findByKakaoId(kakaoId).orElse(null);
+        boolean exists = userRepository.findByKakaoId(kakaoId).isPresent();
 
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("kakaoId", kakaoId);
+        payload.put("provider", provider);
+        payload.put("isUserAlreadyExist", exists);
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8");
+        String loginKey = "login:" + UUID.randomUUID();
+        redisTokenUtil.setValues(loginKey, om.writeValueAsString(payload), LOGIN_KEY_TTL);
 
-
-        if (user==null) {
-            response.addCookie(createCookie("isUserAlreadyExist", "false"));
-            response.addCookie(createCookie("kakaoId", kakaoId));
-            response.addCookie(createCookie("provider", provider));
-            response.sendRedirect("https://www.beautiflow.co.kr");
-        } else {
-            Long userId = user.getId();
-            response.addCookie(createCookie("isUserAlreadyExist", "true"));
-            response.addCookie(createCookie("kakaoId", kakaoId));
-            response.addCookie(createCookie("provider", provider));
-            String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
-            String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
-            response.addCookie(createCookie("accessToken", accessToken));
-            response.addCookie(createCookie("refreshToken", refreshToken));
-            response.sendRedirect("https://www.beautiflow.co.kr");
-        }
-
-
-    }
-
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        return cookie;
+        response.setStatus(HttpServletResponse.SC_FOUND);
+        String frontCallbackUrl = "/";
+        response.setHeader("Location", frontCallbackUrl + "?loginKey=" + loginKey);
     }
 }
