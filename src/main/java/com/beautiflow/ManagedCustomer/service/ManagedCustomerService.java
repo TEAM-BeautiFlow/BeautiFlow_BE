@@ -52,17 +52,17 @@ public class ManagedCustomerService {
         .findByDesignerIdAndCustomerId(designerId, customerId)
         .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.MANAGED_CUSTOMER_ERROR_CODE));
 
+    // 그룹 업데이트 (그대로 유지)
     managed.updateInfo(req.targetGroup());
 
-    User customer = managed.getCustomer();
-    UserStyle style = customer.getStyle(); // 연관관계 필요
-
-    if (style != null) {
-      style.updateDescription(req.styleDescription());
+    // 메모 업데이트
+    if (req.memo() != null) {
+      managed.updateMemo(req.memo());
     }
 
     return CustomerUpdateRes.of(customerId);
   }
+
 
   @Transactional(readOnly = true)
   public List<CustomerListSimpleRes> getCustomersByGroup(Long designerId, List<String> groups) {

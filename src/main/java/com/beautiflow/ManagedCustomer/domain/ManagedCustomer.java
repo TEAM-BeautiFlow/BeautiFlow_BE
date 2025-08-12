@@ -51,6 +51,9 @@ public class ManagedCustomer {
 		this.targetGroup = targetGroup;
 	}
 
+	public void updateMemo(String memo) {
+		this.memo = memo;
+	}
 }
 
 
