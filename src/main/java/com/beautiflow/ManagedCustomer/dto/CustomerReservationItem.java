@@ -8,13 +8,13 @@ import java.time.LocalTime;
 import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-
 public record CustomerReservationItem(
     Long reservationId,
     String imageUrl,
     String shopName,
     String designerName,
     List<String> optionNames,
+    String treatmentNames, // ← 시술명 추가
     LocalDate date,
     LocalTime time,
     ReservationStatus status
@@ -29,6 +29,10 @@ public record CustomerReservationItem(
         reservation.getReservationOptions().stream()
             .map(ro -> ro.getOptionItem().getName())
             .toList(),
+        reservation.getReservationTreatments().stream()
+            .findFirst() // 첫 번째만 꺼내기
+            .map(rt -> rt.getTreatment().getName())
+            .orElse(null),
         reservation.getReservationDate(),
         reservation.getStartTime(),
         reservation.getStatus()
@@ -41,8 +45,7 @@ public record CustomerReservationItem(
     try {
       // ["url1", "url2"] 형태라 가정
       ObjectMapper mapper = new ObjectMapper();
-      List<String> urls = mapper.readValue(jsonString, new TypeReference<>() {
-      });
+      List<String> urls = mapper.readValue(jsonString, new TypeReference<>() {});
       return urls.isEmpty() ? null : urls.get(0);
     } catch (Exception e) {
       return null; // 파싱 실패 시 null 반환
