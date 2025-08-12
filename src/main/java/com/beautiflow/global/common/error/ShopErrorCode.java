@@ -20,8 +20,7 @@ public enum ShopErrorCode implements ErrorCode{
     ALREADY_SHOP_MEMBER(HttpStatus.BAD_REQUEST,"SHOP406","이미 해당 매장의 직원으로 등록되어 있습니다."),
     ACCESS_DENIED_SHOP_ROLE(HttpStatus.BAD_REQUEST,"SHOP407", "원장만 가능한 기능입니다."),
     SHOP_MEMBER_NOT_APPROVED(HttpStatus.BAD_REQUEST,"SHOP408","아직 승인되지 않은 직원입니다."),
-    SHOP_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"SHOP409","직원을 찾을 수 없습니다."),
-    IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"SHOP410","이미지 저장에 실패했습니다.");
+    IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"SHOP409","이미지 저장에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
