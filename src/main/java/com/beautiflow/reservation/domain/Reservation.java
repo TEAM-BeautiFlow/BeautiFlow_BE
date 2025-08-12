@@ -122,8 +122,16 @@ public class Reservation extends BaseTimeEntity {
 		this.styleImageUrls = null;
 	}
 
-	public void changeStatus(ReservationStatus status) {
-		this.status = status;
+	public void changeStatus(ReservationStatus newStatus) {
+		if (newStatus == null || this.status == newStatus)
+			return;
+
+		// 취소/노쇼는 자동 완료 대상에서 막기 (정책에 맞춰 유지/수정)
+		if (this.status == ReservationStatus.CANCELLED || this.status == ReservationStatus.NO_SHOW) {
+			return;
+		}
+
+		this.status = newStatus;
 	}
 
 

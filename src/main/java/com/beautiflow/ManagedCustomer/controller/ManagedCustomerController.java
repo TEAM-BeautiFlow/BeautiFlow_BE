@@ -34,7 +34,7 @@ public class ManagedCustomerController {
   }
 
   @PatchMapping("/{customerId}")
-  @Operation(summary = "고객 정보 수정 (메모/그룹)")
+  @Operation(summary = "고객 정보 수정 (메모/그룹)", description = "디자이너가 관리 중인 특정 고객의 메모와 그룹을 수정합니다.")
   public ResponseEntity<ApiResponse<CustomerUpdateRes>> updateCustomer(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable Long customerId,

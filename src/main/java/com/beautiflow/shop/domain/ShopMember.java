@@ -56,5 +56,25 @@ public class ShopMember {
 	private String storedFilePath;
 
 	private LocalDateTime appliedAt;
+
 	private LocalDateTime processedAt;
+
+
+	public void updateIntro(String intro) {
+		this.intro = intro;
+	}
+
+	public void updateImageInfo(String imageUrl, String originalFileName, String storedFilePath) {
+		this.imageUrl = imageUrl;
+		this.originalFileName = originalFileName;
+		this.storedFilePath = storedFilePath;
+	}
+
+	public void clearImageInfo() {
+		this.imageUrl = null;
+		this.originalFileName = null;
+		this.storedFilePath = null;
+	}
+
+
 }

@@ -2,12 +2,12 @@ package com.beautiflow.shop.controller;
 
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
-import com.beautiflow.reservation.dto.response.AvailableDesignerRes;
 import com.beautiflow.shop.dto.ChatDesignerRes;
 import com.beautiflow.shop.dto.ShopApplyRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
 import com.beautiflow.reservation.dto.response.TreatmentDetailWithOptionRes;
 import com.beautiflow.reservation.dto.response.TreatmentRes;
+import com.beautiflow.shop.dto.ShopExistsRes;
 import com.beautiflow.shop.dto.ShopRegistrationReq;
 import com.beautiflow.shop.dto.ShopRegistrationRes;
 import com.beautiflow.shop.service.ShopInfoService;
@@ -145,5 +145,14 @@ public class ShopInfoController {
         Long userId = currentUser.getUserId();
         ShopApplyRes shopApplyRes = shopOnboardingService.ApplyToShop(userId, shopId);
         return ResponseEntity.ok(shopApplyRes);
+    }
+
+    @GetMapping(value = "/exists", params = "businessNumber")
+    public ResponseEntity<ApiResponse<ShopExistsRes>>exists(
+            @AuthenticationPrincipal CustomOAuth2User currentUser
+            ,@RequestParam String businessNumber) {
+        Long userId = currentUser.getUserId();
+        ShopExistsRes shopExistsRes = shopOnboardingService.IsShopExists(userId, businessNumber);
+        return ResponseEntity.ok(ApiResponse.success(shopExistsRes));
     }
 }

@@ -71,4 +71,10 @@ public class User extends BaseTimeEntity {
 	}
 
 
+
+	public void patchUserInfo(String name, String email, String contact) {
+		this.name = name;
+		this.email = email;
+		this.contact = contact;
+	}
 }
