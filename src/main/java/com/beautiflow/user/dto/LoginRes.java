@@ -1,18 +1,17 @@
 package com.beautiflow.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 @Builder
-public record SignUpRes(
-        Long id,
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record LoginRes(
         String kakaoId,
         String provider,
-        String name,
-        String contact,
+        String isNewUser,
         String email,
-        boolean deleted,
         String accessToken,
         String refreshToken
-) {
 
+) {
 }

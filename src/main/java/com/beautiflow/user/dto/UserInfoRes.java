@@ -3,16 +3,12 @@ package com.beautiflow.user.dto;
 import lombok.Builder;
 
 @Builder
-public record SignUpRes(
+public record UserInfoRes(
         Long id,
         String kakaoId,
-        String provider,
         String name,
         String contact,
-        String email,
-        boolean deleted,
-        String accessToken,
-        String refreshToken
+        String email
 ) {
 
 }

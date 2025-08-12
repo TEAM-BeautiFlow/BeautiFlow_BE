@@ -40,62 +40,62 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+            .cors(corsCustomizer -> corsCustomizer.configurationSource(
+                request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(
+                            List.of("http://localhost:3000","http://localhost:5173","https://www.beautiflow.co.kr","http://localhost:8080", "https://beautiflow.co.kr"));
+                    configuration.setAllowedMethods(
+                            Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(List.of("Authorization"));
+                    return configuration;
+                }))
 
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(
-                        request -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
-                            configuration.setAllowedOrigins(
-                                    List.of("http://localhost:3000","http://localhost:5173","https://www.beautiflow.co.kr","http://localhost:8080", "https://beautiflow.co.kr","http://3.38.93.35"));
-                            configuration.setAllowedMethods(
-                                    Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-                            configuration.setAllowCredentials(true);
-                            configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-                            configuration.setMaxAge(3600L);
-                            configuration.setExposedHeaders(List.of("Authorization"));
-                            return configuration;
-                        }))
+            .requestCache(cache -> cache.requestCache(new NullRequestCache()))
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
 
-                .requestCache(cache -> cache.requestCache(new NullRequestCache()))
-                .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
+            .oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                        .userService(customOAuth2UserService))
+                .successHandler(customSuccessHandler))
 
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/users/login",
+                    "/connect/**",
+                    "/users/auth/phone/send-code",
+                    "/users/auth/phone/verify-code",
+                    "/login/oauth2/code/kakao-customer",
+                    "/login/oauth2/code/kakao-staff",
+                    "/users/signup",
+                    "/users/refresh",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html",
+                    "/login/oauth2/**",
+                    "/oauth2/**",
+                    "/health",
+                    "/shops/{shopId}",
+                    "/shops/{shopId}/treatments",
+                    "/shops/{shopId}/treatments/{treatmentId}",
+                    "/shops/{shopId}/notices"
+                ).permitAll()
+                .anyRequest().authenticated())
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/connect/**",
-                                "/users/auth/phone/send-code",
-                                "/users/auth/phone/verify-code",
-
-                                "/login/oauth2/code/kakao-customer",
-                                "/login/oauth2/code/kakao-staff",
-                                "/users/signup",
-                                "/users/refresh",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/login/oauth2/**",
-                                "/oauth2/**",
-                                "/health"
-                        ).permitAll()
-                        .anyRequest().authenticated())
-
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTFilter(jwtUtil),
-                        UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JWTFilter.class)
-                .exceptionHandling(e -> e
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                );
-
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(new JWTFilter(jwtUtil),
+                UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtExceptionFilter, JWTFilter.class)
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint(authenticationEntryPoint)
+            );
         return http.build();
-
     }
-
 }

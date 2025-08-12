@@ -68,6 +68,8 @@ public class JWTUtil {
         return getClaim(token, "kakaoId", String.class);
     }
 
+    public String getEmail(String token) {return getClaim(token, "email", String.class);}
+
     public Long getUserId(String token) {
         return getClaim(token, "userId", Number.class).longValue();
     }
@@ -127,6 +129,7 @@ public class JWTUtil {
         String provider = getProvider(token);
         String kakaoId = getKakaoId(token);
         Long userId = getUserId(token);
+        String email = getEmail(token);
 
         GlobalRole globalRole = switch (provider) {
             case "kakao-customer" -> GlobalRole.CUSTOMER;
@@ -134,18 +137,19 @@ public class JWTUtil {
             default -> throw new RuntimeException("Invalid provider");
         };
 
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(provider, kakaoId, userId, globalRole);
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(provider, kakaoId, userId, email, globalRole);
 
         return new UsernamePasswordAuthenticationToken(customOAuth2User, userId, customOAuth2User.getAuthorities());
     }
 
 
-    public String createAccessToken(String provider, String kakaoId, Long userId) {
+    public String createAccessToken(String provider, String kakaoId, Long userId, String email) {
 
         return Jwts.builder()
                 .claim("provider", provider)
                 .claim("kakaoId", kakaoId)
                 .claim("userId", userId)
+                .claim("email", email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenValidity))
                 .signWith(secretKey)

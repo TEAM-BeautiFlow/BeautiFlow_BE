@@ -18,13 +18,16 @@ public class CustomOAuth2User implements OAuth2User {
     private final String kakaoId;
     @Getter
     private final Long userId;
+    @Getter
+    private final String email;
     private final GlobalRole role;
 
 
-    public CustomOAuth2User(String provider, String kakaoId, Long userId, GlobalRole role) {
+    public CustomOAuth2User(String provider, String kakaoId, Long userId, String email, GlobalRole role) {
         this.kakaoId = kakaoId;
         this.provider = provider;
         this.userId = userId;
+        this.email = email;
         this.role = role;
     }
 

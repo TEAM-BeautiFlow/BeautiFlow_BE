@@ -28,6 +28,7 @@ public class SignUpService {
 
         String kakaoId = signUpReq.kakaoId();
         String provider = signUpReq.provider();
+        String email = signUpReq.email();
         String name = signUpReq.name();
         String contact = signUpReq.contact();
 
@@ -49,6 +50,7 @@ public class SignUpService {
             user = User.builder()
                     .kakaoId(kakaoId)
                     .name(name)
+                    .email(email)
                     .contact(contact)
                     .build();
             try {
@@ -77,7 +79,7 @@ public class SignUpService {
         }
 
         Long userId = user.getId();
-        String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId);
+        String accessToken = jwtUtil.createAccessToken(provider, kakaoId, userId, email);
         String refreshToken = jwtUtil.createRefreshToken(kakaoId, userId);
 
         return SignUpRes.builder()
@@ -85,6 +87,7 @@ public class SignUpService {
                 .kakaoId(user.getKakaoId())
                 .provider(provider)
                 .name(user.getName())
+                .email(user.getEmail())
                 .contact(user.getContact())
                 .deleted(user.isDeleted())
                 .accessToken(accessToken)
