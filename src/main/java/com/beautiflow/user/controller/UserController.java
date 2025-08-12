@@ -80,7 +80,6 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.successWithNoData());
     }
 
-
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal CustomOAuth2User user) {
@@ -94,9 +93,9 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserStyleRes>> postStyle(
             @AuthenticationPrincipal CustomOAuth2User user,
             @RequestPart("request") UserStyleReq userStyleReq,
-            @RequestPart("images") List<MultipartFile> images) {
-        Long userId = user.getUserId();
-        UserStyleRes userStyleRes = userStyleService.postUserStyle(userId, userStyleReq, images);
+            @RequestPart(value="images", required = false) List<MultipartFile> images) {
+        Long userId =user.getUserId();
+        UserStyleRes userStyleRes = userStyleService.postUserStyle(userId,userStyleReq, images);
         return ResponseEntity.ok((ApiResponse.success(userStyleRes)));
     }
 
