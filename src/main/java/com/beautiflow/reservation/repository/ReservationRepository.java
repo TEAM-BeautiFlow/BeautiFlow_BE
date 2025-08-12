@@ -99,6 +99,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("targetDate") LocalDate targetDate,
             @Param("cutoff") LocalTime cutoff
     );
+
     @Query("""
     SELECT DISTINCT r FROM Reservation r
     LEFT JOIN FETCH r.reservationOptions ro
