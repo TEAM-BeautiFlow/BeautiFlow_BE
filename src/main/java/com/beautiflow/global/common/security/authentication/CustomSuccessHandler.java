@@ -25,8 +25,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RedisTokenUtil redisTokenUtil;
     private final ObjectMapper om = new ObjectMapper();
 
-    //임시로 유효기간 길게
-    private static final Duration LOGIN_KEY_TTL = Duration.ofMinutes(80);
+    private static final Duration LOGIN_KEY_TTL = Duration.ofMinutes(3);
 
 
     public CustomSuccessHandler( UserRepository userRepository,

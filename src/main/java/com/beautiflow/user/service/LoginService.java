@@ -37,7 +37,7 @@ public class LoginService {
             throw new BeautiFlowException(UserErrorCode.LOGIN_KEY_REQUIRED);
         }
 
-        //redisTokenUtil.deleteValues(loginReq.loginKey()); 개발환경에서 주석처리
+        redisTokenUtil.deleteValues(loginReq.loginKey());
 
         try {
             JsonNode node = objectMapper.readTree(json);
