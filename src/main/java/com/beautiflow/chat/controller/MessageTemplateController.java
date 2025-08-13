@@ -21,10 +21,12 @@ import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Message Template", description = "채팅 메시지 템플릿 관리 API")
 @RequestMapping("/templates")
 public class MessageTemplateController {
 

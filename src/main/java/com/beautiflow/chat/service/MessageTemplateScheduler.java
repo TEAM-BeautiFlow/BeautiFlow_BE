@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import com.beautiflow.chat.domain.MessageTemplate;
 import com.beautiflow.chat.domain.SendTiming;
-import com.beautiflow.chat.dto.ChatMessageSendReq;
+import com.beautiflow.chat.dto.chatMessageDto.ChatMessageSendReq;
 import com.beautiflow.chat.repository.MessageTemplateRepository;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.SenderType;

@@ -6,7 +6,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
 import com.beautiflow.chat.domain.ChatRoom;
-import com.beautiflow.chat.dto.ChatMessageSendReq;
+import com.beautiflow.chat.dto.chatMessageDto.ChatMessageSendReq;
 import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.service.ChatMessageService;
 import com.beautiflow.chat.service.RedisPubSubService;
