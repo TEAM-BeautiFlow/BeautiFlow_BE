@@ -30,7 +30,7 @@ public class ManagedCustomerService {
 
   private final ManagedCustomerRepository managedCustomerRepository;
   private final ReservationRepository reservationRepository;
-  private final CustomerGroupRepository customerGroupRepository; // ★ 추가
+  private final CustomerGroupRepository customerGroupRepository;
 
   @Transactional //디자이너와 고객이 이미 고객 관리에 등록돼 있는지 확인. -> 없으면 새로 등록
   public void autoRegister(User designer, User customer) {
@@ -56,7 +56,8 @@ public class ManagedCustomerService {
 
     mc.updateMemo(req.memo());
 
-    List<CustomerGroup> groups = (req.groupIds() == null || req.groupIds().isEmpty())
+    // groupIds가 빈 배열이면 전체 해제, 값이 있으면 해당 그룹으로 교체
+    List<CustomerGroup> groups = req.groupIds().isEmpty()
         ? List.of()
         : customerGroupRepository.findAllById(req.groupIds());
 
@@ -64,6 +65,8 @@ public class ManagedCustomerService {
 
     return CustomerUpdateRes.of(customerId);
   }
+
+
 
 
 
