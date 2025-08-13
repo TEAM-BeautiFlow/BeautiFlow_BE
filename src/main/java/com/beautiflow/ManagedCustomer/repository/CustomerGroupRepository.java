@@ -4,10 +4,7 @@ import com.beautiflow.ManagedCustomer.domain.CustomerGroup;
 import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
