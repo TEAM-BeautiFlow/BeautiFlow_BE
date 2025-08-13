@@ -96,5 +96,4 @@ public class ShopInfoService {
                 .map(ChatDesignerRes::from)
                 .toList();
     }
-
 }
