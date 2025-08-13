@@ -1,5 +1,7 @@
 package com.beautiflow.treatment.domain;
 
+import com.beautiflow.treatment.dto.TreatmentUpdateReq;
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,6 +48,24 @@ public class Treatment {
 	@OneToMany(mappedBy = "treatment")
 	private List<TreatmentImage> images = new ArrayList<>();
 
-	@OneToMany(mappedBy = "treatment")
+	@OneToMany(mappedBy = "treatment", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OptionGroup> optionGroups = new ArrayList<>();
+
+	public void updateTreatment(TreatmentUpdateReq requestDto) {
+		if (requestDto.category() != null) {
+			this.category = requestDto.category();
+		}
+		if (requestDto.name() != null) {
+			this.name = requestDto.name();
+		}
+		if (requestDto.price() != null) {
+			this.price = requestDto.price();
+		}
+		if (requestDto.durationMinutes() != null) {
+			this.durationMinutes = requestDto.durationMinutes();
+		}
+		if (requestDto.description() != null) {
+			this.description = requestDto.description();
+		}
+	}
 }

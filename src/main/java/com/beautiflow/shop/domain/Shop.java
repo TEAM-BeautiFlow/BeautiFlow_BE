@@ -58,11 +58,15 @@ public class Shop {
 	@OneToMany(mappedBy = "shop")
 	private final List<ShopNotice> notices = new ArrayList<>();
 
-	@OneToMany(mappedBy = "shop")
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
 	private final List<BusinessHour> businessHours = new ArrayList<>();
 
 	@OneToMany(mappedBy = "shop")
 	private final List<Treatment> treatments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<RegularHoliday> regularHolidays = new ArrayList<>();
 
 
 	public void updateDetails(ShopUpdateReq requestDto) {
