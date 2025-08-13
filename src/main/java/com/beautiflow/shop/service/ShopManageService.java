@@ -5,6 +5,7 @@ import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.s3.S3Service;
 import com.beautiflow.global.common.s3.S3UploadResult;
+import com.beautiflow.global.domain.HolidayCycle;
 import com.beautiflow.global.domain.WeekDay;
 import com.beautiflow.reservation.repository.TreatmentImageRepository;
 import com.beautiflow.reservation.repository.TreatmentRepository;
@@ -27,6 +28,7 @@ import com.beautiflow.treatment.dto.TreatmentUpdateReq;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -94,14 +96,22 @@ public class ShopManageService {
 
     shop.getRegularHolidays().clear();
 
-    if (requestDtos != null) {
-      List<RegularHoliday> newHolidays = requestDtos.stream()
-          .map(dto -> RegularHoliday.builder()
+    if (requestDtos != null && !requestDtos.isEmpty()) {
+      Map<HolidayCycle, List<WeekDay>> cycleMap = requestDtos.stream()
+          .collect(Collectors.toMap(
+              RegularHolidayDto::getCycle,
+              RegularHolidayDto::getDaysOfWeek,
+              (existing, replacement) -> replacement
+          ));
+
+      List<RegularHoliday> newHolidays = cycleMap.entrySet().stream()
+          .map(entry -> RegularHoliday.builder()
               .shop(shop)
-              .cycle(dto.getCycle())
-              .dayOfWeek(dto.getDayOfWeek())
+              .cycle(entry.getKey())
+              .daysOfWeek(entry.getValue())
               .build())
           .toList();
+
       shop.getRegularHolidays().addAll(newHolidays);
     }
   }
