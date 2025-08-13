@@ -3,9 +3,12 @@ package com.beautiflow.ManagedCustomer.repository;
 import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
+
+import java.util.Collection;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -33,5 +36,28 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
       """)
   List<ManagedCustomer> searchByDesignerWithOptionalGroups(
       Long designerId, String keyword, List<Long> groupIds);
+
+  @Query("""
+        select distinct mc
+        from ManagedCustomer mc
+        join mc.groups g
+        where mc.designer.id = :designerId
+          and g.code in :groupCodes
+    """)
+  List<ManagedCustomer> findByDesignerIdAndGroupCodes(
+      @Param("designerId") Long designerId,
+      @Param("groupCodes") Collection<String> groupCodes
+  );
+
+  @Query("""
+        select mc
+        from ManagedCustomer mc
+        where mc.designer.id = :designerId
+          and mc.customer.id in :customerIds
+    """)
+  List<ManagedCustomer> findByDesignerIdAndCustomerIds(
+      @Param("designerId") Long designerId,
+      @Param("customerIds") Collection<Long> customerIds
+  );
 
 }
