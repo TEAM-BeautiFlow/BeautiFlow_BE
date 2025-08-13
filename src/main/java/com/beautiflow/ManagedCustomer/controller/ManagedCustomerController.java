@@ -9,6 +9,7 @@ import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,10 @@ public class ManagedCustomerController {
   @GetMapping("/{customerId}")
   @Operation(summary = "고객 상세 정보 조회", description = "디자이너가 관리 중인 특정 고객의 상세 정보를 조회합니다.")
   public ResponseEntity<ApiResponse<CustomerDetailRes>> getCustomerDetail(
-      @AuthenticationPrincipal CustomOAuth2User user,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable Long customerId
   ) {
-    CustomerDetailRes result = managedCustomerService.getCustomerDetail(user.getUserId(), customerId);
+    CustomerDetailRes result = managedCustomerService.getCustomerDetail(customOAuth2User.getUserId(), customerId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -45,12 +46,20 @@ public class ManagedCustomerController {
   }
 
   @GetMapping("/list")
-  @Operation(summary = "고객 그룹 목록 조회", description = "디자이너가 관리 중인 고객을 그룹 필터링 기준으로 조회합니다.")
+  @Operation(
+      summary = "고객 목록(그룹 필터) 조회",
+      description = """
+        그룹 '이름' 목록으로 필터링합니다. 예: /mangedCustomer/list?groups=VIP&groups=블랙리스트
+        파라미터를 생략하면 모든 고객을 반환합니다.
+      """
+  )
   public ResponseEntity<ApiResponse<List<CustomerListSimpleRes>>> getCustomersByGroup(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @RequestParam(required = false) List<String> groups
+      @Parameter(description = "그룹 '이름' 목록 (예: VIP, BLACKLIST)")
+      @RequestParam(name = "groups", required = false) List<String> groupNames
   ) {
-    List<CustomerListSimpleRes> result = managedCustomerService.getCustomersByGroup(customOAuth2User.getUserId(), groups);
+    List<CustomerListSimpleRes> result =
+        managedCustomerService.getCustomersByGroup(customOAuth2User.getUserId(), groupNames);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -68,13 +77,10 @@ public class ManagedCustomerController {
   @DeleteMapping("/{customerId}")
   @Operation(summary = "고객 삭제", description = "디자이너가 관리 중인 특정 고객을 삭제합니다.")
   public ResponseEntity<ApiResponse<Void>> deleteCustomer(
-      @AuthenticationPrincipal CustomOAuth2User user,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable Long customerId
   ) {
-    managedCustomerService.deleteCustomer(user.getUserId(), customerId);
+    managedCustomerService.deleteCustomer(customOAuth2User.getUserId(), customerId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
-
-
-
 }
