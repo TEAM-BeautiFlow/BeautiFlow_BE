@@ -34,10 +34,8 @@ public class S3Service {
           .contentLength(file.getSize())
           .build();
 
-      // 파일 업로드
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
-      // 업로드 된 파일의 URL
       GetUrlRequest getUrlRequest = GetUrlRequest.builder()
           .bucket(bucket)
           .key(fileKey)

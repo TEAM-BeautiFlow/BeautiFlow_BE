@@ -22,6 +22,7 @@ public class ShopNoticeService {
   private final ShopRepository shopRepository;
   private final ShopNoticeRepository shopNoticeRepository;
 
+  // 매장 공지 조회
   @Transactional(readOnly = true)
   public List<ShopNoticeRes> getNotices(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -32,6 +33,7 @@ public class ShopNoticeService {
         .collect(Collectors.toList());
   }
 
+  // 매장 공지 생성
   @Transactional
   public ShopNotice createNotice(Long shopId, NoticeCreateReq requestDto) {
     Shop shop = shopRepository.findById(shopId)
@@ -46,6 +48,7 @@ public class ShopNoticeService {
     return shopNoticeRepository.save(notice);
   }
 
+  // 매장 공지 수정
   @Transactional
   public ShopNotice updateNotice(Long shopId, Long noticeId, NoticeUpdateReq requestDto) {
     if (!shopRepository.existsById(shopId)) {
@@ -64,6 +67,7 @@ public class ShopNoticeService {
     return notice;
   }
 
+  // 매장 공지 삭제
   @Transactional
   public void deleteNotice(Long shopId, Long noticeId) {
     if (!shopRepository.existsById(shopId)) {

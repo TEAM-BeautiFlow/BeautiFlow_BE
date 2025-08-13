@@ -141,7 +141,7 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  // 매장 상세 정보 조회
+  @Operation(summary = "매장 상세 정보 조회")
   @GetMapping("/{shopId}")
   public ResponseEntity<ApiResponse<ShopInfoRes>> getShopDetails(
       @PathVariable Long shopId,
@@ -151,7 +151,7 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(shopDetails));
   }
 
-  // 매장 정보 및 이미지 수정
+  @Operation(summary = "매장 정보 및 이미지 수정")
   @PatchMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
@@ -164,7 +164,7 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(updatedShop));
   }
 
-  // 매장 사업자 등록증 이미지 조회
+  @Operation(summary = "매장 사업자 등록증 이미지 조회")
   @GetMapping("/{shopId}/license-image")
   @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<String>> getLicenseImage(
@@ -174,7 +174,7 @@ public class ShopManageController {
     return ResponseEntity.ok(ApiResponse.success(licenseImageUrl));
   }
 
-  // 매장 사업자 등록증 이미지 업로드
+  @Operation(summary = "매장 사업자 등록증 이미지 업로드")
   @PostMapping(value = "/{shopId}/license-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<String>> uploadLicenseImage(

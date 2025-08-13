@@ -18,19 +18,16 @@ public class BusinessHourRes {
   private LocalTime breakEnd;
   private List<WeekDay> regularClosedDays;
 
-  // BusinessHour 엔티티 리스트를 이 DTO로 변환하는 정적 팩토리 메서드
   public static BusinessHourRes from(List<BusinessHour> businessHours) {
     if (businessHours == null || businessHours.isEmpty()) {
-      return null; // 또는 기본값 반환
+      return null;
     }
 
-    // 영업일 중 첫 번째 날을 기준으로 대표 시간을 찾음
     BusinessHour representativeDay = businessHours.stream()
         .filter(bh -> !bh.isClosed() && bh.getOpenTime() != null)
         .findFirst()
         .orElse(null);
 
-    // 휴무일 목록을 추출
     List<WeekDay> closedDays = businessHours.stream()
         .filter(BusinessHour::isClosed)
         .map(BusinessHour::getDayOfWeek)

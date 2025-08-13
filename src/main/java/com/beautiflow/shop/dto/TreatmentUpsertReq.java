@@ -27,7 +27,5 @@ public record TreatmentUpsertReq(
 
     String description,
 
-    // [!!!] 옵션 그룹 목록을 추가합니다.
-    // TreatmentUpdateReq의 구조와 맞춰줍니다.
     List<OptionGroupUpdateReq> optionGroups
 ) {}
