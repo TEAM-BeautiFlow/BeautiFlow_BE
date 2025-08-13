@@ -147,6 +147,7 @@ public class ShopInfoController {
         return ResponseEntity.ok(shopApplyRes);
     }
 
+    @Operation(summary = "샵 존재 여부 조회 API", description = "사업자 등록 번호로 샵의 존재 여부를 조회하는 API입니다.")
     @GetMapping(value = "/exists", params = "businessNumber")
     public ResponseEntity<ApiResponse<ShopExistsRes>>exists(
             @AuthenticationPrincipal CustomOAuth2User currentUser

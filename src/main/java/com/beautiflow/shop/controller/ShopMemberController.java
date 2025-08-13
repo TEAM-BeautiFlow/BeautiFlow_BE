@@ -28,7 +28,7 @@ public class ShopMemberController {
     private final ShopMemberService shopMemberService;
 
     @AuthCheck({ShopRole.DESIGNER,ShopRole.OWNER})
-    @Operation(summary = "디자이너 정보 수정")
+    @Operation(summary = "디자이너 정보 수정 API")
     @PatchMapping(value="/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ShopMemberInfoRes>>patchInfo (
             @PathVariable Long shopId,
@@ -41,6 +41,7 @@ public class ShopMemberController {
     }
 
     @AuthCheck({ShopRole.DESIGNER,ShopRole.OWNER})
+    @Operation(summary = "디자이너 정보 조회 API")
     @GetMapping(value="/{shopId}")
     public ResponseEntity<ApiResponse<ShopMemberInfoRes>> getInfo (
             @PathVariable Long shopId,
