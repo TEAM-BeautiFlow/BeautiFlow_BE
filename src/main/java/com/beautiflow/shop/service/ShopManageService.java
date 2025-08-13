@@ -24,7 +24,6 @@ import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.treatment.domain.TreatmentImage;
 import com.beautiflow.treatment.dto.TreatmentUpdateReq;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,12 +61,10 @@ public class ShopManageService {
     Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
-    // 1. 기존 이미지 삭제 처리
     if (requestDto.deleteImageIds() != null && !requestDto.deleteImageIds().isEmpty()) {
       deleteImages(shop, requestDto.deleteImageIds());
     }
 
-    // 2. 새로운 이미지 추가 처리
     if (newImages != null && !newImages.isEmpty()) {
       uploadNewImages(shop, newImages);
     }
@@ -85,19 +82,17 @@ public class ShopManageService {
 
     List<BusinessHour> businessHours = shop.getBusinessHours();
 
-    // BusinessHour 엔티티 리스트를 BusinessHourRes DTO로 변환
     return BusinessHourRes.from(businessHours);
   }
 
+  // 매장 정기 휴일 수정
   @Transactional
   public void updateRegularHolidays(Long shopId, List<RegularHolidayDto> requestDtos) {
     Shop shop = shopRepository.findById(shopId)
         .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
-    // 기존 정기 휴무 규칙 모두 삭제
     shop.getRegularHolidays().clear();
 
-    // 새로운 규칙으로 다시 설정
     if (requestDtos != null) {
       List<RegularHoliday> newHolidays = requestDtos.stream()
           .map(dto -> RegularHoliday.builder()
@@ -110,6 +105,7 @@ public class ShopManageService {
     }
   }
 
+  // 매장 정기 휴일 조회
   @Transactional(readOnly = true)
   public List<RegularHolidayDto> getRegularHolidays(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -148,6 +144,7 @@ public class ShopManageService {
     shop.getBusinessHours().addAll(newBusinessHours);
   }
 
+  //
   @Transactional
   public List<TreatmentUpsertRes> upsertTreatmentsWithoutImages(Long shopId, List<TreatmentUpsertReq> requestDtos) {
     Shop shop = shopRepository.findById(shopId)
@@ -156,7 +153,6 @@ public class ShopManageService {
     List<Treatment> savedTreatments = requestDtos.stream()
         .map(dto -> {
           if (dto.id() == null) {
-            // 신규 생성
             Treatment newTreatment = Treatment.builder()
                 .shop(shop)
                 .category(dto.category())
@@ -167,7 +163,6 @@ public class ShopManageService {
                 .build();
             return treatmentRepository.save(newTreatment);
           } else {
-            // 기존 수정
             Treatment existingTreatment = treatmentRepository.findByShopAndId(shop, dto.id())
                 .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
@@ -186,7 +181,7 @@ public class ShopManageService {
         .collect(Collectors.toList());
   }
 
-  // [!!!] 2. 이미지만 업로드하는 새로운 서비스 메서드
+  // 이미지 업로드
   @Transactional
   public void uploadTreatmentImages(Long shopId, Long treatmentId, List<MultipartFile> images) {
     Shop shop = shopRepository.findById(shopId)
@@ -195,45 +190,17 @@ public class ShopManageService {
         .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
     if (images != null && !images.isEmpty()) {
-      // 이전에 구현했던 이미지 업로드 헬퍼 메서드를 호출합니다.
       uploadNewTreatmentImages(treatment, images);
     }
   }
 
-  @Transactional
-  public void deleteTreatmentImages(Long shopId, Long treatmentId, Long imageId) {
-    // 1. 매장과 시술 정보가 유효한지 먼저 확인 (보안 강화)
-    if (!treatmentRepository.existsByIdAndShopId(treatmentId, shopId)) {
-      throw new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND);
-    }
-
-    // 2. 삭제할 이미지 엔티티를 찾음
-    TreatmentImage image = treatmentImageRepository.findById(imageId)
-        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND));
-
-    // 3. (중요) 해당 이미지가 올바른 시술에 속해 있는지 다시 한번 확인
-    if (!image.getTreatment().getId().equals(treatmentId)) {
-      // 다른 시술의 이미지 ID를 추측해서 삭제하려는 시도를 방지
-      throw new BeautiFlowException(ShopErrorCode.UNAUTHORIZED_SHOP_ACCESS);
-    }
-
-    // 4. S3에서 파일 삭제
-    if (image.getStoredFilePath() != null && !image.getStoredFilePath().isEmpty()) {
-      s3Service.deleteFile(image.getStoredFilePath());
-    }
-
-    // 5. DB에서 이미지 정보 삭제
-    treatmentImageRepository.delete(image);
-  }
-
+  // 시술 이미지 업로드
   private void uploadNewTreatmentImages(Treatment treatment, List<MultipartFile> newImages) {
     for (MultipartFile file : newImages) {
       String dirName = String.format("shops/%d/treatments/%d", treatment.getShop().getId(), treatment.getId());
 
-      // 2. S3에 파일 업로드
       S3UploadResult result = s3Service.uploadFile(file, dirName);
 
-      // 3. DB에 저장할 TreatmentImage 엔티티 생성
       TreatmentImage newImage = TreatmentImage.builder()
           .treatment(treatment)
           .originalFileName(file.getOriginalFilename())
@@ -241,7 +208,6 @@ public class ShopManageService {
           .imageUrl(result.imageUrl())
           .build();
 
-      // 4. 연관관계 설정 (JPA가 관리하도록 리스트에 추가)
       treatment.getImages().add(newImage);
 
       treatmentImageRepository.save(newImage);
@@ -287,18 +253,14 @@ public class ShopManageService {
       throw new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND);
     }
 
-    // 2. shopId를 기반으로 S3 저장 경로 생성
     String dirName = String.format("shops/%d/license", shopId);
 
-    // 3. S3에 파일 먼저 업로드
     S3UploadResult result = s3Service.uploadFile(licenseImage, dirName);
 
-    // 4. DB 업데이트 로직만 트랜잭션으로 호출
     try {
       updateLicenseImageUrl(shopId, result.imageUrl());
       return result.imageUrl();
     } catch (Exception e) {
-      // 5. DB 업데이트 실패 시 업로드한 S3 파일을 삭제
       s3Service.deleteFile(result.fileKey());
       throw e;
     }
