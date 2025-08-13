@@ -24,6 +24,7 @@ import com.beautiflow.shop.repository.ShopRepository;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.treatment.domain.TreatmentImage;
 import com.beautiflow.treatment.dto.TreatmentUpdateReq;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,12 +70,12 @@ public class ShopManageService {
       uploadNewImages(shop, newImages);
     }
 
-    // 3. 샵 정보 업데이트
     shop.updateDetails(requestDto);
 
     return ShopInfoRes.from(shop);
   }
 
+  // 매장 영업 시간 조회
   @Transactional(readOnly = true)
   public BusinessHourRes getBusinessHours(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -85,7 +86,7 @@ public class ShopManageService {
     return BusinessHourRes.from(businessHours);
   }
 
-  // 매장 정기 휴일 수정
+  // 매장 정기 휴무 수정
   @Transactional
   public void updateRegularHolidays(Long shopId, List<RegularHolidayDto> requestDtos) {
     Shop shop = shopRepository.findById(shopId)
@@ -105,7 +106,7 @@ public class ShopManageService {
     }
   }
 
-  // 매장 정기 휴일 조회
+  // 매장 정기 휴무 조회
   @Transactional(readOnly = true)
   public List<RegularHolidayDto> getRegularHolidays(Long shopId) {
     Shop shop = shopRepository.findById(shopId)
@@ -144,7 +145,7 @@ public class ShopManageService {
     shop.getBusinessHours().addAll(newBusinessHours);
   }
 
-  //
+  // 시술 정보 생성/수정 (이미지 제외)
   @Transactional
   public List<TreatmentUpsertRes> upsertTreatmentsWithoutImages(Long shopId, List<TreatmentUpsertReq> requestDtos) {
     Shop shop = shopRepository.findById(shopId)
@@ -181,7 +182,7 @@ public class ShopManageService {
         .collect(Collectors.toList());
   }
 
-  // 이미지 업로드
+  // 시술 이미지 업로드
   @Transactional
   public void uploadTreatmentImages(Long shopId, Long treatmentId, List<MultipartFile> images) {
     Shop shop = shopRepository.findById(shopId)
@@ -194,7 +195,28 @@ public class ShopManageService {
     }
   }
 
-  // 시술 이미지 업로드
+  // 시술 이미지 삭제
+  @Transactional
+  public void deleteTreatmentImages(Long shopId, Long treatmentId, Long imageId) {
+    if (!treatmentRepository.existsByIdAndShopId(treatmentId, shopId)) {
+      throw new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND);
+    }
+
+    TreatmentImage image = treatmentImageRepository.findById(imageId)
+        .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND));
+
+    if (!image.getTreatment().getId().equals(treatmentId)) {
+      throw new BeautiFlowException(ShopErrorCode.UNAUTHORIZED_SHOP_ACCESS);
+    }
+
+    if (image.getStoredFilePath() != null && !image.getStoredFilePath().isEmpty()) {
+      s3Service.deleteFile(image.getStoredFilePath());
+    }
+
+    treatmentImageRepository.delete(image);
+  }
+
+  // 새로운 시술 이미지 업로드
   private void uploadNewTreatmentImages(Treatment treatment, List<MultipartFile> newImages) {
     for (MultipartFile file : newImages) {
       String dirName = String.format("shops/%d/treatments/%d", treatment.getShop().getId(), treatment.getId());
@@ -214,6 +236,7 @@ public class ShopManageService {
     }
   }
 
+  // 시술 삭제
   @Transactional
   public void deleteTreatment(Long shopId, Long treatmentId) {
     List<Treatment> treatments = treatmentRepository.findByShopIdAndId(shopId, treatmentId);
@@ -248,7 +271,6 @@ public class ShopManageService {
   // 매장 사업자 등록증 이미지 업로드
   @Transactional
   public String uploadLicenseImage(Long shopId, MultipartFile licenseImage) {
-    // 1. DB 트랜잭션 시작 전에 매장 존재 여부 확인
     if (!shopRepository.existsById(shopId)) {
       throw new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND);
     }
@@ -276,15 +298,12 @@ public class ShopManageService {
 
   // 이미지 삭제
   private void deleteImages(Shop shop, List<Long> imageIdsToDelete) {
-    // 삭제할 이미지 ID에 대해 유효성 검사 수행
     for (Long imageId : imageIdsToDelete) {
-      // 해당 ID 이미지 찾기
       ShopImage imageToRemove = shop.getShopImages().stream()
           .filter(shopImage -> shopImage.getId().equals(imageId))
           .findFirst()
           .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.IMAGE_NOT_FOUND));
 
-      // S3에 있는 실제 파일 삭제
       s3Service.deleteFile(imageToRemove.getStoredFilePath());
       shop.getShopImages().remove(imageToRemove);
     }
@@ -293,10 +312,8 @@ public class ShopManageService {
   // 새로운 이미지 업로드
   private void uploadNewImages(Shop shop, List<MultipartFile> newImages) {
     for (MultipartFile file : newImages) {
-      // S3에 파일 업로드
       S3UploadResult result = s3Service.uploadFile(file, "shops/images");
 
-      // DB에 저장할 ShopImage 엔티티 생성
       ShopImage newImage = ShopImage.builder()
           .shop(shop)
           .originalFileName(file.getOriginalFilename())
@@ -304,7 +321,6 @@ public class ShopManageService {
           .imageUrl(result.imageUrl())
           .build();
 
-      // 연관관계 설정 및 DB 저장
       shop.getShopImages().add(newImage);
       shopImageRepository.save(newImage);
     }

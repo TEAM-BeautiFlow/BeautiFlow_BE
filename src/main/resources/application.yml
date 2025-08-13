@@ -1,13 +1,7 @@
-# ===================================================================
-# 모든 환경(local, prod 등)에서 공통으로 사용되는 기본 설정 파일입니다.
-# ===================================================================
-
 spring:
   application:
     name: beautiflow
-  #  datasource:
-  #    hikari:
-  #      driver-class-name: com.mysql.cj.jdbc.Driver
+
   sql:
     init:
       mode: never

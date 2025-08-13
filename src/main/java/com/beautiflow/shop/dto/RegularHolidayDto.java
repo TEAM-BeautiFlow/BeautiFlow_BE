@@ -17,7 +17,6 @@ public class RegularHolidayDto {
   @NotNull
   private WeekDay dayOfWeek;
 
-  // Entity -> DTO 변환
   public static RegularHolidayDto from(RegularHoliday holiday) {
     RegularHolidayDto dto = new RegularHolidayDto();
     dto.cycle = holiday.getCycle();

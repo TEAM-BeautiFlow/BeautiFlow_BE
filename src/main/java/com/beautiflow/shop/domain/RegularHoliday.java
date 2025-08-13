@@ -35,10 +35,10 @@ public class RegularHoliday {
   private Shop shop;
 
   @Enumerated(EnumType.STRING)
-  private HolidayCycle cycle; // 주기 (매주, 격주 등)
+  private HolidayCycle cycle;
 
   @Enumerated(EnumType.STRING)
-  private WeekDay dayOfWeek; // 요일 (월, 화, 수 등)
+  private WeekDay dayOfWeek;
 
   public void setShop(Shop shop) {
     this.shop = shop;

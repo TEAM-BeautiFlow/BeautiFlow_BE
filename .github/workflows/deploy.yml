@@ -1,6 +1,4 @@
-# .github/workflows/ci-cd.yml
-
-name: Beautiflow CI/CD (Single Server)
+name: Beautiflow CI/CD
 
 concurrency:
   group: beautiflow-${{ github.ref }}
@@ -9,7 +7,7 @@ concurrency:
 on:
   push:
     branches:
-      - main # main 브랜치에 push될 때 실행됩니다.
+      - main
 
 jobs:
   build:
@@ -61,8 +59,6 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-    
-
       - name: Deploy to Server
         run: |
           HOST=${{ secrets.EC2_HOST }} # GitHub Secrets에 EC2_HOST를 등록해주세요.
@@ -72,18 +68,8 @@ jobs:
           scp -o StrictHostKeyChecking=no beautiflow.tar.gz ubuntu@${HOST}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no scripts/deploy.sh ubuntu@${HOST}:/home/ubuntu/
           
-          # 2. 원격에서 deploy.sh 실행 (이제 'prod' 프로파일만 인자로 전달)
+          # 2. 원격에서 deploy.sh 실행
           ssh -t -o StrictHostKeyChecking=no ubuntu@${HOST} << 'EOF'
-            echo "=============================================="
-            echo ">>> Executing remote commands on EC2 server..."
-            echo ">>> Checking the version of deploy.sh that was copied to the server:"
-            
-            # [!!!] 이 부분을 추가하여 서버에 복사된 deploy.sh 내용을 직접 출력합니다.
-            cat /home/ubuntu/deploy.sh
-            
-            echo "=============================================="
-            echo ">>> Now executing deploy.sh..."
-            
             chmod +x deploy.sh
             ./deploy.sh prod
           EOF
