@@ -5,6 +5,7 @@ import static jakarta.persistence.FetchType.LAZY;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.*;
 
 @Entity
@@ -54,6 +55,14 @@ public class ManagedCustomer {
 	public void updateMemo(String memo) {
 		this.memo = memo;
 	}
+
+	public List<TargetGroup> getTargetGroups() {
+		if (this.targetGroup != null) {
+			return List.of(this.targetGroup);
+		}
+		return List.of();
+	}
+
 }
 
 

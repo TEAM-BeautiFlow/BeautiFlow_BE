@@ -15,6 +15,10 @@ import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,23 +70,26 @@ public class ManagedCustomerService {
 
   @Transactional(readOnly = true)
   public List<CustomerListSimpleRes> getCustomersByGroup(Long designerId, List<String> groups) {
-    List<ManagedCustomer> customers;
 
-    if (groups == null || groups.isEmpty()) {
-      customers = managedCustomerRepository.findByDesignerId(designerId);
-    } else {
-      List<TargetGroup> groupEnums = groups.stream()
-          .map(String::toUpperCase)
-          .map(TargetGroup::valueOf)
-          .toList();
+    Set<TargetGroup> filter = (groups == null || groups.isEmpty())
+        ? null
+        : groups.stream()
+            .filter(s -> s != null && !s.isBlank())
+            .map(s -> s.trim().toUpperCase(Locale.ROOT))
+            .map(s -> {
+              try { return TargetGroup.valueOf(s); }
+              catch (IllegalArgumentException e) { return null; }
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
 
-      customers = managedCustomerRepository.findByDesignerIdAndTargetGroupIn(designerId, groupEnums);
-    }
+    var list = managedCustomerRepository.findByDesignerAndGroups(designerId, filter);
 
-    return customers.stream()
+    return list.stream()
         .map(CustomerListSimpleRes::from)
         .toList();
   }
+
 
   @Transactional(readOnly = true)
   public List<CustomerReservationItem> getCustomerReservationHistory(Long designerId, Long customerId) {
