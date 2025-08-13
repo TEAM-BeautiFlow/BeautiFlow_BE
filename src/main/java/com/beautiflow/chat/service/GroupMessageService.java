@@ -1,6 +1,12 @@
 package com.beautiflow.chat.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,33 +55,52 @@ public class GroupMessageService {
 		Shop shop = shopRepository.findById(req.shopId())
 			.orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND));
 
-		// 여러 TargetGroup
-		List<User> targetCustomers = managedCustomerRepository
-			.findByDesignerIdAndTargetGroupInAndCustomerIdIn(designerId, req.targetGroups(), req.customerIds())
+		Set<User> targets = new LinkedHashSet<>();
+
+		if (req.groupCodes() != null && !req.groupCodes().isEmpty()) {
+			List<ManagedCustomer> byGroups = managedCustomerRepository.findByDesignerIdAndGroupCodes(designerId, req.groupCodes());
+			byGroups.stream().map(ManagedCustomer::getCustomer).forEach(targets::add);
+		}
+		if (req.customerIds() != null && !req.customerIds().isEmpty()) {
+			List<ManagedCustomer> byCustomers = managedCustomerRepository.findByDesignerIdAndCustomerIds(designerId, req.customerIds());
+			byCustomers.stream().map(ManagedCustomer::getCustomer).forEach(targets::add);
+		}
+
+		if (targets.isEmpty()) {
+			throw new BeautiFlowException(UserErrorCode.USER_NOT_FOUND);
+		}
+
+		List<Long> customerIdList = targets.stream().map(User::getId).toList();
+		Map<Long, ChatRoom> existingRoomsByCustomerId = chatRoomRepository
+			.findByShopIdAndDesignerIdAndCustomerIdIn(req.shopId(), designer.getId(), customerIdList)
 			.stream()
-			.map(ManagedCustomer::getCustomer)
-			.distinct() // 중복 제거
-			.toList();
+			.collect(Collectors.toMap(cr -> cr.getCustomer().getId(), Function.identity()));
 
-		for (User customer : targetCustomers) {
-			ChatRoom room = chatRoomRepository.findByShopIdAndCustomerIdAndDesignerId(
-				req.shopId(), customer.getId(), designerId
-			).map(existing -> {
-				existing.reEnterBy(designer);
+		List<ChatRoom> roomsToCreate = new ArrayList<>();
 
-				if (existing.isCustomerExited()) {
-					existing.reEnterBy(customer);
-				}
-
-				return existing;
-			}).orElseGet(() -> {
-				ChatRoom newRoom = ChatRoom.builder()
+		for (User customer : targets) {
+			ChatRoom room = existingRoomsByCustomerId.get(customer.getId());
+			if (room == null) {
+				room = ChatRoom.builder()
 					.shop(shop)
 					.customer(customer)
 					.designer(designer)
 					.build();
-				return chatRoomRepository.save(newRoom);
-			});
+				roomsToCreate.add(room);
+				existingRoomsByCustomerId.put(customer.getId(), room);
+			} else {
+				room.reEnterBy(designer);
+				if (room.isCustomerExited()) {
+					room.reEnterBy(customer);
+				}
+			}
+		}
+
+		if (!roomsToCreate.isEmpty()) {
+			chatRoomRepository.saveAll(roomsToCreate);
+		}
+		for (User customer : targets) {
+			ChatRoom room = existingRoomsByCustomerId.get(customer.getId());
 
 			ChatMessage message = ChatMessage.builder()
 				.chatRoom(room)

@@ -1,5 +1,6 @@
 package com.beautiflow.chat.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,13 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 		@Param("shopId") Long shopId,
 		@Param("customerId") Long customerId,
 		@Param("designerId") Long designerId);
+
+	@Query("""
+        select cr
+        from ChatRoom cr
+        where cr.shop.id = :shopId
+          and cr.designer.id = :designerId
+          and cr.customer.id in :customerIds
+    """)
+	List<ChatRoom> findByShopIdAndDesignerIdAndCustomerIdIn(Long shopId, Long designerId, Collection<Long> customerIds);
 }
