@@ -1,4 +1,4 @@
-package com.beautiflow.chat.dto;
+package com.beautiflow.chat.dto.chatMessageDto;
 
 import java.time.LocalDateTime;
 

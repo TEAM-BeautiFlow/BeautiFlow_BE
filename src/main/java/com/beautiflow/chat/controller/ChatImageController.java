@@ -1,7 +1,7 @@
 package com.beautiflow.chat.controller;
 
 import com.beautiflow.chat.domain.ChatRoom;
-import com.beautiflow.chat.dto.ChatMessageSendReq;
+import com.beautiflow.chat.dto.chatMessageDto.ChatMessageSendReq;
 import com.beautiflow.chat.repository.ChatRoomRepository;
 import com.beautiflow.chat.service.ChatMessageService;
 import com.beautiflow.chat.service.RedisPubSubService;
@@ -15,6 +15,9 @@ import com.beautiflow.global.domain.SenderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chat")
+@Tag(name = "Chat", description = "채팅 이미지 관련 API")
 public class ChatImageController {
 
 	private final S3Service s3Service;
@@ -37,6 +41,10 @@ public class ChatImageController {
 	private final RedisPubSubService pubSubService;
 
 	@PostMapping(value = "/{roomId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(
+		summary = "채팅방 이미지 전송",
+		description = "채팅방에 이미지를 업로드하고, 업로드된 이미지를 실시간으로 모든 참가자에게 전송합니다."
+	)
 	public ResponseEntity<S3UploadResult> uploadImageAndBroadcast(
 		@PathVariable Long roomId,
 		@RequestPart("file") MultipartFile file,

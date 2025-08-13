@@ -1,4 +1,4 @@
-package com.beautiflow.chat.dto;
+package com.beautiflow.chat.dto.chatRoomDto;
 
 import com.beautiflow.chat.domain.ChatRoom;
 

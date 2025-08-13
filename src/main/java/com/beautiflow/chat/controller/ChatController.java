@@ -12,19 +12,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.beautiflow.chat.dto.ChatMessageRes;
-import com.beautiflow.chat.dto.ChatRoomSummaryRes;
-import com.beautiflow.chat.dto.RoomCreateReq;
-import com.beautiflow.chat.dto.RoomCreateRes;
+import com.beautiflow.chat.dto.chatMessageDto.ChatMessageRes;
+import com.beautiflow.chat.dto.chatRoomDto.ChatRoomSummaryRes;
+import com.beautiflow.chat.dto.chatRoomDto.RoomCreateReq;
+import com.beautiflow.chat.dto.chatRoomDto.RoomCreateRes;
 import com.beautiflow.chat.service.ChatMessageService;
 import com.beautiflow.chat.service.ChatRoomService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@Tag(name = "Chat", description = "채팅 관련 API")
 @RequestMapping("/chat")
 @RequiredArgsConstructor
 public class ChatController {

@@ -21,7 +21,7 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/connect")
-			.setAllowedOrigins("http://localhost:5173","https://beautiflow.co.kr","http://www.beautiflow.co.kr")
+			.setAllowedOrigins("http://localhost:5173","https://beautiflow.co.kr","https://www.beautiflow.co.kr")
 			.withSockJS();
 	}
 
