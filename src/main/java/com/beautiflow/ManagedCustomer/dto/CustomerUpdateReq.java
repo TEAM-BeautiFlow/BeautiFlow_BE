@@ -1,6 +1,5 @@
 package com.beautiflow.ManagedCustomer.dto;
 
-import jakarta.validation.constraints.Size;
 import java.util.List;
 
 // CustomerUpdateReq
