@@ -1,8 +1,5 @@
 package com.beautiflow.ManagedCustomer.service;
 
-import static com.beautiflow.global.common.error.CustomerGroupErrorCode.CUSTOMER_GROUP_ERROR_CODE;
-import static org.apache.logging.log4j.message.StructuredDataId.RESERVED;
-
 import com.beautiflow.ManagedCustomer.domain.CustomerGroup;
 import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
 import com.beautiflow.ManagedCustomer.dto.CustomerDetailRes;
@@ -13,19 +10,16 @@ import com.beautiflow.ManagedCustomer.dto.CustomerReservationItem;
 import com.beautiflow.ManagedCustomer.dto.CustomerUpdateReq;
 import com.beautiflow.ManagedCustomer.dto.CustomerUpdateRes;
 import com.beautiflow.ManagedCustomer.repository.ManagedCustomerRepository;
-import com.beautiflow.ManagedCustomer.repository.CustomerGroupRepository; // ★ 추가
+import com.beautiflow.ManagedCustomer.repository.CustomerGroupRepository;
 import com.beautiflow.global.common.error.CustomerGroupErrorCode;
 import com.beautiflow.global.common.error.ManagedCustomerErrorCode;
-import com.beautiflow.global.common.error.CommonErrorCode;               // ★ 추가
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.reservation.repository.ReservationRepository;
 import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
