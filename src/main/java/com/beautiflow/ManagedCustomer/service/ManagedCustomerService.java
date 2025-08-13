@@ -11,6 +11,7 @@ import com.beautiflow.global.common.error.ManagedCustomerErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.reservation.repository.ReservationRepository;
+import com.beautiflow.shop.domain.Shop;
 import com.beautiflow.user.domain.User;
 import com.beautiflow.user.domain.UserStyle;
 import java.util.List;
@@ -51,17 +52,17 @@ public class ManagedCustomerService {
         .findByDesignerIdAndCustomerId(designerId, customerId)
         .orElseThrow(() -> new BeautiFlowException(ManagedCustomerErrorCode.MANAGED_CUSTOMER_ERROR_CODE));
 
+    // 그룹 업데이트 (그대로 유지)
     managed.updateInfo(req.targetGroup());
 
-    User customer = managed.getCustomer();
-    UserStyle style = customer.getStyle(); // 연관관계 필요
-
-    if (style != null) {
-      style.updateDescription(req.styleDescription());
+    // 메모 업데이트
+    if (req.memo() != null) {
+      managed.updateMemo(req.memo());
     }
 
     return CustomerUpdateRes.of(customerId);
   }
+
 
   @Transactional(readOnly = true)
   public List<CustomerListSimpleRes> getCustomersByGroup(Long designerId, List<String> groups) {
@@ -101,6 +102,13 @@ public class ManagedCustomerService {
     managedCustomerRepository.delete(managed);
   }
 
+  @Transactional
+  public void autoRegister(User designer, User customer, Shop shop) {
+    boolean exists = managedCustomerRepository.existsByDesignerAndCustomer(designer, customer);
+    if (!exists) {
+      managedCustomerRepository.save(new ManagedCustomer(designer, customer, null, null));
+    }
+  }
 
 
 }
