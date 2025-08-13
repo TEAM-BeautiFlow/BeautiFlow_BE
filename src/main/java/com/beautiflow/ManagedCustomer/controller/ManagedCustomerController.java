@@ -1,10 +1,12 @@
 package com.beautiflow.ManagedCustomer.controller;
 
 import com.beautiflow.ManagedCustomer.dto.CustomerDetailRes;
+import com.beautiflow.ManagedCustomer.dto.CustomerGroupDetailRes;
 import com.beautiflow.ManagedCustomer.dto.CustomerListSimpleRes;
 import com.beautiflow.ManagedCustomer.dto.CustomerReservationItem;
 import com.beautiflow.ManagedCustomer.dto.CustomerUpdateReq;
 import com.beautiflow.ManagedCustomer.dto.CustomerUpdateRes;
+import com.beautiflow.ManagedCustomer.service.CustomerGroupService;
 import com.beautiflow.ManagedCustomer.service.ManagedCustomerService;
 import com.beautiflow.global.common.ApiResponse;
 import com.beautiflow.global.common.security.authentication.CustomOAuth2User;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class ManagedCustomerController {
 
   private final ManagedCustomerService managedCustomerService;
+  private final CustomerGroupService customerGroupService;
 
   @GetMapping("/{customerId}")
   @Operation(summary = "고객 상세 정보 조회", description = "디자이너가 관리 중인 특정 고객의 상세 정보를 조회합니다.")
@@ -83,4 +86,15 @@ public class ManagedCustomerController {
     managedCustomerService.deleteCustomer(customOAuth2User.getUserId(), customerId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
+
+  @GetMapping
+  @Operation(summary = "고객 그룹 목록 조회(시스템 기본 + 내 커스텀)")
+  public ResponseEntity<ApiResponse<List<CustomerGroupDetailRes>>> getCustomerGroups(
+      @AuthenticationPrincipal CustomOAuth2User principal
+  ) {
+    Long designerId = principal.getUserId();
+    List<CustomerGroupDetailRes> result = customerGroupService.getAvailableGroups(designerId);
+    return ResponseEntity.ok(ApiResponse.success(result));
+  }
+
 }

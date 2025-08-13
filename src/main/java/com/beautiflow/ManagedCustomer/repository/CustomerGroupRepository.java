@@ -23,4 +23,14 @@ public interface CustomerGroupRepository extends JpaRepository<CustomerGroup, Lo
       @Param("designerId") Long designerId,
       @Param("codes") Collection<String> codesLower // 소문자로 넘기기
   );
+
+  @Query("""
+    select g
+    from CustomerGroup g
+    where g.isSystem = true
+       or g.designer.id = :designerId
+    order by case when g.isSystem = true then 0 else 1 end, g.code asc
+    """)
+  List<CustomerGroup> findAllForDesigner(@Param("designerId") Long designerId);
+
 }
