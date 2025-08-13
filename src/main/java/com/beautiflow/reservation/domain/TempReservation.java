@@ -110,6 +110,4 @@ public class TempReservation extends BaseTimeEntity {
         this.requestNotes = null;
         this.styleImageUrls = null;
     }
-
-
 }
