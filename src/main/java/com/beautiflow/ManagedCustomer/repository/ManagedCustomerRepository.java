@@ -1,7 +1,6 @@
 package com.beautiflow.ManagedCustomer.repository;
 
 import com.beautiflow.ManagedCustomer.domain.ManagedCustomer;
-import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 
 import java.util.Collection;
@@ -22,8 +21,6 @@ public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer
 
   List<ManagedCustomer> findByDesignerIdAndGroups_CodeIn(Long designerId, List<String> codes);
 
-  List<ManagedCustomer> findByDesignerIdAndTargetGroupInAndCustomerIdIn(
-      Long designerId, List<TargetGroup> targetGroups, List<Long> customerIds);
 
   @Query("""
       SELECT mc

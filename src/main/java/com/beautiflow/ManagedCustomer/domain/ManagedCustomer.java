@@ -2,7 +2,6 @@ package com.beautiflow.ManagedCustomer.domain;
 
 import static jakarta.persistence.FetchType.LAZY;
 
-import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import jakarta.persistence.*;
 import java.util.*;
@@ -35,10 +34,6 @@ public class ManagedCustomer {
 
 	@ManyToOne(fetch = LAZY)
 	private User customer;
-
-	//동준님 삭제
-	@Enumerated(EnumType.STRING)
-	private TargetGroup targetGroup;
 
 	@ManyToMany
 	@JoinTable(
