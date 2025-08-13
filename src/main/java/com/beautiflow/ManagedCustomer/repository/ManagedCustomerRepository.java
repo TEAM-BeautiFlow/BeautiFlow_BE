@@ -11,26 +11,27 @@ import java.util.List;
 
 public interface ManagedCustomerRepository extends JpaRepository<ManagedCustomer, Long> {
 
-
   boolean existsByDesignerAndCustomer(User designer, User customer);
 
   Optional<ManagedCustomer> findByDesignerIdAndCustomerId(Long designerId, Long customerId);
 
   List<ManagedCustomer> findByDesignerId(Long designerId);
 
-  List<ManagedCustomer> findByDesignerIdAndTargetGroupIn(Long designerId, List<TargetGroup> groupEnums);
+  List<ManagedCustomer> findByDesignerIdAndGroups_CodeIn(Long designerId, List<String> codes);
+
+  List<ManagedCustomer> findByDesignerIdAndTargetGroupInAndCustomerIdIn(
+      Long designerId, List<TargetGroup> targetGroups, List<Long> customerIds);
 
   @Query("""
       SELECT mc
       FROM ManagedCustomer mc
       JOIN FETCH mc.customer c
+      LEFT JOIN mc.groups g
       WHERE mc.designer.id = :designerId
         AND (:keyword IS NULL OR c.name LIKE %:keyword%)
-        AND (:groups IS NULL OR mc.targetGroup IN :groups)
+        AND (:groupIds IS NULL OR (g IS NOT NULL AND g.id IN :groupIds))
       """)
-
-  List<ManagedCustomer> findByDesignerIdAndTargetGroupInAndCustomerIdIn(
-      Long designerId, List<TargetGroup> targetGroups, List<Long> customerIds);
-
+  List<ManagedCustomer> searchByDesignerWithOptionalGroups(
+      Long designerId, String keyword, List<Long> groupIds);
 
 }

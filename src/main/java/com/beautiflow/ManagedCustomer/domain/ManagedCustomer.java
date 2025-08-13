@@ -5,6 +5,7 @@ import static jakarta.persistence.FetchType.LAZY;
 import com.beautiflow.global.domain.TargetGroup;
 import com.beautiflow.user.domain.User;
 import jakarta.persistence.*;
+import java.util.*;
 import lombok.*;
 
 @Entity
@@ -35,25 +36,35 @@ public class ManagedCustomer {
 	@ManyToOne(fetch = LAZY)
 	private User customer;
 
+	//동준님 삭제
 	@Enumerated(EnumType.STRING)
 	private TargetGroup targetGroup;
 
+	@ManyToMany
+	@JoinTable(
+			name = "managed_customer_groups",
+			joinColumns = @JoinColumn(name = "managed_customer_id"),
+			inverseJoinColumns = @JoinColumn(name = "group_id")
+	)
+	@Builder.Default
+	private Set<CustomerGroup> groups = new HashSet<>();
+
 	private String memo;
 
-	public ManagedCustomer(User designer, User customer, TargetGroup targetGroup, String memo) {
-		this.designer = designer;
-		this.customer = customer;
-		this.targetGroup = targetGroup;
-		this.memo = memo;
-	}
-
-	public void updateInfo(TargetGroup targetGroup) {
-		this.targetGroup = targetGroup;
+	public void replaceGroups(Collection<CustomerGroup> target) {
+		this.groups.clear();
+		if (target != null) this.groups.addAll(target);
 	}
 
 	public void updateMemo(String memo) {
 		this.memo = memo;
 	}
+
+	public ManagedCustomer(User designer, User customer, String memo) {
+		this.designer = designer;
+		this.customer = customer;
+		this.groups = new HashSet<>();
+		this.memo = memo;
+	}
+
 }
-
-

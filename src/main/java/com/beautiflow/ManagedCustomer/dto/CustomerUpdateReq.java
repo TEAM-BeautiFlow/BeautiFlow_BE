@@ -1,8 +1,9 @@
 package com.beautiflow.ManagedCustomer.dto;
 
-import com.beautiflow.global.domain.TargetGroup;
+import java.util.List;
 
+// CustomerUpdateReq
 public record CustomerUpdateReq(
-    String memo,
-    TargetGroup targetGroup
+    List<Long> groupIds,
+    String memo
 ) {}
