@@ -1,8 +1,11 @@
 package com.beautiflow.ManagedCustomer.dto;
 
-import com.beautiflow.global.domain.TargetGroup;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 
+// CustomerUpdateReq
 public record CustomerUpdateReq(
-    String memo,
-    TargetGroup targetGroup
+    List<Long> groupIds,
+    Boolean clearGroup,   // ← 명시적으로 true면 그룹 해제
+    String memo
 ) {}
