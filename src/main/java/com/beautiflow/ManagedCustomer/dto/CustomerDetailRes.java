@@ -13,7 +13,8 @@ public record CustomerDetailRes(
     String email,            // 추가
     List<String> styleImageUrls,
     String requestNotes,     // 여기로 스타일 설명 이동
-    String memo              // 사장님 개인 메모
+    String memo,              // 사장님 개인 메모
+    List<String> groupCodes
 ) {
   public static CustomerDetailRes from(ManagedCustomer mc) {
     User customer = mc.getCustomer();
@@ -24,6 +25,12 @@ public record CustomerDetailRes(
         ? style.getImages().stream().map(UserStyleImage::getImageUrl).toList()
         : List.of();
 
+    List<String> codes = (mc.getGroups() != null && !mc.getGroups().isEmpty())
+        ? mc.getGroups().stream()
+        .map(g -> g.getCode())   // ★ 코드 사용
+        .toList()
+        : List.of();
+
     return new CustomerDetailRes(
         customer.getId(),
         customer.getName(),
@@ -31,7 +38,8 @@ public record CustomerDetailRes(
         customer.getEmail(),   //  User.email 가져옴         // description은 비워둠
         styleImageUrls,
         styleDesc,              // 요청사항에 스타일 설명
-        mc.getMemo()            // 사장님 메모
+        mc.getMemo(),        // 사장님 메모
+        codes
     );
   }
 }
