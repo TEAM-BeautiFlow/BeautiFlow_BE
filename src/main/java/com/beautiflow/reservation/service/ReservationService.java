@@ -6,6 +6,8 @@ import com.beautiflow.global.common.error.ShopErrorCode;
 import com.beautiflow.global.common.error.TreatmentErrorCode;
 import com.beautiflow.global.common.exception.BeautiFlowException;
 import com.beautiflow.global.common.lock.ReservationLockManager;
+import com.beautiflow.global.common.s3.S3Service;
+import com.beautiflow.global.common.s3.S3UploadResult;
 import com.beautiflow.global.domain.ApprovalStatus;
 import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.global.domain.ShopRole;
@@ -60,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -78,6 +81,7 @@ public class ReservationService {
     private final TempReservationRepository tempReservationRepository;
     private final TempReservationTreatmentRepository tempReservationTreatmentRepository;
     private final TempReservationOptionRepository tempReservationOptionRepository;
+    private final S3Service s3Service;
 
     @Transactional
     public void processReservationFlow(Long shopId, User customer, TmpReservationReq request) throws InterruptedException {
@@ -107,7 +111,9 @@ public class ReservationService {
                         request.dateTimeDesignerData().designerId());
             }
             if (request.requestNotesStyleData() != null) {
-                updateReservationRequestNotes(shopId, customer, request.requestNotesStyleData());
+                RequestNotesStyleReq notesStyleReq = request.requestNotesStyleData();
+                List<MultipartFile> referencesImages = notesStyleReq.referenceImages();
+                updateReservationRequestNotes(shopId, customer, notesStyleReq, referencesImages);
             }
             if (request.isSaveFinalReservation()) {
                 saveReservation(shopId, customer);
@@ -290,7 +296,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservationRequestNotes(Long shopId, User customer, RequestNotesStyleReq request) {
+    public void updateReservationRequestNotes(Long shopId, User customer, RequestNotesStyleReq request, List<MultipartFile> referenceImages) {
         TempReservation tempReservation = tempReservationRepository
                 .findByCustomerAndShop(
                         customer,
@@ -298,9 +304,14 @@ public class ReservationService {
                                 .orElseThrow(() -> new BeautiFlowException(ShopErrorCode.SHOP_NOT_FOUND))
                 )
                 .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
+        String dirName = String.format("reservations/%d/reference", tempReservation.getId());
+        List<String> uploadedUrls = new ArrayList<>();
+        for (MultipartFile file : referenceImages) {
+            S3UploadResult result = s3Service.uploadFile(file, dirName);
+            uploadedUrls.add(result.imageUrl());
+        }
 
-        tempReservation.updateRequestNotes(request.requestNotes(), request.styleImageUrls());
-
+        tempReservation.updateRequestNotes(request.requestNotes(), uploadedUrls);
         tempReservationRepository.save(tempReservation);
     }
 
