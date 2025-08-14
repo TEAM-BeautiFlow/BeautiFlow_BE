@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 public class RegularHolidayDto {
@@ -15,12 +17,12 @@ public class RegularHolidayDto {
   private HolidayCycle cycle;
 
   @NotNull
-  private WeekDay dayOfWeek;
+  private List<WeekDay> daysOfWeek;
 
   public static RegularHolidayDto from(RegularHoliday holiday) {
     RegularHolidayDto dto = new RegularHolidayDto();
     dto.cycle = holiday.getCycle();
-    dto.dayOfWeek = holiday.getDayOfWeek();
+    dto.daysOfWeek = holiday.getDaysOfWeek();
     return dto;
   }
 }

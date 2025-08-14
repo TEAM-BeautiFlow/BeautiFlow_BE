@@ -2,6 +2,9 @@ package com.beautiflow.shop.domain;
 
 import com.beautiflow.global.domain.HolidayCycle;
 import com.beautiflow.global.domain.WeekDay;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,8 +42,14 @@ public class RegularHoliday {
   @Enumerated(EnumType.STRING)
   private HolidayCycle cycle;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "regular_holiday_days",
+      joinColumns = @JoinColumn(name = "regular_holiday_id")
+  )
   @Enumerated(EnumType.STRING)
-  private WeekDay dayOfWeek;
+  @Column(name = "day_of_week")
+  private List<WeekDay> daysOfWeek = new ArrayList<>();
 
   public void setShop(Shop shop) {
     this.shop = shop;
