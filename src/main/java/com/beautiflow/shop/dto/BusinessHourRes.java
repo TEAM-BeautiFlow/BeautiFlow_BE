@@ -16,7 +16,6 @@ public class BusinessHourRes {
   private LocalTime closeTime;
   private LocalTime breakStart;
   private LocalTime breakEnd;
-  private List<WeekDay> regularClosedDays;
 
   public static BusinessHourRes from(List<BusinessHour> businessHours) {
     if (businessHours == null || businessHours.isEmpty()) {
@@ -28,17 +27,11 @@ public class BusinessHourRes {
         .findFirst()
         .orElse(null);
 
-    List<WeekDay> closedDays = businessHours.stream()
-        .filter(BusinessHour::isClosed)
-        .map(BusinessHour::getDayOfWeek)
-        .collect(Collectors.toList());
-
     return BusinessHourRes.builder()
         .openTime(representativeDay != null ? representativeDay.getOpenTime() : null)
         .closeTime(representativeDay != null ? representativeDay.getCloseTime() : null)
         .breakStart(representativeDay != null ? representativeDay.getBreakStart() : null)
         .breakEnd(representativeDay != null ? representativeDay.getBreakEnd() : null)
-        .regularClosedDays(closedDays)
         .build();
   }
 }

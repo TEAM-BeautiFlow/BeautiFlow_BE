@@ -88,6 +88,18 @@ public class Shop {
 		if (requestDto.introduction() != null) {
 			this.introduction = requestDto.introduction();
 		}
+		if (requestDto.bankName() != null) {
+			this.bankName = requestDto.bankName();
+		}
+		if (requestDto.accountNumber() != null) {
+			this.accountNumber = requestDto.accountNumber();
+		}
+		if (requestDto.accountHolder() != null) {
+			this.accountHolder = requestDto.accountHolder();
+		}
+		if (requestDto.depositAmount() != null) {
+			this.depositAmount = requestDto.depositAmount();
+		}
 	}
 
 	public void setLicenseImageUrl(String licenseImageUrl) {

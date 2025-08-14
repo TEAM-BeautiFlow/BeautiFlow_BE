@@ -12,7 +12,10 @@ public record ShopInfoRes(
     String shopName,
     String contact,
     String link,
-    String accountInfo,
+    String bankName,
+    String accountNumber,
+    String accountHolder,
+    Integer depositAmount,
     String address,
     String introduction
 ) {
@@ -34,9 +37,12 @@ public record ShopInfoRes(
             shop.getShopName(),
             shop.getContact(),
             shop.getLink(),
-            shop.getAccountInfo(),
+            shop.getBankName(),
+            shop.getAccountNumber(),
+            shop.getAccountHolder(),
+            shop.getDepositAmount() != null ? shop.getDepositAmount() : 0,
             shop.getAddress(),
             shop.getIntroduction()
-        );
+            );
   }
 }
