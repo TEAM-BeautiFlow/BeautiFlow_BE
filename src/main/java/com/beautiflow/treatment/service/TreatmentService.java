@@ -57,11 +57,9 @@ public class TreatmentService {
   public void updateTreatment(Long treatmentId, TreatmentUpdateReq requestDto,
       List<MultipartFile> newImages, List<Long> deleteImageIds) {
 
-    // 1. 시술 엔티티 조회
     Treatment treatment = treatmentRepository.findById(treatmentId)
         .orElseThrow(() -> new BeautiFlowException(TreatmentErrorCode.TREATMENT_NOT_FOUND));
 
-    // 2. 이미지 개수 검증
     int imagesToDeleteCount = (deleteImageIds != null) ? deleteImageIds.size() : 0;
     int newImagesCount = (newImages != null) ? newImages.size() : 0;
     int currentImageCount = treatment.getImages().size();
@@ -70,93 +68,50 @@ public class TreatmentService {
       throw new BeautiFlowException(TreatmentErrorCode.IMAGE_COUNT_EXCEEDED);
     }
 
-    // 3. 기존 이미지 삭제 (S3 및 DB)
     if (deleteImageIds != null && !deleteImageIds.isEmpty()) {
       deleteTreatmentImages(deleteImageIds);
     }
 
-    // 4. 새 이미지 업로드 (S3 및 DB)
     if (newImages != null && !newImages.isEmpty()) {
-      Long shopId = treatment.getShop().getId();
-      uploadNewTreatmentImages(treatment, newImages, shopId);
+      uploadNewTreatmentImages(treatment, newImages);
     }
 
-    // 5. 텍스트 정보 업데이트
     treatment.updateTreatment(requestDto);
-
-    // 6. 옵션 그룹 및 아이템 정보 업데이트
-    if (requestDto.optionGroups() != null) {
-      updateOptionGroups(treatment, requestDto.optionGroups()); // 이전 답변의 헬퍼 메서드 재사용
-    }
   }
 
-  private void updateOptionGroups(Treatment treatment, List<OptionGroupUpdateReq> groupDtos) {
-    Map<Long, OptionGroup> existingGroupsMap = treatment.getOptionGroups().stream()
-        .collect(Collectors.toMap(OptionGroup::getId, Function.identity()));
-
-    for (OptionGroupUpdateReq groupDto : groupDtos) {
-      OptionGroup optionGroup;
-      if (groupDto.id() == null) {
-        // ID가 없으면: 신규 그룹 생성 및 추가
-        optionGroup = OptionGroup.builder()
-            .name(groupDto.name())
-            .enabled(true) // 기본값 혹은 DTO에 따라 설정
-            .treatment(treatment)
-            .build();
-        treatment.getOptionGroups().add(optionGroup);
-      } else {
-        // ID가 있으면: 기존 그룹 수정
-        optionGroup = existingGroupsMap.get(groupDto.id());
-        if (optionGroup != null) {
-          optionGroup.setName(groupDto.name()); // 그룹 이름 등 업데이트
-          existingGroupsMap.remove(groupDto.id()); // 처리된 그룹은 Map에서 제거
-        } else {
-          throw new BeautiFlowException(TreatmentErrorCode.OPTION_GROUP_NOT_FOUND);
-        }
-      }
-
-      // 해당 그룹의 아이템 목록 업데이트
-      if (groupDto.items() != null) {
-        updateOptionItems(optionGroup, groupDto.items());
-      }
-    }
-    // Map에 남아있는 그룹 = 요청에서 누락된 그룹 = 삭제 대상
-    treatment.getOptionGroups().removeAll(existingGroupsMap.values());
-  }
-
-  private void updateOptionItems(OptionGroup optionGroup, List<OptionItemUpdateReq> itemDtos) {
-    Map<Long, OptionItem> existingItemsMap = optionGroup.getItems().stream()
-        .collect(Collectors.toMap(OptionItem::getId, Function.identity()));
-
-    for (OptionItemUpdateReq itemDto : itemDtos) {
-      if (itemDto.id() == null) {
-        // ID가 없으면: 신규 아이템 생성 및 추가
-        OptionItem newItem = OptionItem.builder()
-            .name(itemDto.name())
-            .extraPrice(itemDto.extraPrice())
-            .extraMinutes(itemDto.extraMinutes())
-            .description(itemDto.description())
-            .optionGroup(optionGroup)
-            .build();
-        optionGroup.getItems().add(newItem);
-      } else {
-        // ID가 있으면: 기존 아이템 수정
-        OptionItem existingItem = existingItemsMap.get(itemDto.id());
-        if (existingItem != null) {
-          existingItem.updateDetails(
-              itemDto.name(),
-              itemDto.extraPrice(),
-              itemDto.extraMinutes(),
-              itemDto.description()
-          );
-
-          existingItemsMap.remove(itemDto.id());
-        }
-      }
-    }
-    // Map에 남아있는 아이템 = 삭제 대상
-    optionGroup.getItems().removeAll(existingItemsMap.values());
-  }
+//  private void updateOptionGroups(Treatment treatment, List<OptionGroupUpdateReq> groupDtos) {
+//    Map<Long, OptionGroup> existingGroupsMap = treatment.getOptionGroups().stream()
+//        .collect(Collectors.toMap(OptionGroup::getId, Function.identity()));
+//
+//    for (OptionGroupUpdateReq groupDto : groupDtos) {
+//      OptionGroup optionGroup;
+//      if (groupDto.id() == null) {
+//        // ID가 없으면: 신규 그룹 생성 및 추가
+//        optionGroup = OptionGroup.builder()
+//            .name(groupDto.name())
+//            .enabled(true) // 기본값 혹은 DTO에 따라 설정
+//            .treatment(treatment)
+//            .build();
+//        treatment.getOptionGroups().add(optionGroup);
+//      } else {
+//        // ID가 있으면: 기존 그룹 수정
+//        optionGroup = existingGroupsMap.get(groupDto.id());
+//        if (optionGroup != null) {
+//          optionGroup.setName(groupDto.name()); // 그룹 이름 등 업데이트
+//          existingGroupsMap.remove(groupDto.id()); // 처리된 그룹은 Map에서 제거
+//        } else {
+//          throw new BeautiFlowException(TreatmentErrorCode.OPTION_GROUP_NOT_FOUND);
+//        }
+//      }
+//
+//      // 해당 그룹의 아이템 목록 업데이트
+//      if (groupDto.items() != null) {
+//        updateOptionItems(optionGroup, groupDto.items());
+//      }
+//    }
+//    // Map에 남아있는 그룹 = 요청에서 누락된 그룹 = 삭제 대상
+//    treatment.getOptionGroups().removeAll(existingGroupsMap.values());
+//  }
 
   // 시술 이미지 삭제 시
   private void deleteTreatmentImages(List<Long> imageIds) {
@@ -173,8 +128,8 @@ public class TreatmentService {
   }
 
   // 시술 이미지 업로드 시
-  private void uploadNewTreatmentImages(Treatment treatment, List<MultipartFile> files, Long shopId) {
-    String s3Path = String.format("shops/%d/treatments", shopId);
+  private void uploadNewTreatmentImages(Treatment treatment, List<MultipartFile> files) {
+    String s3Path = String.format("shops/%d/treatments", treatment.getShop().getId());
 
     for (MultipartFile file : files) {
       try {
@@ -185,7 +140,7 @@ public class TreatmentService {
             .storedFilePath(result.fileKey())
             .imageUrl(result.imageUrl())
             .build();
-        treatmentImageRepository.save(newImage);
+        treatment.getImages().add(newImage);
       } catch (Exception e) {
         throw new BeautiFlowException(TreatmentErrorCode.S3_UPLOAD_FAILED);
       }
