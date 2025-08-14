@@ -218,9 +218,14 @@ public class ReservationController {
                             example = "CONFIRMED"
                     )
             )
-            @RequestParam(name = "status") ReservationStatus status
+            @RequestParam(name = "status") ReservationStatus status,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User
     ){
-        List<ReservationStatusRes> result = reservationService.getReservationsByStatus(status);
+        Long userId = customOAuth2User.getUserId();
+        User customer = userRepository.findById(userId)
+                .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
+        List<ReservationStatusRes> result = reservationService.getReservationsByStatus(customer, status);
         return ResponseEntity.ok(result);
     }
 
