@@ -41,15 +41,15 @@ public class ChatRoomService {
 	private final SmsService smsService;
 
 	public RoomCreateRes createRoom(Long requesterId, RoomCreateReq roomCreateReq){
+		User requester = userRepository.findById(requesterId)
+			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
+
 		Optional<ChatRoom> optional = chatRoomRepository
 			.findByShopIdAndCustomerIdAndDesignerId(roomCreateReq.shopId(), roomCreateReq.customerId(), roomCreateReq.designerId());
 
 		if (optional.isPresent()) {
 			ChatRoom room = optional.get();
 
-			// 재입장 처리
-			User requester = userRepository.findById(requesterId)
-				.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 			room.reEnterBy(requester);
 
 			return RoomCreateRes.of(room);
@@ -61,6 +61,10 @@ public class ChatRoomService {
 		User designer = userRepository.findById(roomCreateReq.designerId())
 			.orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
+		if (!requester.getId().equals(customer.getId()) && !requester.getId().equals(designer.getId())) {
+			throw new BeautiFlowException(ChatRoomErrorCode.INVALID_CHATROOM_PARAMETER);
+		}
+
 		ChatRoom newRoom = ChatRoom.builder()
 			.shop(shop)
 			.customer(customer)
@@ -69,8 +73,12 @@ public class ChatRoomService {
 
 		chatRoomRepository.save(newRoom);
 
-		smsService.sendNewContactAlert(designer.getContact());
 
+		User recipient = requester.getId().equals(customer.getId()) ? designer : customer;
+		String to = recipient != null ? recipient.getContact() : null;
+		if (to != null && !to.isBlank()) {
+			smsService.sendNewContactAlert(to);
+		}
 
 		return RoomCreateRes.of(newRoom);
 
@@ -113,8 +121,7 @@ public class ChatRoomService {
 			LocalDateTime lastReadTime = chatRoomReadRepository
 				.findByChatRoomAndUser(room,me)
 				.map(ChatRoomRead::getLastReadTime)
-				.orElse(LocalDateTime.MIN);
-
+				.orElse(LocalDateTime.of(1970, 1, 1, 0, 0));
 
 			int unreadCount = chatMessageRepository.countByChatRoomAndSenderNotAndCreatedTimeAfter(room, me, lastReadTime);
 
