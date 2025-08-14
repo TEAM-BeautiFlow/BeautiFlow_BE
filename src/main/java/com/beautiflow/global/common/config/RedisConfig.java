@@ -105,7 +105,7 @@ public class RedisConfig {
         Config config = new Config();
         SingleServerConfig singleServerConfig = config.useSingleServer();
         config.useSingleServer()
-            .setAddress("rediss://" + host + ":" + port);
+            .setAddress("redis://" + host + ":" + port);
         return Redisson.create(config);
     }
 
