@@ -563,8 +563,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationStatusRes> getReservationsByStatus(ReservationStatus status) {
-        List<Reservation> reservations = reservationRepository.findAllByStatusWithOptionsAndGroups(status);
+    public List<ReservationStatusRes> getReservationsByStatus(User customer,ReservationStatus status) {
+        List<Reservation> reservations = reservationRepository.findAllByStatusWithOptionsAndGroups(status, customer);
 
         return reservations.stream()
                 .map(ReservationStatusRes::from)
