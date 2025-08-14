@@ -26,9 +26,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final ObjectMapper om = new ObjectMapper();
 
     private static final Duration LOGIN_KEY_TTL = Duration.ofMinutes(3);
-    private static final String FRONT_BASE_URL = "https://www.beautiflow.co.kr";
-    private static final String PROVIDER_KAKAO_STAFF = "kakao-staff";
-    private static final String PROVIDER_KAKAO_CUSTOMER = "kakao-customer";
 
 
     public CustomSuccessHandler( UserRepository userRepository,
@@ -55,20 +52,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         payload.put("isUserAlreadyExist", exists);
         payload.put("email", email);
 
-        String path;
-        if (provider != null && provider.equalsIgnoreCase(PROVIDER_KAKAO_STAFF)) {
-            path = "/onboard";
-        } else if (provider != null && provider.equalsIgnoreCase(PROVIDER_KAKAO_CUSTOMER)) {
-            path = "/user/mypage";
-        } else {
-            path = "/user/mypage";
-        }
-
-
         String loginKey = "login:" + UUID.randomUUID();
         redisTokenUtil.setValues(loginKey, om.writeValueAsString(payload), LOGIN_KEY_TTL);
 
         response.setStatus(HttpServletResponse.SC_FOUND);
-        response.setHeader("Location", FRONT_BASE_URL + path  + "?loginKey=" + loginKey);
+        String frontCallbackUrl = "https://www.beautiflow.co.kr/signup";
+        response.setHeader("Location", frontCallbackUrl + "?loginKey=" + loginKey);
     }
 }
