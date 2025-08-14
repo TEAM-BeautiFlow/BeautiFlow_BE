@@ -36,7 +36,15 @@ public class ChatRoomRead {
 
 	private LocalDateTime lastReadTime;
 
+	private LocalDateTime lastAlertSentAt;
+	private Long lastAlertFromMessageId;
+
 	public void updateReadTime(LocalDateTime time) {
 		this.lastReadTime = time;
+	}
+
+	public void markAlerted(Long messageId,LocalDateTime now){
+		this.lastAlertFromMessageId=messageId;
+		this.lastAlertSentAt=now;
 	}
 }

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,4 +41,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
           and cr.customer.id in :customerIds
     """)
 	List<ChatRoom> findByShopIdAndDesignerIdAndCustomerIdIn(Long shopId, Long designerId, Collection<Long> customerIds);
+
+	@Query("""
+        select cr
+        from ChatRoom cr
+        where (cr.customerExited = false or cr.designerExited = false)
+    """)
+	Page<ChatRoom> findAllActive(Pageable pageable);
 }
