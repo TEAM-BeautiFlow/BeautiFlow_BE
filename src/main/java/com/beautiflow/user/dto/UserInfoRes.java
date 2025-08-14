@@ -8,7 +8,8 @@ public record UserInfoRes(
         String kakaoId,
         String name,
         String contact,
-        String email
+        String email,
+        Long shopId
 ) {
 
 }
