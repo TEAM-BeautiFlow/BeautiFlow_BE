@@ -158,7 +158,7 @@ public class ShopManageController {
       @PathVariable Long shopId,
       @RequestPart("requestDto") ShopUpdateReq requestDto,
       @AuthenticationPrincipal CustomOAuth2User currentUser,
-      @RequestParam(value = "newImages", required = false) List<MultipartFile> newImages
+      @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages
   ) {
     ShopInfoRes updatedShop = shopManageService.updateShopDetailsAndImages(shopId, requestDto, newImages);
     return ResponseEntity.ok(ApiResponse.success(updatedShop));

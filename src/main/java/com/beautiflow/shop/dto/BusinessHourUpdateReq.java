@@ -16,7 +16,5 @@ public record BusinessHourUpdateReq(
 
     LocalTime breakStart,
 
-    LocalTime breakEnd,
-
-    List<WeekDay> regularClosedDays
+    LocalTime breakEnd
 ) {}

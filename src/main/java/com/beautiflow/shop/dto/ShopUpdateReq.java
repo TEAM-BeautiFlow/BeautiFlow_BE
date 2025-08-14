@@ -9,6 +9,10 @@ public record ShopUpdateReq(
     String accountInfo,
     String address,
     String introduction,
+    String bankName,
+    String accountNumber,
+    String accountHolder,
+    Integer depositAmount,
     List<Long> deleteImageIds
 ) {
 }

@@ -135,21 +135,18 @@ public class ShopManageService {
 
     shop.getBusinessHours().clear();
 
-    List<WeekDay> closedDays = requestDto.regularClosedDays();
-
     List<BusinessHour> newBusinessHours = EnumSet.allOf(WeekDay.class).stream()
-        .map(day -> {
-          boolean isClosed = closedDays != null && closedDays.contains(day);
-          return BusinessHour.builder()
+        .map(day ->
+            BusinessHour.builder()
               .shop(shop)
               .dayOfWeek(day)
-              .isClosed(isClosed)
-              .openTime(isClosed ? null : requestDto.openTime())
-              .closeTime(isClosed ? null : requestDto.closeTime())
-              .breakStart(isClosed ? null : requestDto.breakStart())
-              .breakEnd(isClosed ? null : requestDto.breakEnd())
-              .build();
-        })
+              .isClosed(false)
+              .openTime(requestDto.openTime())
+              .closeTime(requestDto.closeTime())
+              .breakStart(requestDto.breakStart())
+              .breakEnd(requestDto.breakEnd())
+              .build()
+        )
         .toList();
 
     shop.getBusinessHours().addAll(newBusinessHours);
