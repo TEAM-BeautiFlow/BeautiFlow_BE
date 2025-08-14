@@ -1,5 +1,6 @@
 package com.beautiflow.treatment.domain;
 
+import com.beautiflow.shop.dto.OptionItemUpdateReq;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -32,11 +33,11 @@ public class OptionItem {
 	private Integer extraPrice;
 	private String description;
 
-	public void updateDetails(String name, Integer extraPrice, Integer extraMinutes, String description) {
-		this.name = name;
-		this.extraPrice = extraPrice;
-		this.extraMinutes = extraMinutes;
-		this.description = description;
+	public void updateDetails(OptionItemUpdateReq dto) {
+		this.name = dto.name();
+		this.extraPrice = dto.extraPrice();
+		this.extraMinutes = dto.extraMinutes();
+		this.description = dto.description();
 	}
 
 	public void setOptionGroup(OptionGroup optionGroup) {
