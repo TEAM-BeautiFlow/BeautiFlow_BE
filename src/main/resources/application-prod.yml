@@ -58,3 +58,15 @@ coolsms:
   api-key: ${COOLSMS_API_KEY}
   api-secret: ${COOLSMS_API_SECRET}
   from-number: ${COOLSMS_FROM_NUMBER}
+
+alert:
+  unread:
+    threshold-minutes: 60
+    page-size: 200
+    enable-night-block: true
+    night-start: "21:00"
+    night-end: "08:00"
+
+app:
+  chat:
+    deep-link-prefix: "https://www.beautiflow.co.kr/chat/rooms/"
