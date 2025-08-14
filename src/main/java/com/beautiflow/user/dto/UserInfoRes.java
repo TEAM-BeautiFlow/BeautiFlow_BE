@@ -1,5 +1,7 @@
 package com.beautiflow.user.dto;
 
+import com.beautiflow.shop.dto.ShopMemberInfoRes;
+import java.util.List;
 import lombok.Builder;
 
 @Builder
@@ -9,7 +11,7 @@ public record UserInfoRes(
         String name,
         String contact,
         String email,
-        Long shopId
+        List<ShopMemberInfoRes> shopMembers
 ) {
 
 }

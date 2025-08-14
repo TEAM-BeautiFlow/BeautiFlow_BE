@@ -14,7 +14,7 @@ public interface ShopMemberRepository extends JpaRepository<ShopMember,Long> {
     boolean existsByUserAndShop(User user, Shop shop);
     Optional<ShopMember> findByUserIdAndShopId(Long userId, Long shopId);
     List<ShopMember> findByShopIdAndStatus(Long shopId, ApprovalStatus status);
-    Optional<ShopMember> findFirstByUser_Id(Long userId);
+    List<ShopMember> findByUser_Id(Long userId);
 
     Optional<ShopMember> findByShopIdAndUserIdAndStatus(Long shopId, Long userId, ApprovalStatus status);
 }
