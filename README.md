@@ -29,7 +29,8 @@
 - **사용자 그룹(VIP, 자주 방문 등)** 기반 **그룹 메시지 발송**
 - **예약 조건·시점(N일 전/후)** 템플릿 자동/수동 발송
 
-//## 아키텍처 개요
+## 아키텍처 개요
+<img width="1410" height="852" alt="image" src="https://github.com/user-attachments/assets/b3ef35ad-966f-492e-8919-a88c9c355782" />
 
 ---
 
