@@ -37,6 +37,25 @@ public class MyPageService {
             shopIds.add(sm.getShop() != null ? sm.getShop().getId() : null);
         }
 
+        List<ShopMemberInfoRes> members = new ArrayList<>();
+        Iterator<ShopMember> memberIterator = shopMemberRepository.findByUser_Id(userId).iterator();
+
+        while (memberIterator.hasNext()) {
+            ShopMember sm = memberIterator.next();
+            members.add(
+                    ShopMemberInfoRes.builder()
+                            .shopId(sm.getShop() != null ? sm.getShop().getId() : null)
+                            .userId(userId)
+                            .memberId(sm.getId())
+                            .intro(sm.getIntro())
+                            .imageUrl(sm.getImageUrl())
+                            .originalFileName(sm.getOriginalFileName())
+                            .storedFilePath(sm.getStoredFilePath())
+                            .build()
+            );
+        }
+
+
         return UserInfoRes.builder()
                 .id(user.getId())
                 .kakaoId(user.getKakaoId())
@@ -44,6 +63,7 @@ public class MyPageService {
                 .email(user.getEmail())
                 .contact(user.getContact())
                 .shopId(shopIds)
+                .shopMembers(members)
                 .build();
     }
 
