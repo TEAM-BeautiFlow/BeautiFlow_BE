@@ -1,4 +1,5 @@
 package com.beautiflow.shop.converter;
+import com.beautiflow.shop.domain.ShopImage;
 import com.beautiflow.shop.domain.ShopMember;
 import com.beautiflow.shop.dto.ShopApplyRes;
 import com.beautiflow.shop.dto.ShopDetailRes;
@@ -17,6 +18,8 @@ import com.beautiflow.treatment.domain.OptionGroup;
 import com.beautiflow.treatment.domain.OptionItem;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.treatment.domain.TreatmentImage;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ShopConverter {
@@ -28,19 +31,34 @@ public class ShopConverter {
                 .contact(shop.getContact())
                 .address(shop.getAddress())
                 .introText(shop.getIntroduction())
-                .mainImageUrl(shop.getShopImages().get(0).getImageUrl())
-                .notices(shop.getNotices().stream()
-                        .map(ShopConverter::toNoticeDto)
-                        .collect(Collectors.toList()))
-                .notices(shop.getNotices().stream()
-                        .map(ShopConverter::toNoticeDto)
-                        .collect(Collectors.toList()))
-                .businessHours(shop.getBusinessHours().stream()
-                        .map(ShopConverter::toBusinessHourDto)
-                        .collect(Collectors.toList()))
-                .treatments(shop.getTreatments().stream()
-                        .map(ShopConverter::toTreatmentDto)
-                        .collect(Collectors.toList()))
+                .mainImageUrl(
+                        shop.getShopImages()
+                                .stream()
+                                .findFirst()
+                                .map(ShopImage::getImageUrl)
+                                .orElse(null)
+                )
+                .notices(
+                        Optional.ofNullable(shop.getNotices())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toNoticeDto)
+                                .collect(Collectors.toList())
+                )
+                .businessHours(
+                        Optional.ofNullable(shop.getBusinessHours())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toBusinessHourDto)
+                                .collect(Collectors.toList())
+                )
+                .treatments(
+                        Optional.ofNullable(shop.getTreatments())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toTreatmentDto)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
     private static NoticeDto toNoticeDto(ShopNotice notice) {
@@ -70,9 +88,13 @@ public class ShopConverter {
                 .price(treatment.getPrice())
                 .durationMinutes(treatment.getDurationMinutes())
                 .description(treatment.getDescription())
-                .images(treatment.getImages().stream()
-                        .map(ShopConverter::toTreatmentImageDto)
-                        .collect(Collectors.toList()))
+                .images(
+                        Optional.ofNullable(treatment.getImages())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toTreatmentImageDto)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -96,9 +118,13 @@ public class ShopConverter {
                                 .imageUrl(image.getImageUrl())
                                 .build())
                         .collect(Collectors.toList()))
-                .optionGroups(treatment.getOptionGroups().stream()
-                        .map(ShopConverter::toOptionGroupDto)
-                        .collect(Collectors.toList()))
+                .optionGroups(
+                        Optional.ofNullable(treatment.getOptionGroups())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toOptionGroupDto)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -107,9 +133,13 @@ public class ShopConverter {
                 .id(group.getId())
                 .name(group.getName())
                 .enabled(group.isEnabled())
-                .items(group.getItems().stream()
-                        .map(ShopConverter::toOptionItemDto)
-                        .collect(Collectors.toList()))
+                .items(
+                        Optional.ofNullable(group.getItems())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .map(ShopConverter::toOptionItemDto)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 

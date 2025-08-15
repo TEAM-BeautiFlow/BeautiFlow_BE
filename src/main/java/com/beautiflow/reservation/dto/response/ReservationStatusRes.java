@@ -4,6 +4,7 @@ import com.beautiflow.global.domain.ReservationStatus;
 import com.beautiflow.reservation.domain.Reservation;
 import com.beautiflow.reservation.domain.ReservationOption;
 import com.beautiflow.reservation.domain.TempReservationOption;
+import com.beautiflow.shop.domain.ShopImage;
 import com.beautiflow.treatment.domain.Treatment;
 import com.beautiflow.treatment.domain.TreatmentImage;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 public record ReservationStatusRes(
@@ -34,10 +36,14 @@ public record ReservationStatusRes(
         String styleImageUrls
 ) {
     public static ReservationStatusRes from(Reservation reservation) {
-        List<ReservationTreatmentInfoRes> treatmentInfos = reservation.getReservationTreatments().stream()
+        List<ReservationTreatmentInfoRes> treatmentInfos = Optional.ofNullable(reservation.getReservationTreatments())
+                .orElse(List.of())
+                .stream()
                 .map(rt -> {
                     Treatment t = rt.getTreatment();
-                    List<String> imageUrls = t.getImages().stream()
+                    List<String> imageUrls = Optional.ofNullable(t.getImages())
+                            .orElse(List.of())
+                            .stream()
                             .map(TreatmentImage::getImageUrl)
                             .toList();
                     return new ReservationTreatmentInfoRes(
@@ -83,7 +89,10 @@ public record ReservationStatusRes(
                 reservation.getStatus(),
                 reservation.getId(),
                 reservation.getShop().getId(),
-                reservation.getShop().getShopImages().get(0).getImageUrl(),
+                reservation.getShop().getShopImages().stream()
+                .findFirst()
+                .map(ShopImage::getImageUrl)
+                .orElse(null),
                 reservation.getShop().getShopName(),
                 reservation.getShop().getAddress(),
                 reservation.getReservationDate(),
