@@ -81,10 +81,10 @@ public class SecurityConfig {
                     "/login/oauth2/**",
                     "/oauth2/**",
                     "/health",
-                    "/shops/{shopId}",
-                    "/shops/{shopId}/treatments",
-                    "/shops/{shopId}/treatments/{treatmentId}",
-                    "/shops/{shopId}/notices"
+                    "/shops/*",
+                    "/shops/*/treatments",
+                    "/shops/*/treatments/*",
+                    "/shops/*/notices"
                 ).permitAll()
                 .anyRequest().authenticated())
 
