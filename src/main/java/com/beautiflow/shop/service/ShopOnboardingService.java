@@ -85,7 +85,7 @@ public class ShopOnboardingService {
                 .user(user)
                 .shop(shop)
                 .role(ShopRole.DESIGNER)
-                .status(ApprovalStatus.PENDING)
+                .status(ApprovalStatus.APPROVED)
                 .appliedAt(now)
                 .processedAt(now)
                 .build();
