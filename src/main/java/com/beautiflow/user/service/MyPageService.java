@@ -12,6 +12,8 @@ import com.beautiflow.user.dto.UserInfoReq;
 import com.beautiflow.user.dto.UserInfoRes;
 import com.beautiflow.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +30,12 @@ public class MyPageService {
         User user = userRepository.findById(userId).orElseThrow(() -> new BeautiFlowException(
                 UserErrorCode.USER_NOT_FOUND));
 
-        List<ShopMemberInfoRes> members = shopMemberRepository.findByUser_Id(userId).stream()
-                .map(sm -> ShopMemberInfoRes.builder()
-                        .shopId(sm.getShop() != null ? sm.getShop().getId() : null)
-                        .userId(userId)
-                        .memberId(sm.getId())
-                        .intro(sm.getIntro())
-                        .imageUrl(sm.getImageUrl())
-                        .originalFileName(sm.getOriginalFileName())
-                        .storedFilePath(sm.getStoredFilePath())
-                        .build())
-                .collect(Collectors.toList());
+
+        List<Long> shopIds = new ArrayList<>();
+
+        for (ShopMember sm : shopMemberRepository.findByUser_Id(userId)) {
+            shopIds.add(sm.getShop() != null ? sm.getShop().getId() : null);
+        }
 
         return UserInfoRes.builder()
                 .id(user.getId())
@@ -46,7 +43,7 @@ public class MyPageService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .contact(user.getContact())
-                .shopMembers(members)
+                .shopId(shopIds)
                 .build();
     }
 
