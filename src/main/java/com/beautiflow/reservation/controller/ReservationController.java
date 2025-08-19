@@ -44,6 +44,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -55,7 +56,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Reservation", description = "고객_매장/예약")
 @SecurityRequirement(name = "Bearer Authentication")
@@ -69,7 +72,10 @@ public class ReservationController {
     private final TreatmentRepository treatmentRepository;
     private final ReservationLockManager reservationLockManager;
 
-    @PostMapping("/{shopId}/process")
+    @PostMapping(
+            value = "/{shopId}/process",
+            consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }
+    )
     @Operation(summary = "통합 예약 처리 API",
             description = "임시 저장, 수정, 삭제, 최종 저장, 락 해제를 한 API에서 처리")
     public ResponseEntity<?> processReservation(
@@ -79,14 +85,20 @@ public class ReservationController {
                     schema = @Schema(type = "integer", format = "int64", example = "1")
             )
             @PathVariable(name = "shopId") Long shopId,
-            @RequestBody TmpReservationReq request,
+            @RequestPart("request")
+            @Parameter(description = "통합 예약 JSON 요청 데이터")
+            TmpReservationReq request,
+
+            @RequestPart(value = "referenceImages", required = false)
+            @Parameter(description = "참고용 이미지 파일들")
+            List<MultipartFile> referenceImages,
             @AuthenticationPrincipal CustomOAuth2User principal
     ) throws InterruptedException {
         Long userId = principal.getUserId();
         User customer = userRepository.findById(userId)
                 .orElseThrow(() -> new BeautiFlowException(UserErrorCode.USER_NOT_FOUND));
 
-        reservationService.processReservationFlow(shopId, customer, request);
+        reservationService.processReservationFlow(shopId, customer, request, referenceImages);
 
         return ResponseEntity.ok(ApiResponse.success("예약 작업을 성공했습니다."));
     }
