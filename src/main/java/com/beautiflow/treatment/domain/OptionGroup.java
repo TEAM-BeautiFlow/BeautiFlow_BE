@@ -1,5 +1,6 @@
 package com.beautiflow.treatment.domain;
 
+import com.beautiflow.shop.dto.OptionGroupUpdateReq;
 import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,5 +44,42 @@ public class OptionGroup {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setTreatment(Treatment treatment) {
+		this.treatment = treatment;
+	}
+
+	public OptionGroup(String name) {
+		this.name = name;
+		this.enabled = true; // 기본값으로 활성화
+	}
+
+	public void updateFromDto(OptionGroupUpdateReq dto) {
+		this.name = dto.name();
+
+		Map<Long, OptionItem> existingItemsMap = this.items.stream()
+				.collect(Collectors.toMap(OptionItem::getId, Function.identity()));
+
+		List<OptionItem> updatedItems = dto.items().stream().map(itemDto -> {
+			OptionItem item;
+			if (itemDto.id() == null) {
+				item = OptionItem.builder()
+						.name(itemDto.name())
+						.extraPrice(itemDto.extraPrice())
+						.extraMinutes(itemDto.extraMinutes())
+						.description(itemDto.description())
+						.build();
+				item.setOptionGroup(this);
+			} else {
+				item = existingItemsMap.get(itemDto.id());
+				if (item == null) throw new IllegalArgumentException("존재하지 않는 옵션 아이템 ID: " + itemDto.id());
+				item.updateDetails(itemDto);
+			}
+			return item;
+		}).toList();
+
+		this.items.clear();
+		this.items.addAll(updatedItems);
 	}
 }

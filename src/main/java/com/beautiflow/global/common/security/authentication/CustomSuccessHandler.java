@@ -56,7 +56,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         redisTokenUtil.setValues(loginKey, om.writeValueAsString(payload), LOGIN_KEY_TTL);
 
         response.setStatus(HttpServletResponse.SC_FOUND);
-        String frontCallbackUrl = "http://localhost:5173";
+        String frontCallbackUrl = "https://www.beautiflow.co.kr/signup";
         response.setHeader("Location", frontCallbackUrl + "?loginKey=" + loginKey);
     }
 }

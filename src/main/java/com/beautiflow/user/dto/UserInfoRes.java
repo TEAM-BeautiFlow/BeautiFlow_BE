@@ -11,6 +11,7 @@ public record UserInfoRes(
         String name,
         String contact,
         String email,
+        List<Long> shopId,
         List<ShopMemberInfoRes> shopMembers
 ) {
 
