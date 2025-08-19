@@ -84,7 +84,7 @@ public class ReservationService {
     private final S3Service s3Service;
 
     @Transactional
-    public void processReservationFlow(Long shopId, User customer, TmpReservationReq request) throws InterruptedException {
+    public void processReservationFlow(Long shopId, User customer, TmpReservationReq request, List<MultipartFile> referenceImages) throws InterruptedException {
         try {
             if (request.isDeleteTempReservation()) {
                 deleteTemporaryReservation(customer, shopId);
@@ -112,8 +112,7 @@ public class ReservationService {
             }
             if (request.requestNotesStyleData() != null) {
                 RequestNotesStyleReq notesStyleReq = request.requestNotesStyleData();
-                List<MultipartFile> referencesImages = notesStyleReq.referenceImages();
-                updateReservationRequestNotes(shopId, customer, notesStyleReq, referencesImages);
+                updateReservationRequestNotes(shopId, customer, notesStyleReq, referenceImages);
             }
             if (request.isSaveFinalReservation()) {
                 saveReservation(shopId, customer);
@@ -306,9 +305,11 @@ public class ReservationService {
                 .orElseThrow(() -> new BeautiFlowException(ReservationErrorCode.TEMP_RESERVATION_NOT_FOUND));
         String dirName = String.format("reservations/%d/reference", tempReservation.getId());
         List<String> uploadedUrls = new ArrayList<>();
-        for (MultipartFile file : referenceImages) {
-            S3UploadResult result = s3Service.uploadFile(file, dirName);
-            uploadedUrls.add(result.imageUrl());
+        if (referenceImages != null) {
+            for (MultipartFile file : referenceImages) {
+                S3UploadResult result = s3Service.uploadFile(file, dirName);
+                uploadedUrls.add(result.imageUrl());
+            }
         }
 
         tempReservation.updateRequestNotes(request.requestNotes(), uploadedUrls);
