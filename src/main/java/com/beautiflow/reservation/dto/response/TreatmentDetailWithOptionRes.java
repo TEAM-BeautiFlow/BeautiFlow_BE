@@ -27,6 +27,7 @@ public record TreatmentDetailWithOptionRes(
         public record OptionItemDto(
                 Long id,
                 String name,
+                Integer extraPrice,
                 Integer extraMinutes,
                 String description
         ) {}
