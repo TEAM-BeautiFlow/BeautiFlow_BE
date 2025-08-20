@@ -113,7 +113,7 @@ public record MyReservInfoRes(
         Integer totalDurationMinutes = tempReservation.getTotalDurationMinutes() != null ?
                 tempReservation.getTotalDurationMinutes() : 0;
 
-        Integer deposit = shop.getDeposit() != null ? shop.getDeposit() : 0;
+        Integer deposit = shop.getDepositAmount() != null ? shop.getDepositAmount() : 0;
 
         return new MyReservInfoRes(
                 customerName,
