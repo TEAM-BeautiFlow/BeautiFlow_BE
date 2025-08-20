@@ -40,6 +40,9 @@ public class ChatRoomService {
 	private final ChatRoomReadRepository chatRoomReadRepository;
 	private final SmsService smsService;
 
+	private static final LocalDateTime MYSQL_MIN = LocalDateTime.of(1000, 1, 1, 0, 0);
+
+
 	public RoomCreateRes createRoom(Long requesterId, RoomCreateReq roomCreateReq){
 		Optional<ChatRoom> optional = chatRoomRepository
 			.findByShopIdAndCustomerIdAndDesignerId(roomCreateReq.shopId(), roomCreateReq.customerId(), roomCreateReq.designerId());
@@ -113,7 +116,8 @@ public class ChatRoomService {
 			LocalDateTime lastReadTime = chatRoomReadRepository
 				.findByChatRoomAndUser(room,me)
 				.map(ChatRoomRead::getLastReadTime)
-				.orElse(LocalDateTime.MIN);
+				.filter(t -> t != null && !t.isBefore(MYSQL_MIN) && t.getYear() <= 9999)
+				.orElse(MYSQL_MIN);
 
 
 			int unreadCount = chatMessageRepository.countByChatRoomAndSenderNotAndCreatedTimeAfter(room, me, lastReadTime);
