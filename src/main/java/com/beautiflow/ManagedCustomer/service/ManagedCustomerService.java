@@ -20,8 +20,6 @@ import com.beautiflow.user.domain.User;
 import com.beautiflow.user.repository.UserRepository;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,8 +57,7 @@ public class ManagedCustomerService {
     mc.updateMemo(req.memo());
 
     // groupIds가 빈 배열이면 전체 해제, 값이 있으면 해당 그룹으로 교체
-    List<Long> ids = Optional.ofNullable(req.groupIds()).orElse(List.of());
-    List<CustomerGroup> groups = ids.isEmpty()
+    List<CustomerGroup> groups = req.groupIds().isEmpty()
         ? List.of()
         : customerGroupRepository.findAllById(req.groupIds());
 
