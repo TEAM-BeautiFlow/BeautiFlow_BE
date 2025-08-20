@@ -80,7 +80,7 @@ sudo systemctl enable ${SERVICE_NAME}.service
 # 4. 배포 후 검증 (디버깅 모드)
 # =========================================================================
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 서비스 헬스 체크 대기 중 (최대 3분)..."
-HEALTH_CHECK_URL="http://localhost:80/health"
+HEALTH_CHECK_URL="http://localhost:8080/health"
 
 echo "================== 헬스 체크 디버깅 시작 =================="
 for i in {1..36}; do
