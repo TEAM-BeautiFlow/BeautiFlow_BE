@@ -87,12 +87,12 @@ public class ManagedCustomerController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @GetMapping
+    @GetMapping("/groups")
   @Operation(summary = "고객 그룹 목록 조회(시스템 기본 + 내 커스텀)")
   public ResponseEntity<ApiResponse<List<CustomerGroupDetailRes>>> getCustomerGroups(
-      @AuthenticationPrincipal CustomOAuth2User principal
+      @AuthenticationPrincipal CustomOAuth2User CustomOAuth2User
   ) {
-    Long designerId = principal.getUserId();
+    Long designerId = CustomOAuth2User.getUserId();
     List<CustomerGroupDetailRes> result = customerGroupService.getAvailableGroups(designerId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
