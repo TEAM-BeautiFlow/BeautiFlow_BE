@@ -148,6 +148,7 @@ public class ShopConverter {
                 .id(item.getId())
                 .name(item.getName())
                 .extraMinutes(item.getExtraMinutes())
+                .extraPrice(item.getExtraPrice())
                 .description(item.getDescription())
                 .build();
     }
