@@ -95,7 +95,10 @@ public class ChatRoomService {
 
 		//  둘 다 나갔으면 삭제
 		if (room.isBothExited()) {
+			chatRoomReadRepository.deleteByChatRoomId(roomId);
+			chatMessageRepository.deleteByChatRoomId(roomId);
 			chatRoomRepository.delete(room);
+
 		}
 	}
 
