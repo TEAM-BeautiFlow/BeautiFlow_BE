@@ -24,7 +24,7 @@ public record CustomerReservationItem(
   public static CustomerReservationItem from(Reservation reservation) {
     return new CustomerReservationItem(
         reservation.getId(),
-        extractFirstImage(reservation.getStyleImageUrls()),
+        extractTreatmentImage(reservation),
         reservation.getShop().getShopName(),
         reservation.getDesigner().getName(),
         reservation.getReservationTreatments().stream()
@@ -38,6 +38,16 @@ public record CustomerReservationItem(
         reservation.getStartTime(),
         reservation.getStatus()
     );
+  }
+
+  private static String extractTreatmentImage(Reservation reservation) {
+    return reservation.getReservationTreatments().stream()
+        .findFirst()
+        .map(rt -> rt.getTreatment())
+        .map(treatment -> treatment.getImages())
+        .filter(images -> !images.isEmpty())
+        .map(images -> images.get(0).getImageUrl())
+        .orElse(null);
   }
 
   private static String extractFirstImage(String jsonString) {
