@@ -54,9 +54,10 @@ public class ChatRoom extends BaseTimeEntity {
 	}
 
 	public void exitBy(User user) {
-		if (user.equals(customer)) {
+		Long uid = user.getId();
+		if (Objects.equals(this.customer.getId(), uid)) {
 			this.customerExited = true;
-		} else if (user.equals(designer)) {
+		} else if (Objects.equals(this.designer.getId(), uid)) {
 			this.designerExited = true;
 		} else {
 			throw new IllegalArgumentException("채팅방에 속하지 않은 유저입니다.");
