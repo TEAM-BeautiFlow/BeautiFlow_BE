@@ -54,7 +54,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 영업시간 일괄 수정", description = "해당 매장의 일주일치 영업시간 전체를 새로 설정합니다.")
   @PutMapping("/{shopId}/business-hours")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<Void>> updateBusinessHours(
       @Parameter(description = "매장 ID", required = true)
       @PathVariable Long shopId,
@@ -67,7 +66,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 정기 휴무 일괄 수정", description = "매장의 정기 휴무 규칙을 새로 설정합니다.")
   @PutMapping("/{shopId}/holidays")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<Void>> updateRegularHolidays(
       @Parameter(description = "매장 ID", required = true)
       @PathVariable Long shopId,
@@ -92,7 +90,6 @@ public class ShopManageController {
   @Operation(summary = "매장 시술 생성/수정",
       description = "시술의 텍스트 정보와 옵션만 생성/수정. 이미지는 별도의 API 사용. id = null이면 신규 생성")
   @PutMapping("/{shopId}/treatments")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<List<TreatmentUpsertRes>>> upsertTreatments(
       @Parameter(description = "매장 ID", required = true)
       @PathVariable Long shopId,
@@ -130,7 +127,6 @@ public class ShopManageController {
   }
 
   @Operation(summary = "매장 시술 삭제", description = "특정 시술을 삭제합니다. 시술에 연결된 모든 이미지와 옵션도 함께 삭제됩니다.")
-  @AuthCheck(ShopRole.OWNER)
   @DeleteMapping("/{shopId}/treatments/{treatmentId}")
   public ResponseEntity<ApiResponse<Void>> deleteTreatment(
       @Parameter(description = "매장 ID", required = true) @PathVariable Long shopId,
@@ -153,7 +149,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 정보 및 이미지 수정")
   @PatchMapping(value = "/{shopId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<ShopInfoRes>> updateShopDetails(
       @PathVariable Long shopId,
       @RequestPart("requestDto") ShopUpdateReq requestDto,
@@ -166,7 +161,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 사업자 등록증 이미지 조회")
   @GetMapping("/{shopId}/license-image")
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<String>> getLicenseImage(
       @PathVariable Long shopId,
       @AuthenticationPrincipal CustomOAuth2User currentUser) {
@@ -176,7 +170,6 @@ public class ShopManageController {
 
   @Operation(summary = "매장 사업자 등록증 이미지 업로드")
   @PostMapping(value = "/{shopId}/license-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @AuthCheck(ShopRole.OWNER)
   public ResponseEntity<ApiResponse<String>> uploadLicenseImage(
       @PathVariable Long shopId,
       @RequestParam(value = "licenseImage") MultipartFile licenseImage,
