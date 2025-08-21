@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 public record ReservationListRes(
     Long reservationId,
+    Long customerId,
     String customerName,
     LocalDate date,
     LocalTime startTime,
@@ -20,6 +21,7 @@ public record ReservationListRes(
         : r.getReservationTreatments().get(0).getTreatment();
     return new ReservationListRes(
         r.getId(),
+        r.getCustomer() != null ? r.getCustomer().getId() : null,
         r.getCustomer() != null ? r.getCustomer().getName() : null,
         r.getReservationDate(), // ← 추가
         r.getStartTime(),
